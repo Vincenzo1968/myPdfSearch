@@ -13406,6 +13406,11 @@ int ParseFontObject(Params *pParams, int objNum)
 		goto uscita;
 	}
 	
+	#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PROF)
+	fprintf(stderr, "[DEBUG] PARSE_FONT objNum=%d\n", objNum);
+	#endif
+	
+	/*
     //  Cleaning of previous font sequences <<<<
     if (pParams->sequences != NULL)
     {
@@ -13431,6 +13436,7 @@ int ParseFontObject(Params *pParams, int objNum)
 			goto uscita;
 		}
     }
+    */
 
 	pParams->pReadNextChar = ReadNextChar;
 
@@ -19475,8 +19481,6 @@ int encryptobjkeydict(Params *pParams)
     return 1;
 }
 
-// (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (Bleep) (B
-
 // contentfontobj: T INT LITERAL T INT LITERAL T KW OBJ contentfontobjbody T KW ENDOBJ
 int contentfontobj(Params *pParams)
 {
@@ -19553,6 +19557,29 @@ int contentfontobj(Params *pParams)
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
 
 	pParams->nCurrentParsingFontObjNum = pParams->myToken.vInt;
+	
+    // Pulizia delle sequences del font precedente
+    if (pParams->sequences != NULL)
+    {
+        for (int s = 0; s < 0x10000; s++)
+        {
+            if (pParams->sequences[s] != NULL)
+            {
+                free(pParams->sequences[s]);
+                pParams->sequences[s] = NULL;
+            }
+        }
+    }
+    else
+    {
+        pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
+        if (pParams->sequences == NULL)
+        {
+            snprintf(pParams->szError, 8192, "ERROR contentfontobj: calloc failed for pParams->sequences.\n");
+            myShowErrorMessage(pParams, pParams->szError, 1);
+            return 0;
+        }
+    }
 
 	//pParams->myObjsTable[pParams->nCurrentParsingObj]->dFontSpaceWidth = -1.0;
 
@@ -19889,20 +19916,12 @@ int contentfontobj(Params *pParams)
 		goto uscita;
 		//return 1;
 	}
+	
 
-	if ( pParams->nToUnicodeStreamObjRef > 0 )
-	{
-		for ( int cid = 0; cid < 0x10000; cid++ )
-		{
-			pParams->paCustomizedFont_CharSet[cid] = (wchar_t)0xFFFD;
-
-			if ( pParams->sequences != NULL && pParams->sequences[cid] != NULL )
-			{
-				free(pParams->sequences[cid]);
-				pParams->sequences[cid] = NULL;
-			}
-		}
-
+    if ( pParams->nToUnicodeStreamObjRef > 0 )
+    {
+        wmemset(pParams->paCustomizedFont_CharSet, 0xFFFD, 0x10000);
+        
 		pParams->pCurrentEncodingArray = &(pParams->paCustomizedFont_CharSet[0]);
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_PARSE_FONTOBJ)
