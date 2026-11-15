@@ -2178,6 +2178,8 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	
 	pParams->nFontCacheCount = 0;
 	pParams->nFontCacheClock = 0;
+	pParams->pMyBlockSrc = NULL;
+	pParams->nMyBlockSrcSize = 0;
 
 	pParams->bUpdateNumBytesReadFromCurrentStream = 1;
 
@@ -2625,7 +2627,7 @@ int Parse(Params *pParams, FilesList* myFilesList)
 			}
 		}
 
-		pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+		pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 		pParams->blockCurPos = 0;
 
 		pParams->nCurrentFontSubtype = FONT_SUBTYPE_Type1;
@@ -3612,6 +3614,7 @@ int PushXObjDecodedContent(Params *pParams, int nPageNumber, int nXObjNumber)
 		// PUSH
 		pParams->nStreamsStackTop++;
 
+		pParams->pMyBlockSrc = NULL;
 		pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = NULL;
 
 		pParams->myStreamsStack[pParams->nStreamsStackTop].bStreamState = 1;
@@ -3624,6 +3627,7 @@ int PushXObjDecodedContent(Params *pParams, int nPageNumber, int nXObjNumber)
 		wprintf(L"\n");
 		#endif
 
+		pParams->pMyBlockSrc = NULL;
 		pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = getDecodedStream(pParams, &DecodedStreamSize, NULL);
 		if ( NULL ==  pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream )
 		{
@@ -5262,6 +5266,7 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 			for ( x = 2; nBlockSize <= pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize ; x++ )
 				nBlockSize += BLOCK_SIZE;
 
+			pParams->pMyBlockSrc = NULL;
 			if ( NULL != pParams->myBlock )
 				free(pParams->myBlock);
 
@@ -5283,7 +5288,14 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 		pParams->bStringIsDecoded = pParams->myStreamsStack[pParams->nStreamsStackTop].bStringIsDecoded;
 		pParams->blockCurPos = pParams->myStreamsStack[pParams->nStreamsStackTop].blockCurPos;
 		pParams->blockLen = pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize;
-		memcpy(pParams->myBlock, pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream, pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize);
+		// Dopo un Tf/gs con font gia' in cache myBlock non e' stato toccato: evitiamo di ricopiare l'intero stream.
+		if ( pParams->pMyBlockSrc != pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream ||
+		     pParams->nMyBlockSrcSize != (unsigned long int)pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize )
+		{
+			memcpy(pParams->myBlock, pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream, pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize);
+			pParams->pMyBlockSrc = pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream;
+			pParams->nMyBlockSrcSize = (unsigned long int)pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize;
+		}
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_FN)
 		wprintf(L"INIZIO STACK PEEK pParams->nStreamsStackTop = %d\n", pParams->nStreamsStackTop);
@@ -7402,6 +7414,7 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 		// POP
 		if ( NULL != pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream )
 			free(pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream);
+		pParams->pMyBlockSrc = NULL;
 		pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = NULL;
 		pParams->nStreamsStackTop--;
 
@@ -7469,6 +7482,7 @@ uscita:
 	{
 		if ( NULL != pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream )
 			free(pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream);
+		pParams->pMyBlockSrc = NULL;
 		pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = NULL;
 
 		pParams->nStreamsStackTop--;
@@ -7861,6 +7875,7 @@ int ManageContent(Params *pParams, int nPageNumber)
 	if ( DecodedStreamSize < totalLengthFromPdf )
 		DecodedStreamSize = totalLengthFromPdf + (4096 * 89);
 
+	pParams->pMyBlockSrc = NULL;
 	pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = (unsigned char *)malloc( DecodedStreamSize );
 	if ( NULL == pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream )
 	{
@@ -7938,6 +7953,7 @@ int ManageContent(Params *pParams, int nPageNumber)
 			}
 			#endif
 
+			pParams->pMyBlockSrc = NULL;
 			pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = pszDecodedStreamNew;
 		}
 
@@ -8115,6 +8131,7 @@ uscita:
 	{
 		if ( NULL != pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream )
 			free(pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream);
+		pParams->pMyBlockSrc = NULL;
 		pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = NULL;
 
 		pParams->nStreamsStackTop--;
@@ -8795,6 +8812,7 @@ uscita:
 
 int LoadFirstBlock(Params *pParams, int objNum, const char *pszFunctionName)
 {
+	pParams->pMyBlockSrc = NULL; // myBlock verra' sovrascritto
 	int retValue = 1;
 
 	unsigned long int nBlockSize = pParams->nMyBlockSize;   // dimensione reale del buffer pParams->myBlock
@@ -8899,7 +8917,7 @@ int LoadFirstBlock(Params *pParams, int objNum, const char *pszFunctionName)
 			goto uscita;
 		}
 
-		pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+		pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 
 		if ( pParams->blockLen < 3 )
 		{
@@ -10297,7 +10315,7 @@ int PrintThisObject(Params *pParams, int objNum, int bDecodeStream, int nPageNum
 					k++;
 					if ( k >= pParams->blockLen )
 					{
-						pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+						pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 						k = 0;
 					}
 					continue;
@@ -10349,7 +10367,7 @@ int PrintThisObject(Params *pParams, int objNum, int bDecodeStream, int nPageNum
 				goto uscita;
 			}
 
-			pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+			pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 			if ( pParams->blockLen == 0 )
 			{
 				retValue = 0;
@@ -10394,7 +10412,7 @@ int PrintThisObject(Params *pParams, int objNum, int bDecodeStream, int nPageNum
 		k++;
 		if ( k >= pParams->blockLen )
 		{
-			pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+			pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 			k = 0;
 		}
 	}
@@ -10416,7 +10434,7 @@ int PrintThisObject(Params *pParams, int objNum, int bDecodeStream, int nPageNum
 			goto uscita;
 		}
 
-		pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+		pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 
 		pParams->blockCurPos = 0;
 
@@ -10752,7 +10770,7 @@ int PrintThisObjectFontFile(Params *pParams, int objNum, FILE* fpOutput)
 		k++;
 		if ( k >= pParams->blockLen )
 		{
-			pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+			pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 			k = 0;
 		}
 	}
@@ -11029,7 +11047,7 @@ int CheckObjectType(Params *pParams, int objNum)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 
 	pParams->blockCurPos = 0;
 
@@ -11083,7 +11101,7 @@ int ParseStmObj(Params *pParams, int objNum)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 
 	pParams->blockCurPos = 0;
 
@@ -11149,7 +11167,7 @@ int ParseTrailerXRefStreamObject(Params *pParams)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 	pParams->blockCurPos = 0;
 
 	if ( pParams->blockLen < 3 )
@@ -11393,7 +11411,7 @@ int ParseTrailerXRefStreamObject(Params *pParams)
 			goto uscita;
 		}
 
-		pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+		pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 		pParams->blockCurPos = 0;
 
 		GetNextToken(pParams);
@@ -11636,7 +11654,7 @@ int ParseStreamObject(Params *pParams, int objNum)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 
 	if ( pParams->blockLen < 3 )
 	{
@@ -11714,7 +11732,7 @@ int ParseStreamXObject(Params *pParams, int objNum)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 
 	if ( pParams->blockLen < 3 )
 	{
@@ -15330,7 +15348,7 @@ int contentobjbody(Params *pParams)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 	if ( pParams->blockLen == 0 )
 	{
 		pParams->myToken.Type = T_EOF;
@@ -17309,7 +17327,7 @@ int contentxobjbody(Params *pParams)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 	if ( pParams->blockLen == 0 )
 	{
 		pParams->myToken.Type = T_EOF;
@@ -22875,7 +22893,7 @@ int xrefstream_objbody(Params *pParams)
 	//pos2 = ftell(pParams->fp);
 	//wprintf(L)\n\npos1 = %lu <> pos2 = %lu <> Length = %lu < pos2 - pos1 = %lu\n\n", pos1, pos2, pParams->CurrentContent.LengthFromPdf, pos2 - pos1);
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 	if ( pParams->blockLen == 0 )
 	{
 		pParams->myToken.Type = T_EOF;
@@ -23911,7 +23929,7 @@ int stmobjbody(Params *pParams)
 		goto uscita;
 	}
 
-	pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+	pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 	if ( pParams->blockLen == 0 )
 	{
 		pParams->myToken.Type = T_EOF;

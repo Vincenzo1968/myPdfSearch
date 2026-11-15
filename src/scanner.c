@@ -4017,7 +4017,7 @@ void IgnoreStreamChars(Params *pParams)
 
 	if ( pParams->blockCurPos >= pParams->blockLen )
 	{
-		pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+		pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 		if ( pParams->blockLen == 0 )
 		{
 			pParams->myToken.Type = T_EOF;
@@ -4115,7 +4115,7 @@ unsigned char ReadNextChar(Params *pParams)
 			return ' ';
 		}
 
-		pParams->blockLen = fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp);
+		pParams->blockLen = (pParams->pMyBlockSrc = NULL, fread(pParams->myBlock, 1, BLOCK_SIZE, pParams->fp));
 		if ( pParams->blockLen == 0 )
 		{
 			pParams->myToken.Type = T_EOF;

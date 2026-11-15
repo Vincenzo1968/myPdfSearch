@@ -750,7 +750,11 @@ typedef struct tagParams
 	int countArrayScope;
 
 	unsigned char *myBlock;
-	unsigned long int nMyBlockSize;   // dimensione reale, in byte, del buffer myBlock (0 se non allocato)
+	unsigned long int nMyBlockSize;
+
+	// Stream (puntatore + dimensione) di cui myBlock contiene attualmente una copia fedele; NULL = contenuto non valido.
+	const unsigned char *pMyBlockSrc;
+	unsigned long int nMyBlockSrcSize;   // dimensione reale, in byte, del buffer myBlock (0 se non allocato)
 	int blockLen;
 	int blockCurPos;
 
