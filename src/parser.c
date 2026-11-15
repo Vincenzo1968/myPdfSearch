@@ -1889,7 +1889,7 @@ int getObjsOffsets(Params *pParams, char *pszFileName)
 							bSubtypeState = 1;
 							state = S_PP0;
 						}
-						else if ( cDelim == '/' )
+						else if ( '/' == c )   // cDelim vale DELIM_SPECIALSYMBOL per '/', non il carattere '/': "/Subtype/Image" non veniva riconosciuto
 						{
 							//wprintf(L"OK, are in S PP27; TROVATO '/'; I go in state S PP27\n');
 							state = S_PP27;
@@ -1904,43 +1904,58 @@ int getObjsOffsets(Params *pParams, char *pszFileName)
 						if ( 'I' == c )
 							state = S_PP28;
 						else
+						{
+							bSubtypeState = 0;
 							state = S_PP0;
+						}
 						break;
 
 					case S_PP28:
 						if ( 'm' == c )
 							state = S_PP29;
 						else
+						{
+							bSubtypeState = 0;
 							state = S_PP0;
+						}
 						break;
 
 					case S_PP29:
 						if ( 'a' == c )
 							state = S_PP30;
 						else
+						{
+							bSubtypeState = 0;
 							state = S_PP0;
+						}
 						break;
 
 					case S_PP30:
 						if ( 'g' == c )
 							state = S_PP31;
 						else
+						{
+							bSubtypeState = 0;
 							state = S_PP0;
+						}
 						break;
 
 					case S_PP31:
 						if ( 'e' == c )
 							state = S_PP32;
 						else
+						{
+							bSubtypeState = 0;
 							state = S_PP0;
+						}
 						break;
 
 					case S_PP32:
 						if ( IsDelimiterChar(c) )
 						{
-							bSubtypeState = 0;
 							bCurrentSubtypeIsImage = 1;
 						}
+						bSubtypeState = 0;
 						state = S_PP0;
 						break;
 
@@ -3292,7 +3307,14 @@ int match(Params *pParams, TokenTypeEnum ExpectedToken, char *pszFunctionName)
 		{
 			objNum = pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number;
 			objGen = pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation;
-			bValidObj = 1;
+
+			// Il dump dell'oggetto e' possibile solo per oggetti in uso o compressi in un object stream:
+			// per gli altri tipi (liberi, riservati, sconosciuti) LoadFirstBlock darebbe un secondo errore inutile.
+			if ( OBJ_TYPE_IN_USE == pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Type ||
+			     OBJ_TYPE_STREAM == pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Type )
+			{
+				bValidObj = 1;
+			}
 		}
 
 		if ( NULL != pszFunctionName )
@@ -10326,6 +10348,15 @@ int PrintThisObject(Params *pParams, int objNum, int bDecodeStream, int nPageNum
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(fpOutput, L"Errore PrintThisObject: objNum invalid -> %d\n", objNum);
 		}
+		goto uscita;
+	}
+
+	// Il dump e' possibile solo per oggetti in uso o compressi in un object stream. Per gli altri tipi
+	// (liberi, riservati, ancora sconosciuti) LoadFirstBlock produrrebbe solo un secondo errore inutile.
+	if ( NULL == pParams->myObjsTable[objNum] ||
+	     ( OBJ_TYPE_IN_USE != pParams->myObjsTable[objNum]->Obj.Type && OBJ_TYPE_STREAM != pParams->myObjsTable[objNum]->Obj.Type ) )
+	{
+		retValue = 0;
 		goto uscita;
 	}
 
