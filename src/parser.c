@@ -13501,7 +13501,7 @@ int ParseFontObject(Params *pParams, int objNum)
         FreeFontArrays(pParams);
     }
 
-    pParams->paCustomizedFont_CharSet = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
+    pParams->paCustomizedFont_CharSet = (wchar_t*)calloc(0x10000, sizeof(wchar_t));
     pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
     pParams->nNonNulLSequences = 0;
 		
