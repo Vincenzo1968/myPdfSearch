@@ -543,6 +543,51 @@ typedef struct tag_vlrbtData
 
 } vlrbtData_t;
 
+
+#define FONT_CACHE_SIZE 128
+
+typedef struct tagFontCacheEntry
+{
+    int objNum;
+    int nCurrentFontSubtype;
+    int bEncodigArrayAlreadyInit;
+    int bCurrentFontIdentityH;
+    int bCurrentFontHasDirectEncodingArray;
+    int nCurrentEncodingObj;
+    int nToUnicodeStreamObjRef;
+    char szTemp[MAX_STRLEN];
+    int nCurrentUseCMapRef;
+    char szUseCMap[MAX_STRLEN];
+    int nCurrentFontCodeSpacesNum;
+    int nCurrFontDescriptorRef;
+    char szBaseFont[1024];
+    char szCIDOrdering[64];
+    int nDescendantFontRef;
+    double dCurrFontSpaceWidth;
+    double dCurrFontSpaceWidthScaled;
+    double dCurrFontAvgWidth;
+    double dCurrFontMaxWidth;
+    double dCurrFontLmWidth;
+    double dCurrFontLmWidthScaled;
+    double dCurrFontUmWidth;
+    double dCurrFontUmWidthScaled;
+    int bWisPresent;
+    int nCurrFontWritingMode;
+    int nCurrentParsingFontWidthsArrayRef;
+    int bFontWidthsArrayState;
+    int nCurrentBaseFont;
+    int bHasCodeSpaceTwoByte;
+    int bHasCodeSpaceOneByte;
+    int dimCustomizedFont_CharSet;
+    int bCurrParsingFontIsCIDFont;
+    int bCurrFontSpaceWidthIsZero;
+    CodeSpaceRange_t *pCodeSpaceRangeArray;
+    int nEncodingArrayType;
+    wchar_t *paCustomizedFont_CharSet;
+    wchar_t **sequences;
+} FontCacheEntry;
+
+
 typedef int (*OnUserPasswordCallback)(const char *pdf_filename,
                                       const char *error_msg,
                                       char *out_password,
@@ -555,6 +600,9 @@ typedef struct tagParams
 	Token myTokenLengthObj;
 	
 	int nLastParsedFontObjNum;
+	
+    FontCacheEntry *myFontCache[FONT_CACHE_SIZE];
+    int nFontCacheCount;
 
 	int bCurrTokenIsOperator;
 

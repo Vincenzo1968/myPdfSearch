@@ -2175,6 +2175,8 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	pParams->nObjsTableSizeFromPrescanFile = 0;
 	pParams->pPagesTree = NULL;
 	pParams->pPagesArray = NULL;
+	
+	pParams->nFontCacheCount = 0;
 
 	pParams->bUpdateNumBytesReadFromCurrentStream = 1;
 
@@ -2791,6 +2793,8 @@ successivo:
 
 			free(pParams->myObjsTable);
 			pParams->myObjsTable = NULL;
+			
+			FreeFontCache(pParams);
 		}
 
 		if ( NULL != pParams->pPagesTree )
@@ -2983,6 +2987,8 @@ uscita:
 
 				free(pParams->myObjsTable[x]);
 				pParams->myObjsTable[x] = NULL;
+				
+				FreeFontCache(pParams);
 			}
 		}
 
@@ -13392,6 +13398,188 @@ uscita:
 	return retValue;
 }
 
+void FreeFontCache(Params *pParams)
+{
+    for (int i = 0; i < pParams->nFontCacheCount; i++) {
+        FontCacheEntry *e = pParams->myFontCache[i];
+        if (e) {
+            if (e->pCodeSpaceRangeArray) free(e->pCodeSpaceRangeArray);
+            if (e->paCustomizedFont_CharSet) free(e->paCustomizedFont_CharSet);
+            if (e->sequences) {
+                for (int j = 0; j < 0x10000; j++) {
+                    if (e->sequences[j]) free(e->sequences[j]);
+                }
+                free(e->sequences);
+            }
+            free(e);
+        }
+    }
+    pParams->nFontCacheCount = 0;
+}
+
+void SaveFontCache(Params *pParams, int objNum)
+{
+    for (int i = 0; i < pParams->nFontCacheCount; i++) {
+        if (pParams->myFontCache[i]->objNum == objNum) return; // Già in cache
+    }
+    if (pParams->nFontCacheCount >= FONT_CACHE_SIZE) return;
+
+    FontCacheEntry *e = (FontCacheEntry*)malloc(sizeof(FontCacheEntry));
+    if (!e) return;
+    memset(e, 0, sizeof(FontCacheEntry));
+    e->objNum = objNum;
+
+    e->nCurrentFontSubtype = pParams->nCurrentFontSubtype;
+    e->bEncodigArrayAlreadyInit = pParams->bEncodigArrayAlreadyInit;
+    e->bCurrentFontHasDirectEncodingArray = pParams->bCurrentFontHasDirectEncodingArray;
+    e->nCurrentEncodingObj = pParams->nCurrentEncodingObj;
+    e->nToUnicodeStreamObjRef = pParams->nToUnicodeStreamObjRef;
+    strncpy(e->szTemp, pParams->szTemp, MAX_STRLEN);
+    e->nCurrentUseCMapRef = pParams->nCurrentUseCMapRef;
+    strncpy(e->szUseCMap, pParams->szUseCMap, MAX_STRLEN);
+    e->nCurrentFontCodeSpacesNum = pParams->nCurrentFontCodeSpacesNum;
+    e->nCurrFontDescriptorRef = pParams->nCurrFontDescriptorRef;
+    strncpy(e->szBaseFont, pParams->szBaseFont, 1024);
+    strncpy(e->szCIDOrdering, pParams->szCIDOrdering, 64);
+    e->nDescendantFontRef = pParams->nDescendantFontRef;
+    e->dCurrFontSpaceWidth = pParams->dCurrFontSpaceWidth;
+    e->dCurrFontSpaceWidthScaled = pParams->dCurrFontSpaceWidthScaled;
+    e->dCurrFontAvgWidth = pParams->dCurrFontAvgWidth;
+    e->dCurrFontMaxWidth = pParams->dCurrFontMaxWidth;
+    e->dCurrFontLmWidth = pParams->dCurrFontLmWidth;
+    e->dCurrFontLmWidthScaled = pParams->dCurrFontLmWidthScaled;
+    e->dCurrFontUmWidth = pParams->dCurrFontUmWidth;
+    e->dCurrFontUmWidthScaled = pParams->dCurrFontUmWidthScaled;
+    e->bWisPresent = pParams->bWisPresent;
+    e->nCurrFontWritingMode = pParams->nCurrFontWritingMode;
+    e->nCurrentParsingFontWidthsArrayRef = pParams->nCurrentParsingFontWidthsArrayRef;
+    e->bFontWidthsArrayState = pParams->bFontWidthsArrayState;
+    e->nCurrentBaseFont = pParams->nCurrentBaseFont;
+    e->bHasCodeSpaceTwoByte = pParams->bHasCodeSpaceTwoByte;
+    e->bHasCodeSpaceOneByte = pParams->bHasCodeSpaceOneByte;
+    e->dimCustomizedFont_CharSet = pParams->dimCustomizedFont_CharSet;
+    e->bCurrParsingFontIsCIDFont = pParams->bCurrParsingFontIsCIDFont;
+    e->bCurrFontSpaceWidthIsZero = pParams->bCurrFontSpaceWidthIsZero;
+    e->nCurrentFontSubtype = pParams->nCurrentFontSubtype;
+    e->bEncodigArrayAlreadyInit = pParams->bEncodigArrayAlreadyInit;
+    e->bCurrentFontIdentityH = pParams->bCurrentFontIdentityH;
+
+    if (pParams->pCodeSpaceRangeArray && pParams->nCurrentFontCodeSpacesNum > 0) {
+        e->pCodeSpaceRangeArray = (CodeSpaceRange_t*)malloc(sizeof(CodeSpaceRange_t) * pParams->nCurrentFontCodeSpacesNum);
+        if (e->pCodeSpaceRangeArray) {
+            memcpy(e->pCodeSpaceRangeArray, pParams->pCodeSpaceRangeArray, sizeof(CodeSpaceRange_t) * pParams->nCurrentFontCodeSpacesNum);
+        }
+    }
+
+    if (pParams->pCurrentEncodingArray == pParams->paCustomizedFont_CharSet) e->nEncodingArrayType = 0;
+    else if (pParams->pCurrentEncodingArray == pParams->pArrayUnicode) e->nEncodingArrayType = 1;
+    else if (pParams->pCurrentEncodingArray == pParams->aWIN_CharSet) e->nEncodingArrayType = 2;
+    else if (pParams->pCurrentEncodingArray == pParams->aMAC_CharSet) e->nEncodingArrayType = 3;
+    else if (pParams->pCurrentEncodingArray == pParams->aMACEXP_CharSet) e->nEncodingArrayType = 4;
+    else if (pParams->pCurrentEncodingArray == pParams->aSTD_CharSet) e->nEncodingArrayType = 5;
+    else e->nEncodingArrayType = 0;
+
+    if (pParams->paCustomizedFont_CharSet) {
+        e->paCustomizedFont_CharSet = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
+        if (e->paCustomizedFont_CharSet) {
+            memcpy(e->paCustomizedFont_CharSet, pParams->paCustomizedFont_CharSet, 0x10000 * sizeof(wchar_t));
+        }
+    }
+
+    if (pParams->sequences) {
+        e->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
+        if (e->sequences) {
+            for (int i = 0; i < 0x10000; i++) {
+                if (pParams->sequences[i] != NULL) {
+                    size_t len = wcslen(pParams->sequences[i]) + 1;
+                    e->sequences[i] = (wchar_t*)malloc(len * sizeof(wchar_t));
+                    if (e->sequences[i]) memcpy(e->sequences[i], pParams->sequences[i], len * sizeof(wchar_t));
+                }
+            }
+        }
+    }
+
+    pParams->myFontCache[pParams->nFontCacheCount++] = e;
+}
+
+void RestoreFontCache(Params *pParams, FontCacheEntry *e)
+{
+    pParams->nCurrentFontSubtype = e->nCurrentFontSubtype;
+    pParams->bEncodigArrayAlreadyInit = e->bEncodigArrayAlreadyInit;
+    pParams->bCurrentFontHasDirectEncodingArray = e->bCurrentFontHasDirectEncodingArray;
+    pParams->nCurrentEncodingObj = e->nCurrentEncodingObj;
+    pParams->nToUnicodeStreamObjRef = e->nToUnicodeStreamObjRef;
+    strncpy(pParams->szTemp, e->szTemp, MAX_STRLEN);
+    pParams->nCurrentUseCMapRef = e->nCurrentUseCMapRef;
+    strncpy(pParams->szUseCMap, e->szUseCMap, MAX_STRLEN);
+    pParams->nCurrentFontCodeSpacesNum = e->nCurrentFontCodeSpacesNum;
+    pParams->nCurrFontDescriptorRef = e->nCurrFontDescriptorRef;
+    strncpy(pParams->szBaseFont, e->szBaseFont, 1024);
+    strncpy(pParams->szCIDOrdering, e->szCIDOrdering, 64);
+    pParams->nDescendantFontRef = e->nDescendantFontRef;
+    pParams->dCurrFontSpaceWidth = e->dCurrFontSpaceWidth;
+    pParams->dCurrFontSpaceWidthScaled = e->dCurrFontSpaceWidthScaled;
+    pParams->dCurrFontAvgWidth = e->dCurrFontAvgWidth;
+    pParams->dCurrFontMaxWidth = e->dCurrFontMaxWidth;
+    pParams->dCurrFontLmWidth = e->dCurrFontLmWidth;
+    pParams->dCurrFontLmWidthScaled = e->dCurrFontLmWidthScaled;
+    pParams->dCurrFontUmWidth = e->dCurrFontUmWidth;
+    pParams->dCurrFontUmWidthScaled = e->dCurrFontUmWidthScaled;
+    pParams->bWisPresent = e->bWisPresent;
+    pParams->nCurrFontWritingMode = e->nCurrFontWritingMode;
+    pParams->nCurrentParsingFontWidthsArrayRef = e->nCurrentParsingFontWidthsArrayRef;
+    pParams->bFontWidthsArrayState = e->bFontWidthsArrayState;
+    pParams->nCurrentBaseFont = e->nCurrentBaseFont;
+    pParams->bHasCodeSpaceTwoByte = e->bHasCodeSpaceTwoByte;
+    pParams->bHasCodeSpaceOneByte = e->bHasCodeSpaceOneByte;
+    pParams->dimCustomizedFont_CharSet = e->dimCustomizedFont_CharSet;
+    pParams->bCurrParsingFontIsCIDFont = e->bCurrParsingFontIsCIDFont;
+    pParams->bCurrFontSpaceWidthIsZero = e->bCurrFontSpaceWidthIsZero;
+    pParams->bCurrentFontIdentityH = e->bCurrentFontIdentityH;
+
+    if (pParams->pCodeSpaceRangeArray) {
+        free(pParams->pCodeSpaceRangeArray);
+        pParams->pCodeSpaceRangeArray = NULL;
+    }
+    if (e->pCodeSpaceRangeArray && e->nCurrentFontCodeSpacesNum > 0) {
+        pParams->pCodeSpaceRangeArray = (CodeSpaceRange_t*)malloc(sizeof(CodeSpaceRange_t) * e->nCurrentFontCodeSpacesNum);
+        if (pParams->pCodeSpaceRangeArray) {
+            memcpy(pParams->pCodeSpaceRangeArray, e->pCodeSpaceRangeArray, sizeof(CodeSpaceRange_t) * e->nCurrentFontCodeSpacesNum);
+        }
+    }
+
+    switch (e->nEncodingArrayType) {
+        case 0: pParams->pCurrentEncodingArray = pParams->paCustomizedFont_CharSet; break;
+        case 1: pParams->pCurrentEncodingArray = pParams->pArrayUnicode; break;
+        case 2: pParams->pCurrentEncodingArray = pParams->aWIN_CharSet; break;
+        case 3: pParams->pCurrentEncodingArray = pParams->aMAC_CharSet; break;
+        case 4: pParams->pCurrentEncodingArray = pParams->aMACEXP_CharSet; break;
+        case 5: pParams->pCurrentEncodingArray = pParams->aSTD_CharSet; break;
+        default: pParams->pCurrentEncodingArray = pParams->paCustomizedFont_CharSet; break;
+    }
+
+    if (e->paCustomizedFont_CharSet) {
+        memcpy(pParams->paCustomizedFont_CharSet, e->paCustomizedFont_CharSet, 0x10000 * sizeof(wchar_t));
+    }
+
+    if (!pParams->sequences) {
+        pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
+    }
+    if (pParams->sequences && e->sequences) {
+        for (int i = 0; i < 0x10000; i++) {
+            if (pParams->sequences[i]) {
+                free(pParams->sequences[i]);
+                pParams->sequences[i] = NULL;
+            }
+            if (e->sequences[i] != NULL) {
+                size_t len = wcslen(e->sequences[i]) + 1;
+                pParams->sequences[i] = (wchar_t*)malloc(len * sizeof(wchar_t));
+                if (pParams->sequences[i]) memcpy(pParams->sequences[i], e->sequences[i], len * sizeof(wchar_t));
+            }
+        }
+    }
+}
+
 int ParseFontObject(Params *pParams, int objNum)
 {
 	int retValue = 1;
@@ -13406,10 +13594,20 @@ int ParseFontObject(Params *pParams, int objNum)
 		goto uscita;
 	}
 	
-	#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PROF)
-	fprintf(stderr, "[DEBUG] PARSE_FONT objNum=%d\n", objNum);
-	#endif
-	
+    // Controllo Cache
+    for (int i = 0; i < pParams->nFontCacheCount; i++)
+    {
+        if (pParams->myFontCache[i]->objNum == objNum)
+        {
+            pParams->nCurrentParsingFontObjNum = objNum;
+            pParams->nCurrentObjNum = objNum;
+            pParams->nObjToParse = objNum;
+            RestoreFontCache(pParams, pParams->myFontCache[i]);
+            
+            return 1;
+        }
+    }
+		
 	/*
     //  Cleaning of previous font sequences <<<<
     if (pParams->sequences != NULL)
@@ -13475,6 +13673,11 @@ uscita:
 	mynumstacklist_Free(&(pParams->myCurrFontWidthsStack));
 
 	mynumstacklist_Free( &(pParams->myNumStack) );
+	
+    if (retValue == 1)
+    {
+        SaveFontCache(pParams, objNum);
+    }
 
 	return retValue;
 }
