@@ -2712,10 +2712,20 @@ successivo:
 		}
 		
 		// Libera la cache per il prossimo PDF
-		FreeFontCache(pParams);
-		pParams->paCustomizedFont_CharSet = NULL;
-		pParams->sequences = NULL;
-		pParams->nNonNulLSequences = 0;
+		if (pParams->nFontCacheCount > 0)
+		{
+			// Ci sono font in cache: la cache possiede gli array.
+			FreeFontCache(pParams);
+			pParams->paCustomizedFont_CharSet = NULL;
+			pParams->sequences = NULL;
+			pParams->nNonNulLSequences = 0;
+		}
+		else
+		{
+			// Nessun font in cache (o nessun font nel PDF):
+			// liberiamo gli array originali allocati da InitializeUnicodeArray.
+			FreeFontArrays(pParams);
+		}
 
 		if ( NULL != pParams->pPagesTree )
 		{
@@ -2945,7 +2955,20 @@ uscita:
 	}
 
 	// 1. Liberiamo la cache (che ora possiede paCustomizedFont_CharSet e sequences)
-	FreeFontCache(pParams);
+	if (pParams->nFontCacheCount > 0)
+	{
+		// Ci sono font in cache: la cache possiede gli array.
+		FreeFontCache(pParams);
+		pParams->paCustomizedFont_CharSet = NULL;
+		pParams->sequences = NULL;
+		pParams->nNonNulLSequences = 0;
+	}
+	else
+	{
+		// Nessun font in cache (o nessun font nel PDF):
+		// liberiamo gli array originali allocati da InitializeUnicodeArray.
+		FreeFontArrays(pParams);
+	}
 
 	// 2. Azzeriamo i puntatori in Params (la memoria è già stata liberata da FreeFontCache)
 	pParams->paCustomizedFont_CharSet = NULL;
@@ -13420,6 +13443,31 @@ void RestoreFontCache(Params *pParams, FontCacheEntry *e)
     }
 }
 
+void FreeFontArrays(Params *pParams)
+{
+    if (pParams->paCustomizedFont_CharSet != NULL)
+    {
+        free(pParams->paCustomizedFont_CharSet);
+        pParams->paCustomizedFont_CharSet = NULL;
+    }
+
+    if (pParams->sequences != NULL)
+    {
+        for (int s = 0; s < 0x10000; s++)
+        {
+            if (pParams->sequences[s] != NULL)
+            {
+                free(pParams->sequences[s]);
+                pParams->sequences[s] = NULL;
+            }
+        }
+        free(pParams->sequences);
+        pParams->sequences = NULL;
+    }
+
+    pParams->nNonNulLSequences = 0;
+}
+
 int ParseFontObject(Params *pParams, int objNum)
 {
 	int retValue = 1;
@@ -13447,10 +13495,12 @@ int ParseFontObject(Params *pParams, int objNum)
         }
     }
     
-    // CACHE MISS: Allochiamo nuovi buffer per il parsing
-    if (pParams->nFontCacheCount == 0 && pParams->paCustomizedFont_CharSet != NULL) {
-        free(pParams->paCustomizedFont_CharSet); // Libera l'allocazione iniziale se è la prima volta
+    // CACHE MISS: Libera i vecchi array prima di allocarne di nuovi
+    if (pParams->nFontCacheCount == 0)
+    {
+        FreeFontArrays(pParams);
     }
+
     pParams->paCustomizedFont_CharSet = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
     pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
     pParams->nNonNulLSequences = 0;

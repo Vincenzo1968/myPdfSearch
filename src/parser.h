@@ -171,6 +171,8 @@ int LoadFirstBlock(Params *pParams, int objNum, const char *pszFunctionName);
 
 void myTreeTraversePostOrderLeafOnly(Tree *head, Params *pParams);
 
+
+void FreeFontArrays(Params *pParams);
 void FreeFontCache(Params *pParams);
 void SaveFontCache(Params *pParams, int objNum);
 void RestoreFontCache(Params *pParams, FontCacheEntry *e);
