@@ -11,6 +11,10 @@
 core
 core.*
 vgcore.*
+valgrind.log
+gmon.out
+perf.data
+perf.data.*
 
 # Local PDF test documents
 *.pdf
@@ -37,6 +41,7 @@ Thumbs.db
 
 # Autotools: local configuration and build artifacts
 Makefile
+Makefile.in
 config.log
 config.status
 config.cache
@@ -45,6 +50,10 @@ configure.lineno
 autom4te.cache/
 .deps/
 .libs/
+compile
+depcomp
+install-sh
+missing
 
 # Additional compiler and linker artifacts
 *.lo
@@ -53,4 +62,3 @@ autom4te.cache/
 *.Plo
 
 src/mypdfsearch
-
