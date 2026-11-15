@@ -2223,11 +2223,7 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	pParams->currentObjStm.First = 0;
 	pParams->currentObjStm.Extend = 0;
 
-	//pParams->pCurrentEncodingArray = &(pParams->aUtf8CharSet[0]);
 	pParams->pCurrentEncodingArray = &(pParams->aSTD_CharSet[0]);
-	//pParams->pCurrentEncodingArray = &(pParams->aWIN CharSet[0]);
-	//pParams->pCurrentEncodingArray = &(pParams->aMAC CharSet[0]);
-	//pParams->pCurrentEncodingArray = &(pParams->aPDF CharSet[0]);
 
 	InitializeUnicodeArray(pParams);
 	InitializeCharSetArrays(pParams);
@@ -2246,9 +2242,7 @@ int Parse(Params *pParams, FilesList* myFilesList)
 		if (pParams->pCryptoParams == NULL)
 		{
 			snprintf(pParams->szError, 8192, "ERRORE Parse: impossibile allocare PdfCryptoParams.\n");
-
 			myShowErrorMessage(pParams, pParams->szError, 1);
-
 			return 0;
 		}
 	}
@@ -2265,19 +2259,9 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERROR Parse: InitCMapHT FAILED\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L"ERROR Parse: InitCMapHT FAILED\n");
-		//fwprintf(pParams->fpErrors, L"ERROR Parse: InitCMapHT FAILED\n");
 		retValue = 0;
 		goto uscita;
 	}
-
-	//#if defined(MYPDFSEARCH USE TST)
-	//tstInit(&(pParams->myTST));
-	//#else
-	//genhtInit(&(pParams->myHT), 0, GenWideStringHashFunc, GenWideStringCompareFunc);
-	//#endif
-
-	//genhtInit(&(pParams->myHT EncodingArray), 0, GenStringHashFunc, GenStringCompareFunc);
 
 	myobjreflist_Init(&(pParams->myXObjRefList));
 	myobjreflist_Init(&(pParams->myFontsRefList));
@@ -2288,8 +2272,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE Parse 1: Memoria insufficiente.\n\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L)ERRORE Parse 1: Insufficient memory. \n\n);
-		//fwprintf(pParams->fpErrors, L"ERRORE Parse 1: Insufficient memory. \n\n);
 		retValue = 0;
 		goto uscita;
 	}
@@ -2302,8 +2284,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE Parse 1 bis: Memoria insufficiente.\n\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L)ERRORE Parse 1: Insufficient memory. \n\n);
-		//fwprintf(pParams->fpErrors, L"ERRORE Parse 1 bis: Insufficient memory. \n\n);
 		retValue = 0;
 		goto uscita;
 	}
@@ -2316,8 +2296,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE Parse 2: Memoria insufficiente.\n\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L"ERRORE Parse 2: Insufficient memory. \n\n);
-		//fwprintf(pParams->fpErrors, L"ERRORE Parse 2: Insufficient memory. \n\n);
 		retValue = 0;
 		goto uscita;
 	}
@@ -2326,8 +2304,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE Parse 2 bis: Memoria insufficiente.\n\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L"ERRORE Parse 2: Insufficient memory. \n\n);
-		//fwprintf(pParams->fpErrors, L"ERRORE Parse 2: Insufficient memory. \n\n);
 		retValue = 0;
 		goto uscita;
 	}
@@ -2343,8 +2319,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE Parse 3: Memoria insufficiente.\n\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L'ERRORE Parse 3: Insufficient memory. \n\n);
-		//fwprintf(pParams->fpErrors, L"ERRORE Parse 3: Insufficient memory. \n\n);
 		retValue = 0;
 		goto uscita;
 	}
@@ -2354,8 +2328,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE Parse 4: Memoria insufficiente.\n\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L"ERRORE Parse 4: Insufficient memory. \n\n);
-		//fwprintf(pParams->fpErrors, L"ERRORE Parse 4: Insufficient memory. \n\n);
 		retValue = 0;
 		goto uscita;
 	}
@@ -2369,8 +2341,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 		pParams->bSkipCurrentPdf = 0;
 
 		pParams->bPdfHasText = 0;
-		//pParams->nCountImageContent = 0;
-		//pParams->nCountNotImageContent = 0;
 
 		pParams->bParsingFontObj = 0;
 		pParams->bParsingGsObj = 0;
@@ -2450,9 +2420,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 		{
 			snprintf(pParams->szError, 8192, "ERRORE Parse 5: nell'apertura del file '%s'.\n\n", pParams->szFileName);
 			myShowErrorMessage(pParams, pParams->szError, 1);
-			//wprintf(L"ERRORE Parse 5: in the opening of the '%s' file. \n, pParams->szFileName);
-			//fwprintf(pParams->fpErrors, L"ERRORE Parse 5: in the opening of the '%s' file. \n\n, pParams->szFileName);
-
 			retValue = 0;
 			goto successivo;
 		}
@@ -2494,15 +2461,9 @@ int Parse(Params *pParams, FilesList* myFilesList)
 		{
 			snprintf(pParams->szError, 8192, "ERRORE Parse 5 tris nella lettura del file header '%s'.\n\n", pParams->szFileName);
 			myShowErrorMessage(pParams, pParams->szError, 1);
-			//wprintf(L"ERRORE Parse 5 tris in reading the header file '%s'. \n\n, pParams->szFileName);
-			//fwprintf(pParams->fpErrors, L"ERRORE Parse 5 tris in reading the header file '%s'. \n\n, pParams->szFileName);
 			retValue = 0;
 			goto successivo;
 		}
-
-		#if defined(MYDEBUG_PRINT_ALL)
-		wprintf(L"ReadHeader OK!\n");
-		#endif
 
 		pParams->myPdfTrailer.Size = 0;
 		pParams->myPdfTrailer.Prev = 0;
@@ -2542,15 +2503,11 @@ int Parse(Params *pParams, FilesList* myFilesList)
 			{
 				snprintf(pParams->szError, 8192, "Encrypted file '%s'.\n", pParams->szFileName);
 				myShowErrorMessage(pParams, pParams->szError, 1);
-				//wprintf(L"Encrypted file '%s'. \n, pParams->szFileName);
-				//fwprintf(pParams->fpErrors, L"Encrypted file '%s'. \n, pParams->szFileName);
 			}
 			else
 			{
 				snprintf(pParams->szError, 8192, "ERRORE Parse 6 nella lettura del trailer del file '%s'.\n\n", pParams->szFileName);
 				myShowErrorMessage(pParams, pParams->szError, 1);
-				//wprintf(L"ERRORE Parse 6 in the trailer reading of the '%s' file. \n\n, pParams->szFileName);
-				//fwprintf(pParams->fpErrors, L"ERRORE Parse 6 in the trailer reading of the '%s' file. \n\n, pParams->szFileName);
 			}
 
 			mynumstacklist_Free( &(pParams->myNumStack) );
@@ -2573,8 +2530,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 					{
 						snprintf(pParams->szError, 8192, "ERRORE Parse 6(CheckObjectType) nella lettura del trailer del file '%s'.\n\n", pParams->szFileName);
 						myShowErrorMessage(pParams, pParams->szError, 1);
-						//wprintf(L"ERRORE Parse 6 (CheckObjectType) in reading the trailer of the file '%s'. \n\n, pParams->szFileName);
-						//fwprintf(pParams->fpErrors, L"ERRORE Parse 6(CheckObjectType) in the trailer reading of the '%s' file. \n\n, pParams->szFileName);
 						PrintThisObject(pParams, k, 0, 0, NULL);
 						PrintThisObject(pParams, k, 0, 0, pParams->fpErrors);
 						retValue = 0;
@@ -2605,8 +2560,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 				{
 					snprintf(pParams->szError, 8192, "ERRORE Parse 6(ParseStmObj) nella lettura del trailer del file '%s'.\n\n", pParams->szFileName);
 					myShowErrorMessage(pParams, pParams->szError, 1);
-					//wprintf(L"ERRORE Parse 6 (ParseStmObj) in reading the trailer of the file '%s'. \n\n, pParams->szFileName);
-					//fwprintf(pParams->fpErrors, L"ERRORE Parse 6(ParseStmObj) in the trailer reading of the '%s' file. \n\n, pParams->szFileName);
 					PrintThisObject(pParams, myObjNum, 0, 0, NULL);
 					PrintThisObject(pParams, myObjNum, 0, 0, pParams->fpErrors);
 					myintqueuelist_Free(&myObjsQueue);
@@ -2636,24 +2589,12 @@ int Parse(Params *pParams, FilesList* myFilesList)
 			{
 				snprintf(pParams->szError, 8192, "ERRORE Parse 6(ParseTrailerXRefStreamObject) nella lettura del trailer del file '%s'.\n\n", pParams->szFileName);
 				myShowErrorMessage(pParams, pParams->szError, 1);
-				//wprintf(L"ERRORE Parse 6 (ParseTrailerXRefStreamObject) in the trailer reading of the '%s' file. \n\n, pParams->szFileName);
-				//fwprintf(pParams->fpErrors, L"ERRORE Parse 6(ParseTrailerXRefStreamObject) in the trailer reading of the '%s' file. \n\n, pParams->szFileName);
 				retValue = 0;
 				goto successivo;
 			}
 		}
 
 		mynumstacklist_Free( &(pParams->myNumStack) );
-
-		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"ReadTrailer OK!!!\n");
-		wprintf(L"Trailer Size: %d\n", pParams->myPdfTrailer.Size);
-		wprintf(L"nObjsTableSizeFromPrescanFile: %lu\n", pParams->nObjsTableSizeFromPrescanFile);
-		wprintf(L"Trailer Root: %d %d\n", pParams->myPdfTrailer.Root.Number, pParams->myPdfTrailer.Root.Generation);
-		wprintf(L"Trailer Prev: %d\n\n", pParams->myPdfTrailer.Prev);
-		wprintf(L"Trailer Info: %d %d\n", pParams->myPdfTrailer.Info.Number, pParams->myPdfTrailer.Info.Generation);
-		PrintThisObject(pParams, pParams->myPdfTrailer.Info.Number, 0, 0, NULL);
-		#endif
 
 		// 1. INITIZATION CRITTOGRAPHY (if PDF is encrypted)
 		if (pParams->myPdfTrailer.Encrypt.Number > 0)
@@ -2666,12 +2607,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 			}
 			pParams->bOnParseEncryptObject = 0;
 		}
-
-		// 2.  
-		//if (pParams->myPdfTrailer. Info.Number
-		//{
-		// ParseInfoObject(pParams, pParams->myPdfTrailer. Info.Number);
-		//}
 
 		// 2.  
 		if (pParams->myPdfTrailer.Info.Number > 0)
@@ -2694,20 +2629,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 
 		pParams->nCurrentFontSubtype = FONT_SUBTYPE_Type1;
 
-		// *************************************************************
-		//PrintThisObject(pParams, 1317, 1, 0, NULL);
-		//wprintf(L"\n**********************************************************************************************************************************\n");
-		//PrintThisObject(pParams, 1320, 1, 0, NULL);
-		//PrintThisObject(pParams, 1504, 1, 0, NULL);
-		//PrintThisObject(pParams, 1505, 1, 0, NULL);
-		//PrintThisObject(pParams, 1506, 1, 0, NULL);
-		//goto exit;
-		// *************************************************************
-
-
-
-
-
 		if (!ParseObject(pParams, pParams->myPdfTrailer.Root.Number))
 		{
 			// A PDF jumped because it requires a user password
@@ -2717,10 +2638,6 @@ int Parse(Params *pParams, FilesList* myFilesList)
 
 			goto successivo;
 		}
-
-		//#if defined(MYDEBUG PRINT ALL)
-		//wprintf(L"\n\nTotal number of Image Contents = %u;\nTotal number of content other than Image = %u\n\n", pParams->nCountImageContent, pParams->nCountNotImageContent);
-		//#endif
 
 successivo:
 
@@ -2739,7 +2656,6 @@ successivo:
 //**********************************************************************************************************************************
 		if ( pParams->myObjsTable != NULL )
 		{
-			//for ( x = 0; x < pParams->myPdfTrailer. Size; x++ )
 			for ( x = 0; x < pParams->nObjsTableSizeFromPrescanFile; x++ )
 			{
 				if ( pParams->myObjsTable[x] != NULL )
@@ -2793,9 +2709,13 @@ successivo:
 
 			free(pParams->myObjsTable);
 			pParams->myObjsTable = NULL;
-			
-			FreeFontCache(pParams);
 		}
+		
+		// Libera la cache per il prossimo PDF
+		FreeFontCache(pParams);
+		pParams->paCustomizedFont_CharSet = NULL;
+		pParams->sequences = NULL;
+		pParams->nNonNulLSequences = 0;
 
 		if ( NULL != pParams->pPagesTree )
 		{
@@ -2815,9 +2735,6 @@ successivo:
 		{
 			tstFreeRecursive(&(pParams->myTST), pParams->myTST.pRoot);
 		}
-
-		//if ( NULL!= pParams->myRedBlackTree.pRoot)
-		// vlrbtFree(&(pParams->myRedBlackTree));
 
 		if ( NULL != pParams->pText )
 		{
@@ -2854,15 +2771,6 @@ successivo:
 			pParams->pszDirectGsResourceString = NULL;
 		}
 
-		//if ( (T_NAME == pParams->myToken.Type || T_STRING == pParams->myToken.Type || T_STRING_LITERAL == pParams->myToken.Type || T_STRING_HEXADECIMAL == pParams->myToken.Type) && (NULL != pParams->myToken.vString) )
-		//{
-		// if ( NULL!= pParams->myToken.vString)
-		//	{
-		//  free(pParams->myToken.vString);
-		//  pParams->myToken. vString = NULL;
-		//	}
-		//}
-
 		if ( NULL != pParams->currentObjStm.pszDecodedStream )
 		{
 			free(pParams->currentObjStm.pszDecodedStream);
@@ -2886,19 +2794,6 @@ uscita:
 		pParams->lexeme = NULL;
 	}
 
-
-	//if (pParams->myToken.vString!= NULL )
-	//{
-	// free(pParams->myToken.vString);
-	// pParams->myToken. vString = NULL;
-	//}
-
-	//if (pParams->myTokenLengthObj. VString!
-	//{
-	// free(pParams->myTokenLengthObj.vString);
-	// pParams->myTokenLengthObj. vString = NULL;
-	//}
-
 	if ( pParams->lexemeTemp != NULL )
 	{
 		free(pParams->lexemeTemp);
@@ -2921,7 +2816,7 @@ uscita:
 	{
 		free(pParams->myBlock);
 		pParams->myBlock = NULL;
-	pParams->nMyBlockSize = 0;
+		pParams->nMyBlockSize = 0;
 	}
 
 	if ( pParams->myBlockLengthObj != NULL )
@@ -2938,7 +2833,6 @@ uscita:
 
 	if ( pParams->myObjsTable != NULL )
 	{
-		//for ( x = 0; x < pParams->myPdfTrailer. Size; x++ )
 		for ( x = 0; x < pParams->nObjsTableSizeFromPrescanFile; x++ )
 		{
 			if ( pParams->myObjsTable[x] != NULL )
@@ -2987,8 +2881,6 @@ uscita:
 
 				free(pParams->myObjsTable[x]);
 				pParams->myObjsTable[x] = NULL;
-				
-				FreeFontCache(pParams);
 			}
 		}
 
@@ -3016,9 +2908,6 @@ uscita:
 	{
 		tstFreeRecursive(&(pParams->myTST), pParams->myTST.pRoot);
 	}
-
-	//if ( NULL!= pParams->myRedBlackTree.pRoot)
-	// vlrbtFree(&(pParams->myRedBlackTree));
 
 	if ( NULL != pParams->pText )
 	{
@@ -3055,40 +2944,19 @@ uscita:
 		pParams->pszDirectGsResourceString = NULL;
 	}
 
-	//if ( (T_NAME == pParams->myToken.Type || T_STRING == pParams->myToken.Type || T_STRING_LITERAL == pParams->myToken.Type || T_STRING_HEXADECIMAL == pParams->myToken.Type) && (NULL != pParams->myToken.vString) )
-	//{
-	// if ( NULL!= pParams->myToken.vString)
-	//	{
-	//  free(pParams->myToken.vString);
-	//  pParams->myToken. vString = NULL;
-	//	}
-	//}
+	// 1. Liberiamo la cache (che ora possiede paCustomizedFont_CharSet e sequences)
+	FreeFontCache(pParams);
 
-	if ( NULL != pParams->paCustomizedFont_CharSet )
-	{
-		free(pParams->paCustomizedFont_CharSet);
-		pParams->paCustomizedFont_CharSet = NULL;
-	}
+	// 2. Azzeriamo i puntatori in Params (la memoria è già stata liberata da FreeFontCache)
+	pParams->paCustomizedFont_CharSet = NULL;
+	pParams->sequences = NULL;
+	pParams->nNonNulLSequences = 0;
 
+	// 3. Liberiamo pArrayUnicode (NON è gestito dalla cache)
 	if ( NULL != pParams->pArrayUnicode )
 	{
 		free(pParams->pArrayUnicode);
 		pParams->pArrayUnicode = NULL;
-	}
-
-	// cleanup of sequences
-	if ( NULL != pParams->sequences )
-	{
-		for ( int s = 0; s < 0x10000; s++ )
-		{
-			if ( NULL != pParams->sequences[s] )
-			{
-				free(pParams->sequences[s]);
-				pParams->sequences[s] = NULL;
-			}
-		}
-		free(pParams->sequences);
-		pParams->sequences = NULL;
 	}
 
 	if ( NULL != pParams->fpOutput )
@@ -13464,9 +13332,11 @@ void SaveFontCache(Params *pParams, int objNum)
     e->bEncodigArrayAlreadyInit = pParams->bEncodigArrayAlreadyInit;
     e->bCurrentFontIdentityH = pParams->bCurrentFontIdentityH;
 
-    if (pParams->pCodeSpaceRangeArray && pParams->nCurrentFontCodeSpacesNum > 0) {
+    if (pParams->pCodeSpaceRangeArray && pParams->nCurrentFontCodeSpacesNum > 0)
+    {
         e->pCodeSpaceRangeArray = (CodeSpaceRange_t*)malloc(sizeof(CodeSpaceRange_t) * pParams->nCurrentFontCodeSpacesNum);
-        if (e->pCodeSpaceRangeArray) {
+        if (e->pCodeSpaceRangeArray)
+        {
             memcpy(e->pCodeSpaceRangeArray, pParams->pCodeSpaceRangeArray, sizeof(CodeSpaceRange_t) * pParams->nCurrentFontCodeSpacesNum);
         }
     }
@@ -13479,25 +13349,10 @@ void SaveFontCache(Params *pParams, int objNum)
     else if (pParams->pCurrentEncodingArray == pParams->aSTD_CharSet) e->nEncodingArrayType = 5;
     else e->nEncodingArrayType = 0;
 
-    if (pParams->paCustomizedFont_CharSet) {
-        e->paCustomizedFont_CharSet = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
-        if (e->paCustomizedFont_CharSet) {
-            memcpy(e->paCustomizedFont_CharSet, pParams->paCustomizedFont_CharSet, 0x10000 * sizeof(wchar_t));
-        }
-    }
-
-    if (pParams->sequences) {
-        e->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
-        if (e->sequences) {
-            for (int i = 0; i < 0x10000; i++) {
-                if (pParams->sequences[i] != NULL) {
-                    size_t len = wcslen(pParams->sequences[i]) + 1;
-                    e->sequences[i] = (wchar_t*)malloc(len * sizeof(wchar_t));
-                    if (e->sequences[i]) memcpy(e->sequences[i], pParams->sequences[i], len * sizeof(wchar_t));
-                }
-            }
-        }
-    }
+    // ZERO-COPY: Prendiamo i puntatori, non copiamo!
+    e->paCustomizedFont_CharSet = pParams->paCustomizedFont_CharSet;
+    e->sequences = pParams->sequences;
+    e->nNonNulLSequences = pParams->nNonNulLSequences;
 
     pParams->myFontCache[pParams->nFontCacheCount++] = e;
 }
@@ -13548,6 +13403,12 @@ void RestoreFontCache(Params *pParams, FontCacheEntry *e)
         }
     }
 
+    // PRIMA ripristiniamo i puntatori (ZERO-COPY)
+    pParams->paCustomizedFont_CharSet = e->paCustomizedFont_CharSet;
+    pParams->sequences = e->sequences;
+    pParams->nNonNulLSequences = e->nNonNulLSequences;
+
+    // POI deriviamo pCurrentEncodingArray (dipende dai puntatori appena ripristinati)
     switch (e->nEncodingArrayType) {
         case 0: pParams->pCurrentEncodingArray = pParams->paCustomizedFont_CharSet; break;
         case 1: pParams->pCurrentEncodingArray = pParams->pArrayUnicode; break;
@@ -13556,27 +13417,6 @@ void RestoreFontCache(Params *pParams, FontCacheEntry *e)
         case 4: pParams->pCurrentEncodingArray = pParams->aMACEXP_CharSet; break;
         case 5: pParams->pCurrentEncodingArray = pParams->aSTD_CharSet; break;
         default: pParams->pCurrentEncodingArray = pParams->paCustomizedFont_CharSet; break;
-    }
-
-    if (e->paCustomizedFont_CharSet) {
-        memcpy(pParams->paCustomizedFont_CharSet, e->paCustomizedFont_CharSet, 0x10000 * sizeof(wchar_t));
-    }
-
-    if (!pParams->sequences) {
-        pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
-    }
-    if (pParams->sequences && e->sequences) {
-        for (int i = 0; i < 0x10000; i++) {
-            if (pParams->sequences[i]) {
-                free(pParams->sequences[i]);
-                pParams->sequences[i] = NULL;
-            }
-            if (e->sequences[i] != NULL) {
-                size_t len = wcslen(e->sequences[i]) + 1;
-                pParams->sequences[i] = (wchar_t*)malloc(len * sizeof(wchar_t));
-                if (pParams->sequences[i]) memcpy(pParams->sequences[i], e->sequences[i], len * sizeof(wchar_t));
-            }
-        }
     }
 }
 
@@ -13603,10 +13443,17 @@ int ParseFontObject(Params *pParams, int objNum)
             pParams->nCurrentObjNum = objNum;
             pParams->nObjToParse = objNum;
             RestoreFontCache(pParams, pParams->myFontCache[i]);
-            
             return 1;
         }
     }
+    
+    // CACHE MISS: Allochiamo nuovi buffer per il parsing
+    if (pParams->nFontCacheCount == 0 && pParams->paCustomizedFont_CharSet != NULL) {
+        free(pParams->paCustomizedFont_CharSet); // Libera l'allocazione iniziale se è la prima volta
+    }
+    pParams->paCustomizedFont_CharSet = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
+    pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
+    pParams->nNonNulLSequences = 0;
 		
 	/*
     //  Cleaning of previous font sequences <<<<
