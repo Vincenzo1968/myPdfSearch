@@ -586,6 +586,7 @@ typedef struct tagFontCacheEntry
     wchar_t *paCustomizedFont_CharSet;
     wchar_t **sequences;
     int nNonNulLSequences;
+    unsigned long nLastUse;
 } FontCacheEntry;
 
 
@@ -604,6 +605,7 @@ typedef struct tagParams
 	
     FontCacheEntry *myFontCache[FONT_CACHE_SIZE];
     int nFontCacheCount;
+    unsigned long nFontCacheClock;
     int nNonNulLSequences;
 
 	int bCurrTokenIsOperator;

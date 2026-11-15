@@ -2177,6 +2177,7 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	pParams->pPagesArray = NULL;
 	
 	pParams->nFontCacheCount = 0;
+	pParams->nFontCacheClock = 0;
 
 	pParams->bUpdateNumBytesReadFromCurrentStream = 1;
 
@@ -13273,21 +13274,26 @@ uscita:
 	return retValue;
 }
 
+static void FreeFontCacheEntry(FontCacheEntry *e)
+{
+    if (e) {
+        if (e->pCodeSpaceRangeArray) free(e->pCodeSpaceRangeArray);
+        if (e->paCustomizedFont_CharSet) free(e->paCustomizedFont_CharSet);
+        if (e->sequences) {
+            for (int j = 0; j < 0x10000; j++) {
+                if (e->sequences[j]) free(e->sequences[j]);
+            }
+            free(e->sequences);
+        }
+        free(e);
+    }
+}
+
 void FreeFontCache(Params *pParams)
 {
     for (int i = 0; i < pParams->nFontCacheCount; i++) {
-        FontCacheEntry *e = pParams->myFontCache[i];
-        if (e) {
-            if (e->pCodeSpaceRangeArray) free(e->pCodeSpaceRangeArray);
-            if (e->paCustomizedFont_CharSet) free(e->paCustomizedFont_CharSet);
-            if (e->sequences) {
-                for (int j = 0; j < 0x10000; j++) {
-                    if (e->sequences[j]) free(e->sequences[j]);
-                }
-                free(e->sequences);
-            }
-            free(e);
-        }
+        FreeFontCacheEntry(pParams->myFontCache[i]);
+        pParams->myFontCache[i] = NULL;
     }
     pParams->nFontCacheCount = 0;
 }
@@ -13297,10 +13303,33 @@ void SaveFontCache(Params *pParams, int objNum)
     for (int i = 0; i < pParams->nFontCacheCount; i++) {
         if (pParams->myFontCache[i]->objNum == objNum) return; // Già in cache
     }
-    if (pParams->nFontCacheCount >= FONT_CACHE_SIZE) return;
+    int nSlot = pParams->nFontCacheCount;
+    if (pParams->nFontCacheCount >= FONT_CACHE_SIZE)
+    {
+        // Cache piena: eliminiamo la voce usata meno di recente (LRU).
+        // Gli array correnti non sono in cache (li ha appena creati ParseFontObject): nessun conflitto.
+        nSlot = 0;
+        for (int i = 1; i < pParams->nFontCacheCount; i++)
+        {
+            if (pParams->myFontCache[i]->nLastUse < pParams->myFontCache[nSlot]->nLastUse)
+                nSlot = i;
+        }
+        FreeFontCacheEntry(pParams->myFontCache[nSlot]);
+        pParams->myFontCache[nSlot] = NULL;
+    }
 
     FontCacheEntry *e = (FontCacheEntry*)malloc(sizeof(FontCacheEntry));
-    if (!e) return;
+    if (!e)
+    {
+        // slot libero se abbiamo appena eliminato una voce: lo riempiamo con l'ultima per tenere compatto l'array
+        if (nSlot < pParams->nFontCacheCount)
+        {
+            pParams->myFontCache[nSlot] = pParams->myFontCache[pParams->nFontCacheCount - 1];
+            pParams->myFontCache[pParams->nFontCacheCount - 1] = NULL;
+            pParams->nFontCacheCount--;
+        }
+        return;
+    }
     memset(e, 0, sizeof(FontCacheEntry));
     e->objNum = objNum;
 
@@ -13361,7 +13390,10 @@ void SaveFontCache(Params *pParams, int objNum)
     e->sequences = pParams->sequences;
     e->nNonNulLSequences = pParams->nNonNulLSequences;
 
-    pParams->myFontCache[pParams->nFontCacheCount++] = e;
+    e->nLastUse = ++pParams->nFontCacheClock;
+    if (nSlot == pParams->nFontCacheCount)
+        pParams->nFontCacheCount++;
+    pParams->myFontCache[nSlot] = e;
 }
 
 void RestoreFontCache(Params *pParams, FontCacheEntry *e)
@@ -13493,6 +13525,7 @@ int ParseFontObject(Params *pParams, int objNum)
             pParams->nCurrentParsingFontObjNum = objNum;
             pParams->nCurrentObjNum = objNum;
             pParams->nObjToParse = objNum;
+            pParams->myFontCache[i]->nLastUse = ++pParams->nFontCacheClock;
             FreeUncachedFontArrays(pParams);
             RestoreFontCache(pParams, pParams->myFontCache[i]);
             return 1;
