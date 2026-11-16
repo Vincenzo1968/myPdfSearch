@@ -9763,8 +9763,11 @@ int ParseObject(Params *pParams, int objNum)
 		nToPage = pParams->nCountPageFound;
 
 	nCountPagesToParse = nToPage - nFromPage;
-	if ( nToPage == pParams->nCountPageFound )
-		nMiddlePage = (nCountPagesToParse / 2) + 1;
+
+	// Meta' dell'intervallo richiesto (pagine assolute). Prima veniva calcolata solo se nToPage coincideva con
+	// l'ultima pagina del file e non teneva conto di nFromPage: con -t=N < ultima pagina restava 0 e il ciclo
+	// si fermava subito alla prima pagina senza testo ancora trovato (nessun output).
+	nMiddlePage = nFromPage + (nCountPagesToParse / 2);
 
 	nCountHalfPages = pParams->nCountPageFound / 2;
 
