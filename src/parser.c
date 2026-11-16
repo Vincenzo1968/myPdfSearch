@@ -1996,7 +1996,7 @@ calcoli:
 	for ( k = 0; k < pParams->nObjsTableSizeFromPrescanFile; k++ )
 	{
 		pParams->myObjsTable[k] = (PdfObjsTableItem *)malloc(sizeof(PdfObjsTableItem));
-		if ( !(pParams->myObjsTable) )
+		if ( !(pParams->myObjsTable[k]) )
 		{
 			snprintf(pParams->szError, 8192,
 				"ERROR genhtUpdateData: memoria insufficiente per allocare l'oggetto numero %d sulla tabella degli oggetti.\n\n",
@@ -4637,6 +4637,10 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
             pParams->dsLineMatrix.e,
             pParams->dsLineMatrix.f);
     #endif
+
+    // Testo mostrato senza alcun font selezionato (Tf mancante, PDF malformato): niente da fare.
+    if ( NULL == pParams->pCurrFontGlyphsWidths )
+        return 1;
 
     pParams->dCurrFontSpaceWidthScaled = 0.0;
 
@@ -23507,7 +23511,57 @@ int xrefstream_keyarrayinternal(Params *pParams)
 
 // ************************************************************************************************************************
 
-int EnsureObjTableSize(Params *pParams, uint32_t requiredSize) { if (requiredSize <= pParams->nObjsTableSizeFromPrescanFile) return 1; uint32_t newSize = requiredSize + 10; PdfObjsTableItem **newTable = realloc(pParams->myObjsTable, newSize * sizeof(PdfObjsTableItem*)); if (!newTable) return 0; for (uint32_t i = pParams->nObjsTableSizeFromPrescanFile; i < newSize; i++) { newTable[i] = (PdfObjsTableItem*)calloc(1, sizeof(PdfObjsTableItem)); if (!newTable[i]) return 0; newTable[i]->Obj.Type = OBJ_TYPE_UNKNOWN; newTable[i]->Obj.numObjParent = -1; myobjreflist_Init(&(newTable[i]->myXObjRefList)); myobjreflist_Init(&(newTable[i]->myFontsRefList)); myobjreflist_Init(&(newTable[i]->myGsRefList)); myintqueuelist_Init(&(newTable[i]->queueContentsObjRefs)); } pParams->myObjsTable = newTable; pParams->nObjsTableSizeFromPrescanFile = newSize; return 1; }
+// Limite massimo di oggetti indirettamente indirizzabili (PDF 32000-1, Annex C: 8.388.607). Evita che un file corrotto
+// o ostile ci faccia allocare tabelle enormi.
+#define MYPDF_MAX_OBJS_TABLE_SIZE 8388608u
+
+// Espande, se serve, la tabella degli oggetti fino a contenere 'requiredSize' elementi.
+// Ritorna 1 se ok; 0 se requiredSize supera il limite o la memoria e' insufficiente.
+// In caso di errore la tabella resta coerente: nObjsTableSizeFromPrescanFile conta solo elementi inizializzati.
+int EnsureObjTableSize(Params *pParams, uint32_t requiredSize)
+{
+	uint32_t i;
+	uint32_t newSize;
+	PdfObjsTableItem **newTable;
+	PdfObjsTableItem *pItem;
+
+	if ( requiredSize <= pParams->nObjsTableSizeFromPrescanFile )
+		return 1;
+
+	if ( requiredSize > MYPDF_MAX_OBJS_TABLE_SIZE )
+		return 0;
+
+	newSize = requiredSize + 10;
+
+	newTable = (PdfObjsTableItem **)realloc(pParams->myObjsTable, (size_t)newSize * sizeof(PdfObjsTableItem*));
+	if ( NULL == newTable )
+		return 0;
+
+	// Da qui il vecchio puntatore puo' non essere piu' valido.
+	pParams->myObjsTable = newTable;
+
+	for ( i = pParams->nObjsTableSizeFromPrescanFile; i < newSize; i++ )
+	{
+		pItem = (PdfObjsTableItem*)calloc(1, sizeof(PdfObjsTableItem));
+		if ( NULL == pItem )
+		{
+			pParams->nObjsTableSizeFromPrescanFile = i;
+			return 0;
+		}
+
+		pItem->Obj.Type = OBJ_TYPE_UNKNOWN;
+		pItem->Obj.numObjParent = -1;
+		myobjreflist_Init(&(pItem->myXObjRefList));
+		myobjreflist_Init(&(pItem->myFontsRefList));
+		myobjreflist_Init(&(pItem->myGsRefList));
+		myintqueuelist_Init(&(pItem->queueContentsObjRefs));
+
+		newTable[i] = pItem;
+	}
+
+	pParams->nObjsTableSizeFromPrescanFile = newSize;
+	return 1;
+}
 
 int getObjStmDataFromDecodedStream(Params *pParams)
 {
@@ -23586,12 +23640,23 @@ int getObjStmDataFromDecodedStream(Params *pParams)
 			{
 				objNum = atoi(lexeme);
 
-				if ( objNum < 1 || objNum >= pParams->nObjsTableSizeFromPrescanFile ) { if ( !EnsureObjTableSize(pParams, objNum + 1) ) { snprintf(pParams->szError, 8192, "Errore getObjStmDataFromDecodedStream: objNum non valido -> %d\n", objNum); myShowErrorMessage(pParams, pParams->szError, 1); retValue = 0; goto uscita; } } if (0) {
+				if ( objNum < 1 )
+				{
+					snprintf(pParams->szError, 8192, "Errore getObjStmDataFromDecodedStream: objNum non valido -> %d\n", objNum);
 					myShowErrorMessage(pParams, pParams->szError, 1);
-					//wprintf(L"Errore getObjStmDataFromDecodedStream: not valid objNum -> %d; pParams->nObjsTableSizeFromPrescanFile = %lu\n", objNum, pParams->nObjsTableSizeFromPrescanFile);
-					//fwprintf(pParams->fpErrors, L"Error getObjStmDataFromDecodedStream: invalid objNum -> %d; pParams->nObjsTableSizeFromPrescanFile = %lu\n", objNum, pParams->nObjsTableS
 					retValue = 0;
 					goto uscita;
+				}
+
+				if ( (uint32_t)objNum >= pParams->nObjsTableSizeFromPrescanFile )
+				{
+					if ( !EnsureObjTableSize(pParams, (uint32_t)objNum + 1) )
+					{
+						snprintf(pParams->szError, 8192, "Errore getObjStmDataFromDecodedStream: impossibile espandere la tabella oggetti per objNum -> %d\n", objNum);
+						myShowErrorMessage(pParams, pParams->szError, 1);
+						retValue = 0;
+						goto uscita;
+					}
 				}
 			}
 			else
