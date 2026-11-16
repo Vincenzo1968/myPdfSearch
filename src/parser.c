@@ -2520,23 +2520,9 @@ int Parse(Params *pParams, FilesList* myFilesList)
 		}
 		else if ( 2 == retReadTrailer )
 		{
-			// --- INIZIO FIX ---
-			// Assicuriamoci che la tabella sia grande abbastanza per contenere
-			// il valore di /Size e l'oggetto XRef Stream stesso.
 			uint32_t requiredSize = pParams->myPdfTrailer.Size;
-			if ( (uint32_t)pParams->nXRefStreamObjNum >= requiredSize )
-			{
-				requiredSize = pParams->nXRefStreamObjNum + 1;
-			}
-			if ( !EnsureObjTableSize(pParams, requiredSize) )
-			{
-				snprintf(pParams->szError, 8192, "ERRORE Parse: impossibile espandere myObjsTable.\n");
-				myShowErrorMessage(pParams, pParams->szError, 1);
-				retValue = 0;
-				goto successivo;
-			}
-			// --- FINE FIX ---
-
+			if ( (uint32_t)pParams->nXRefStreamObjNum >= requiredSize ) requiredSize = pParams->nXRefStreamObjNum + 1;
+			if ( !EnsureObjTableSize(pParams, requiredSize) ) { snprintf(pParams->szError, 8192, "ERRORE Parse: impossibile espandere myObjsTable.\n"); myShowErrorMessage(pParams, pParams->szError, 1); retValue = 0; goto successivo; }
 			MyIntQueueList_t myObjsQueue;
 			int myObjNum;
 
@@ -4458,124 +4444,123 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
     wchar_t lastC = L' ';
     wchar_t lastCEncoding = 0;
 
-    int useIdentityHCID = 0;
-    int useUtf16Direct = 0;
+	int useIdentityHCID = 0;
+	int useUtf16Direct = 0;
 
-    // Identity-H significa sempre 2 byte per carattere (CID), 
-    // indipendentemente dalla presenza della mappa /ToUnicode.
-    if (pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 &&
-        pParams->bCurrentFontIdentityH &&
-        pRawBytes != NULL)
-    {
-        useIdentityHCID = 1;
-    }
+	if (pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 &&
+		pParams->nToUnicodeStreamObjRef <= 0 &&
+		pParams->bCurrentFontIdentityH &&
+		pRawBytes != NULL)
+	{
+		useIdentityHCID = 1;
+	}
 
-    // We temporarily keep the previous heuristics
-    // for other Type0 fonts, without ToUnicode.
-    if (!useIdentityHCID &&
-        pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 &&
-        pParams->nToUnicodeStreamObjRef <= 0 &&
-        pRawBytes != NULL &&
-        rawBytesLen >= 4)
-    {
-        size_t pairs = rawBytesLen / 2;
-        size_t low_high_bytes = 0;
+	// We temporarily keep the previous heuristics
+	// for other Type0 fonts, without ToUnicode.
+	if (!useIdentityHCID &&
+		pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 &&
+		pParams->nToUnicodeStreamObjRef <= 0 &&
+		pRawBytes != NULL &&
+		rawBytesLen >= 4)
+	{
+		size_t pairs = rawBytesLen / 2;
+		size_t low_high_bytes = 0;
 
-        for (size_t z = 0; z < pairs; z++)
-        {
-            unsigned char hb = pRawBytes[2 * z];
+		for (size_t z = 0; z < pairs; z++)
+		{
+			unsigned char hb = pRawBytes[2 * z];
 
-            if (hb < 0x80 || hb == 0xFE || hb == 0xFF)
-                low_high_bytes++;
-        }
+			if (hb < 0x80 || hb == 0xFE || hb == 0xFF)
+				low_high_bytes++;
+		}
 
-        if (pairs > 0 && (low_high_bytes * 100 / pairs) >= 30)
-        {
-            useUtf16Direct = 1;
-        }
-    }
+		if (pairs > 0 && (low_high_bytes * 100 / pairs) >= 30)
+		{
+			useUtf16Direct = 1;
+		}
+	}
 
     size_t rawIdx = 0;
 
-    #if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING) || defined(DMYDEBUG_PRINT_ON_SHOW_STRING_OPERATOR) || defined(MYDEBUG_TYPE0_RAW)
-    if (pParams->nCurrentPageNum == 2 && pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && pParams->nToUnicodeStreamObjRef <= 0)
-    {
-        fprintf(stderr, "[TYPE0-RAW] szTemp='%s'\n", pParams->szTemp);
+	#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING) || defined(DMYDEBUG_PRINT_ON_SHOW_STRING_OPERATOR) || defined(MYDEBUG_TYPE0_RAW)
+	if (pParams->nCurrentPageNum == 2 && pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && pParams->nToUnicodeStreamObjRef <= 0)
+	{
+		fprintf(stderr, "[TYPE0-RAW] szTemp='%s'\n", pParams->szTemp);
 
-        fprintf(stderr,
-            "[TYPE0-RAW] EncodingObj=%d UseCMapRef=%d "
-            "szTemp='%s' szUseCMap='%s'\n",
-            pParams->nCurrentEncodingObj,
-            pParams->nCurrentUseCMapRef,
-            pParams->szTemp,
-            pParams->szUseCMap);
+		fprintf(stderr,
+			"[TYPE0-RAW] EncodingObj=%d UseCMapRef=%d "
+			"szTemp='%s' szUseCMap='%s'\n",
+			pParams->nCurrentEncodingObj,
+			pParams->nCurrentUseCMapRef,
+			pParams->szTemp,
+			pParams->szUseCMap);
 
-        fprintf(stderr,
-            "[TYPE0-RAW] CodeSpace1=%d CodeSpace2=%d "
-            "CurrentEncodingIsUnicode=%d\n",
-            pParams->bHasCodeSpaceOneByte,
-            pParams->bHasCodeSpaceTwoByte,
-            pParams->pCurrentEncodingArray == pParams->pArrayUnicode);
+		fprintf(stderr,
+			"[TYPE0-RAW] CodeSpace1=%d CodeSpace2=%d "
+			"CurrentEncodingIsUnicode=%d\n",
+			pParams->bHasCodeSpaceOneByte,
+			pParams->bHasCodeSpaceTwoByte,
+			pParams->pCurrentEncodingArray == pParams->pArrayUnicode);
 
-        fprintf(stderr,
-            "\n[TYPE0-RAW] fontObj=%u CIDFontObj=%u "
-            "BaseFont='%s' Ordering='%s' UseCMap='%s'\n",
-            (unsigned)pParams->nCurrentParsingFontObjNum, (unsigned)pParams->nCurrentParsingCIDFontObjNum, pParams->szBaseFont, pParams->szCIDOrdering, pParams->szUseCMap);
+		fprintf(stderr,
+			"\n[TYPE0-RAW] fontObj=%u CIDFontObj=%u "
+			"BaseFont='%s' Ordering='%s' UseCMap='%s'\n",
+			(unsigned)pParams->nCurrentParsingFontObjNum, (unsigned)pParams->nCurrentParsingCIDFontObjNum, pParams->szBaseFont, pParams->szCIDOrdering, pParams->szUseCMap);
 
-        fprintf(stderr, "[TYPE0-RAW] useUtf16Direct=%d lenString=%zu rawBytesLen=%zu\n", useUtf16Direct, lenString, rawBytesLen);
+		fprintf(stderr, "[TYPE0-RAW] useUtf16Direct=%d lenString=%zu rawBytesLen=%zu\n", useUtf16Direct, lenString, rawBytesLen);
 
-        fprintf(stderr, "[TYPE0-RAW] raw bytes:");
+		fprintf(stderr, "[TYPE0-RAW] raw bytes:");
 
-        for (size_t z = 0; z < rawBytesLen; z++)
-            fprintf(stderr, " %02X", pRawBytes[z]);
+		for (size_t z = 0; z < rawBytesLen; z++)
+			fprintf(stderr, " %02X", pRawBytes[z]);
 
-        fprintf(stderr, "\n[TYPE0-RAW] pszString:");
+		fprintf(stderr, "\n[TYPE0-RAW] pszString:");
 
-        if (pszString != NULL)
-        {
-            for (size_t z = 0; z < lenString; z++)
-                fprintf(stderr, " %04X", (unsigned)pszString[z]);
-        }
+		if (pszString != NULL)
+		{
+			for (size_t z = 0; z < lenString; z++)
+				fprintf(stderr, " %04X", (unsigned)pszString[z]);
+		}
 
-        fprintf(stderr, "\n[TYPE0-RAW] pszEncodingString:");
+		fprintf(stderr, "\n[TYPE0-RAW] pszEncodingString:");
 
-        if (pszEncodingString != NULL)
-        {
-            for (size_t z = 0; z < lenString; z++)
-                fprintf(stderr, " %04X", (unsigned)pszEncodingString[z]);
-        }
+		if (pszEncodingString != NULL)
+		{
+			for (size_t z = 0; z < lenString; z++)
+				fprintf(stderr, " %04X", (unsigned)pszEncodingString[z]);
+		}
 
-        fprintf(stderr, "\n");
-    }
-    #endif
+		fprintf(stderr, "\n");
+	}
+	#endif
 
-    if (useIdentityHCID)
-    {
-        // Identity-H: each code occupies two bytes.
-        // A possible isolated final byte will be managed
-        // as code not valid in the main cycle.
-        lenString = rawBytesLen / 2 + (rawBytesLen % 2);
-    }
-    else if (useUtf16Direct)
-    {
-        size_t idx = 0;
-        size_t nChars = 0;
+	if (useIdentityHCID)
+	{
+    // Identity-H: each code occupies two bytes.
+    // A possible isolated final byte will be managed
+    // as code not valid in the main cycle.
+		lenString = rawBytesLen / 2 + (rawBytesLen % 2);
+	}
+	else if (useUtf16Direct)
+	{
+		size_t idx = 0;
+		size_t nChars = 0;
 
-        while (idx < rawBytesLen)
-        {
-            size_t consumed = 0;
+		while (idx < rawBytesLen)
+		{
+			size_t consumed = 0;
 
-            DecodeUTF16BE(pRawBytes + idx, rawBytesLen - idx, &consumed);
+			DecodeUTF16BE(pRawBytes + idx, rawBytesLen - idx, &consumed);
 
-            if (consumed == 0)
-                consumed = 2;
+			if (consumed == 0)
+				consumed = 2;
 
-            idx += consumed;
-            nChars++;
-        }
+			idx += consumed;
+			nChars++;
+		}
 
-        lenString = nChars;
-    }
+		lenString = nChars;
+	}
 
     #if defined(MYDEBUG_PRINT_ALL) || defined(DMYDEBUG_PRINT_ON_SHOW_STRING_OPERATOR)
     if (pParams->nCurrentPageNum == 2 && pszString != NULL && (wcschr(pszString, L'Ｎ') || wcschr(pszString, L'N') || wcschr(pszString, L'7')))
@@ -4661,7 +4646,7 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
     fontLmWidth    = pParams->pCurrFontGlyphsWidths->dFontLmWidth;
     fontUmWidth    = pParams->pCurrFontGlyphsWidths->dFontUmWidth;
 
-    if (fontSpaceWidth <= 0.0)
+	if (fontSpaceWidth <= 0.0)
         fontSpaceWidth = (avgWidth > 0.0) ? (avgWidth * 0.5) : 0.25;
     else if (fontSpaceWidth < 0.1)
         fontSpaceWidth = 0.1;
@@ -4670,6 +4655,9 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
     {
         int bInsertCurrentGlyph = 1;
         int bActualTextCharUsed = 0;
+        int bUnmappedCID = 0;
+        wchar_t unmappedMapValue = 0;
+        wchar_t unmappedFallbackValue = 0;
 
         // NOTE: c and cEncoding are set below, in the branch
         // useUtf16Direct (from raw bytes) or into the branch else (from
@@ -4753,53 +4741,41 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
         // ---------- Character conversion --------------
         wchar_t finalChar = 0;
 
-        if (useIdentityHCID)
-        {
-            unsigned int cid;
+		if (useIdentityHCID)
+		{
+			unsigned int cid;
 
-            if (rawIdx + 1 < rawBytesLen)
-            {
-                // Identity-H: reconstruction of the CID big-endian.
-                cid = ((unsigned int)pRawBytes[rawIdx] << 8) | (unsigned int)pRawBytes[rawIdx + 1];
+			if (rawIdx + 1 < rawBytesLen)
+			{
+				// Identity-H: reconstruction of the CID big-endian.
+				cid = ((unsigned int)pRawBytes[rawIdx] << 8) | (unsigned int)pRawBytes[rawIdx + 1];
 
-                rawIdx += 2;
+				rawIdx += 2;
 
-                c         = (wchar_t)cid;
-                cEncoding = (wchar_t)cid;
+				c         = (wchar_t)cid;
+				cEncoding = (wchar_t)cid;
 
-                // --- FIX: Prioritize Custom ToUnicode map over ConvertCIDToUnicode ---
-                if (pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && 
-                    pParams->nToUnicodeStreamObjRef > 0 && 
-                    pParams->paCustomizedFont_CharSet != NULL && 
-                    cid < 0x10000)
-                {
-                    finalChar = pParams->paCustomizedFont_CharSet[cid];
-                }
-                else
-                {
-                    finalChar = ConvertCIDToUnicode(pParams, (int)cid);
-                }
-                // ---------------------------------------------------------------------
+				if (pParams->nToUnicodeStreamObjRef > 0 && pParams->paCustomizedFont_CharSet != NULL && cid < 0x10000) { wchar_t uc = pParams->paCustomizedFont_CharSet[cid]; if (uc == (wchar_t)cid || uc == 0xFFFD) { wchar_t conv = ConvertCIDToUnicode(pParams, (int)cid); finalChar = (conv != 0xFFFD && conv != 0xFFFF && conv != 0xFFFE && conv != (wchar_t)cid) ? conv : (wchar_t)0xFFFD; } else if (uc == 0xFFFF || uc == 0xFFFE) finalChar = L' '; else finalChar = uc; } else finalChar = ConvertCIDToUnicode(pParams, (int)cid);
 
-                dblCurrCharWidth = -1.0;
-                dblCurrCharWidth = getCurrCharWidth(pParams, c, cEncoding);
+				dblCurrCharWidth = -1.0;
+				dblCurrCharWidth = getCurrCharWidth(pParams, c, cEncoding);
 
-                if (dblCurrCharWidth < 0.0 || c == L' ')
-                    dblCurrCharWidth = avgWidth;
-            }
-            else
-            {
-                // Incomplete Identity-H code: one byte.
-                // We can't rebuild the CID.
-                rawIdx = rawBytesLen;
+				if (pParams->nToUnicodeStreamObjRef <= 0 && (dblCurrCharWidth < 0.0 || c == L' '))
+					dblCurrCharWidth = avgWidth;
+			}
+			else
+			{
+				// Incomplete Identity-H code: one byte.
+				// We can't rebuild the CID.
+				rawIdx = rawBytesLen;
 
-                c = (wchar_t)0xFFFD;
-                cEncoding = (wchar_t)0xFFFD;
-                finalChar = (wchar_t)0xFFFD;
+				c = (wchar_t)0xFFFD;
+				cEncoding = (wchar_t)0xFFFD;
+				finalChar = (wchar_t)0xFFFD;
 
-                dblCurrCharWidth = avgWidth;
-            }
-        }
+				dblCurrCharWidth = avgWidth;
+			}
+		}
         else if (useUtf16Direct)
         {
             // Decode from raw bytes. We do not touch pszString/pszEncodingString
@@ -4828,23 +4804,74 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
             c         = pszString[i];
             cEncoding = pszEncodingString[i];
 
-            // --- FIX: Prioritize Custom ToUnicode map over ConvertCIDToUnicode ---
-            if (pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && 
-                pParams->nToUnicodeStreamObjRef > 0 && 
-                pParams->paCustomizedFont_CharSet != NULL && 
-                cEncoding >= 0 && cEncoding < 0x10000)
+            if (pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && pParams->nToUnicodeStreamObjRef <= 0)
             {
-                finalChar = pParams->paCustomizedFont_CharSet[(int)cEncoding];
-            }
-            else if (pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && pParams->nToUnicodeStreamObjRef <= 0)
-            {
+
+				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING)
+				fprintf(stderr, "\n[CID-FALLBACK] c=0x%08X cEncoding=0x%08X Ordering='%s'", (unsigned int)c, (unsigned int)cEncoding, pParams->szCIDOrdering);
+				#endif
+
                 finalChar = ConvertCIDToUnicode(pParams, (int)c);
+
+                #if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING)
+				fprintf(stderr, " Unicode=U+%04X\n", (unsigned int)finalChar);
+				#endif
             }
             else
             {
                 finalChar = c;
             }
-            // ---------------------------------------------------------------------
+
+            // CID management not mapped (identity) and noncharacter
+            if ( pParams->nCurrentFontSubtype == FONT_SUBTYPE_Type0 && pParams->nToUnicodeStreamObjRef > 0 && pParams->paCustomizedFont_CharSet != NULL )
+            {
+                int cid = (int)cEncoding;
+
+                if ( cid >= 0 && cid < 0x10000 )
+                {
+                    wchar_t uc = pParams->paCustomizedFont_CharSet[cid];
+
+                    if ( uc == (wchar_t)cid )
+                    {
+                        // identity = not mapped by CMap
+                        wchar_t conv = ConvertCIDToUnicode(pParams, cid);
+                        if ( conv != 0xFFFD && conv != 0xFFFF && conv != 0xFFFE && conv != (wchar_t)cid)
+                        {
+                            finalChar = conv;
+                        }
+                        else
+                        {
+                            finalChar = (wchar_t)0xFFFD;
+                            bUnmappedCID = 1;
+                            unmappedMapValue = uc;
+                            unmappedFallbackValue = conv;
+                        }
+                    }
+                    else if ( uc == 0xFFFD )
+                    {
+                        wchar_t conv = ConvertCIDToUnicode(pParams, cid);
+                        if ( conv != 0xFFFD && conv != 0xFFFF && conv != 0xFFFE && conv != (wchar_t)cid)
+                        {
+                            finalChar = conv;
+                        }
+                        else
+                        {
+                            finalChar = (wchar_t)0xFFFD;
+                            bUnmappedCID = 1;
+                            unmappedMapValue = uc;
+                            unmappedFallbackValue = conv;
+                        }
+                    }
+                    else if ( uc == 0xFFFF || uc == 0xFFFE )
+                    {
+                        finalChar = L' ';
+                    }
+                    else
+                    {
+                        finalChar = uc;
+                    }
+                }
+            }
 
             dblCurrCharWidth = -1.0;
             dblCurrCharWidth = getCurrCharWidth(pParams, c, cEncoding);
@@ -4867,20 +4894,42 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
 
         if (!bActualTextCharUsed)
             finalChar = KangxiToIdeograph(finalChar);
-            
-        // --- INIZIO FIX: Filtro caratteri non validi o di controllo ---
-        // Impedisce che glifi mancanti o caratteri di controllo (spesso mappati a spazi
-        // dalle ToUnicode di OCR o Isartor) vengano inseriti nel testo estratto.
-        if (finalChar == 0xFFFD || finalChar == 0xFFFF || finalChar == 0xFFFE ||
-            (finalChar < 0x20 && finalChar != 0x09 && finalChar != 0x0A && finalChar != 0x0D))
+
+        #if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING)
+        if (bUnmappedCID && !pParams->bActualTextActive)
         {
-            bInsertCurrentGlyph = 0;
+            wprintf(
+                L"\n[UNMAPPED-CID] op=%hs index=%zu "
+                L"fontObj=%u cidFontObj=%u ToUnicodeObj=%d "
+                L"BaseFont='%hs' CIDOrdering='%hs' "
+                L"CID=0x%04X (%u) ToUnicodeValue=U+%04X "
+                L"fallbackValue=U+%04X x=%.3f y=%.3f "
+                L"replacement=U+FFFD\n",
+                szOpName,
+                i,
+                (unsigned)pParams->nCurrentParsingFontObjNum,
+                (unsigned)pParams->nCurrentParsingCIDFontObjNum,
+                pParams->nToUnicodeStreamObjRef,
+                pParams->szBaseFont,
+                pParams->szCIDOrdering,
+                (unsigned)(uint16_t)cEncoding,
+                (unsigned)(uint16_t)cEncoding,
+                (unsigned)unmappedMapValue,
+                (unsigned)unmappedFallbackValue,
+                xCoordCurrent,
+                yCoordCurrent);
         }
-        // --- FINE FIX ---
+        #endif
 
         #if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING)
         wprintf(L"i = %d, c = '%lc', Value = %d; cEncoding = '%lc', Value = %d; finalChar = '%lc'; dblCurrCharWidth = %f\n",
                 i, c, c, cEncoding, cEncoding, finalChar, dblCurrCharWidth);
+        #endif
+
+        #if !(defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_ENCODING))
+        (void)bUnmappedCID;
+        (void)unmappedMapValue;
+        (void)unmappedFallbackValue;
         #endif
 
         // ------------ Horizontal/vertical advance ------------
@@ -5024,7 +5073,7 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
                 pParams->actualTextLastKey = pParams->myRedBlackTreeKey;
                 pParams->actualTextLastData = pParams->myRedBlackTreeData;
             }
-            else if (pParams->sequences != NULL)
+			else if (pParams->sequences != NULL)
             {
                 wchar_t seqCid = cEncoding;
                 int cidIdx = (int)seqCid;
@@ -23458,53 +23507,7 @@ int xrefstream_keyarrayinternal(Params *pParams)
 
 // ************************************************************************************************************************
 
-int EnsureObjTableSize(Params *pParams, uint32_t requiredSize)
-{
-	if (requiredSize <= pParams->nObjsTableSizeFromPrescanFile)
-		return 1; // Già abbastanza grande
-
-	uint32_t newSize = requiredSize + 10; // Aggiungiamo un margine di sicurezza
-	
-	// Usiamo il tipo corretto: PdfObjsTableItem
-	PdfObjsTableItem **newTable = realloc(pParams->myObjsTable, newSize * sizeof(PdfObjsTableItem*));
-	
-	if (!newTable) return 0;
-
-	for (uint32_t i = pParams->nObjsTableSizeFromPrescanFile; i < newSize; i++) {
-		newTable[i] = (PdfObjsTableItem*)calloc(1, sizeof(PdfObjsTableItem));
-		if (!newTable[i]) {
-			return 0;
-		}
-		
-		// Inizializziamo i valori di default, proprio come fa getObjsOffsets
-		newTable[i]->Obj.Type = OBJ_TYPE_UNKNOWN;
-		newTable[i]->Obj.Number = 0;
-		newTable[i]->Obj.Generation = 0;
-		newTable[i]->Obj.Offset = 0;
-		newTable[i]->Obj.StreamOffset = 0;
-		newTable[i]->Obj.StreamLength = 0;
-		newTable[i]->Obj.pszDecodedStream = NULL;
-		newTable[i]->Obj.numObjParent = -1;
-		newTable[i]->Obj.genObjParent = 0;
-		newTable[i]->Obj.pTreeNode = NULL;
-
-		// Inizializziamo le liste e i puntatori interni
-		myobjreflist_Init(&(newTable[i]->myXObjRefList));
-		myobjreflist_Init(&(newTable[i]->myFontsRefList));
-		myobjreflist_Init(&(newTable[i]->myGsRefList));
-		myintqueuelist_Init(&(newTable[i]->queueContentsObjRefs));
-		
-		newTable[i]->pGlyphsWidths = NULL;
-		newTable[i]->pszDirectFontResourceString = NULL;
-		newTable[i]->lenDirectFontResourceString = 0;
-		newTable[i]->pszDirectGsResourceString = NULL;
-		newTable[i]->lenDirectGsResourceString = 0;
-	}
-
-	pParams->myObjsTable = newTable;
-	pParams->nObjsTableSizeFromPrescanFile = newSize;
-	return 1;
-}
+int EnsureObjTableSize(Params *pParams, uint32_t requiredSize) { if (requiredSize <= pParams->nObjsTableSizeFromPrescanFile) return 1; uint32_t newSize = requiredSize + 10; PdfObjsTableItem **newTable = realloc(pParams->myObjsTable, newSize * sizeof(PdfObjsTableItem*)); if (!newTable) return 0; for (uint32_t i = pParams->nObjsTableSizeFromPrescanFile; i < newSize; i++) { newTable[i] = (PdfObjsTableItem*)calloc(1, sizeof(PdfObjsTableItem)); if (!newTable[i]) return 0; newTable[i]->Obj.Type = OBJ_TYPE_UNKNOWN; newTable[i]->Obj.numObjParent = -1; myobjreflist_Init(&(newTable[i]->myXObjRefList)); myobjreflist_Init(&(newTable[i]->myFontsRefList)); myobjreflist_Init(&(newTable[i]->myGsRefList)); myintqueuelist_Init(&(newTable[i]->queueContentsObjRefs)); } pParams->myObjsTable = newTable; pParams->nObjsTableSizeFromPrescanFile = newSize; return 1; }
 
 int getObjStmDataFromDecodedStream(Params *pParams)
 {
@@ -23583,18 +23586,12 @@ int getObjStmDataFromDecodedStream(Params *pParams)
 			{
 				objNum = atoi(lexeme);
 
-				if ( objNum < 1 || objNum >= pParams->nObjsTableSizeFromPrescanFile )
-				{
-					// --- INIZIO FIX ---
-					// Se troviamo un oggetto fuori dai limiti, espandiamo la tabella dinamicamente
-					if ( !EnsureObjTableSize(pParams, objNum + 1) )
-					{
-						snprintf(pParams->szError, 8192, "Errore getObjStmDataFromDecodedStream: objNum non valido -> %d; fallita espansione tabella.\n", objNum);
-						myShowErrorMessage(pParams, pParams->szError, 1);
-						retValue = 0;
-						goto uscita;
-					}
-					// --- FINE FIX ---
+				if ( objNum < 1 || objNum >= pParams->nObjsTableSizeFromPrescanFile ) { if ( !EnsureObjTableSize(pParams, objNum + 1) ) { snprintf(pParams->szError, 8192, "Errore getObjStmDataFromDecodedStream: objNum non valido -> %d\n", objNum); myShowErrorMessage(pParams, pParams->szError, 1); retValue = 0; goto uscita; } } if (0) {
+					myShowErrorMessage(pParams, pParams->szError, 1);
+					//wprintf(L"Errore getObjStmDataFromDecodedStream: not valid objNum -> %d; pParams->nObjsTableSizeFromPrescanFile = %lu\n", objNum, pParams->nObjsTableSizeFromPrescanFile);
+					//fwprintf(pParams->fpErrors, L"Error getObjStmDataFromDecodedStream: invalid objNum -> %d; pParams->nObjsTableSizeFromPrescanFile = %lu\n", objNum, pParams->nObjsTableS
+					retValue = 0;
+					goto uscita;
 				}
 			}
 			else
