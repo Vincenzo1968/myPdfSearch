@@ -1456,13 +1456,18 @@ int myInflate(unsigned char **dest, unsigned long int *destLen, const unsigned c
 
             have = CHUNK - strm.avail_out;
 
-            if ( have > (destLenNew - OffsetDest) )
+            if ( have >= (destLenNew - OffsetDest) )
             {
-				destLenNew += have;
-				destNew = (unsigned char*)realloc(*dest, destLenNew * sizeof(unsigned char) + sizeof(unsigned char));
+				size_t needed = OffsetDest + have + 1;
+				while ( destLenNew < needed )
+				{
+					destLenNew = (destLenNew == 0) ? (CHUNK * 4) : (destLenNew * 2);
+				}
+				destNew = (unsigned char*)realloc(*dest, destLenNew);
 				if ( NULL == destNew )
 				{
-					wprintf(L"ERRORE myInf. Impossibile reallocare %lu bytes per dest\n", destLenNew * sizeof(char) + sizeof(unsigned char));
+					wprintf(L"ERRORE myInf. Impossibile reallocare %lu bytes per dest\n", destLenNew);
+					(void)inflateEnd(&strm);
 					return Z_DATA_ERROR;
 				}
 				*dest = destNew;

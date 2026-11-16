@@ -5143,8 +5143,8 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 	void *pData = NULL;
 	int nFindImageObj;
 
-	unsigned long int nBlockSize = BLOCK_SIZE;
-	unsigned long int x = 0;
+	//unsigned long int nBlockSize = BLOCK_SIZE;
+	//unsigned long int x = 0;
 
 	TokenTypeEnum PrevType = T_UNKNOWN;
 
@@ -5157,6 +5157,10 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 	int nRes;
 
 	//int nCurrFontObjRef = 0;
+	
+	unsigned char *pSavedMyBlock = pParams->myBlock;
+	unsigned long int nSavedMyBlockSize = pParams->nMyBlockSize;
+
 
 	pParams->pLastRawStringBytes    = NULL;
 	pParams->nLastRawStringBytesLen = 0;
@@ -5259,49 +5263,18 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 	{
 		qui_dopo_push:
 
-		nBlockSize = pParams->nMyBlockSize;   // dimensione reale del buffer: altre funzioni possono averlo riallocato
-
-		if ( pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize >= nBlockSize )
-		{
-			for ( x = 2; nBlockSize <= pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize ; x++ )
-				nBlockSize += BLOCK_SIZE;
-
-			pParams->pMyBlockSrc = NULL;
-			if ( NULL != pParams->myBlock )
-				free(pParams->myBlock);
-
-			pParams->myBlock = (unsigned char *)malloc(sizeof(unsigned char) * nBlockSize);
-			pParams->nMyBlockSize = ( NULL != pParams->myBlock ) ? nBlockSize : 0;
-			if ( !(pParams->myBlock) )
-			{
-				snprintf(pParams->szError, 8192, "ERRORE ManageDecodedContent: Memoria insufficiente.\n\n");
-				myShowErrorMessage(pParams, pParams->szError, 1);
-				//wprintf(L"ERRORE ManageDecodedContent: Insufficient memory. \n\n);
-				//fwprintf(pParams->fpErrors, L"ERRORE ManageDecodedContent: Insufficient Memory. \n\n);
-				retValue = 0;
-				goto uscita;
-			}
-		}
-
 		// PEEK STACK
 		pParams->bStreamState = pParams->myStreamsStack[pParams->nStreamsStackTop].bStreamState;
 		pParams->bStringIsDecoded = pParams->myStreamsStack[pParams->nStreamsStackTop].bStringIsDecoded;
 		pParams->blockCurPos = pParams->myStreamsStack[pParams->nStreamsStackTop].blockCurPos;
 		pParams->blockLen = pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize;
-		// Dopo un Tf/gs con font gia' in cache myBlock non e' stato toccato: evitiamo di ricopiare l'intero stream.
-		if ( pParams->pMyBlockSrc != pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream ||
-		     pParams->nMyBlockSrcSize != (unsigned long int)pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize )
-		{
-			memcpy(pParams->myBlock, pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream, pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize);
-			pParams->pMyBlockSrc = pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream;
-			pParams->nMyBlockSrcSize = (unsigned long int)pParams->myStreamsStack[pParams->nStreamsStackTop].DecodedStreamSize;
-		}
+		pParams->myBlock = pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream;
+
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_FN)
 		wprintf(L"INIZIO STACK PEEK pParams->nStreamsStackTop = %d\n", pParams->nStreamsStackTop);
 		wprintf(L"pParams->blockCurPos = %d, pParams->blockLen = %d\n", pParams->blockCurPos, pParams->blockLen);
 		wprintf(L"FINE   STACK PEEK pParams->nStreamsStackTop = %d\n\n", pParams->nStreamsStackTop);
-
 		#endif
 
 		pParams->myToken.Type = T_UNKNOWN;
@@ -6690,6 +6663,9 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 									pParams->bStringIsDecoded = 0;
 									pParams->myStreamsStack[pParams->nStreamsStackTop].blockCurPos = pParams->blockCurPos;
 
+									pParams->myBlock = pSavedMyBlock;
+									pParams->nMyBlockSize = nSavedMyBlockSize;
+
 									mydictionaryqueuelist_Init(&(pParams->CurrentContent.decodeParms), 1, 1);
 									mystringqueuelist_Init(&(pParams->CurrentContent.queueFilters));
 
@@ -6714,6 +6690,10 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 										retValue = 0;
 										goto uscita;
 									}
+
+									pSavedMyBlock = pParams->myBlock;
+									nSavedMyBlockSize = pParams->nMyBlockSize;
+									pParams->myBlock = pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream;
 
 									if ( !(pParams->bXObjIsImage) )
 									{
@@ -6843,9 +6823,8 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 							pParams->bStringIsDecoded = 0;
 							pParams->myStreamsStack[pParams->nStreamsStackTop].blockCurPos = pParams->blockCurPos;
 
-							//#if defined(MYDEBUG PRINT ALL) || defined(MYDEBUG PRINT ON ManageContent FN) | defined(MYDEBUG PRINT ON ManageContent FN ShowFontSelected) || defined(MYDEBUG PRINT DECODED CONTENT TOKENS)
-							//wprintf(L"\tOject FONT %d 0 R NOT found in the HashTable. It's no big deal to make the trip. \n, nTemp);
-							//#endif
+							pParams->myBlock = pSavedMyBlock;
+							pParams->nMyBlockSize = nSavedMyBlockSize;
 
 							pParams->bCurrParsingFontIsCIDFont = 0;
 							
@@ -6868,6 +6847,10 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 								goto uscita;
 							}
 							
+							pSavedMyBlock = pParams->myBlock;
+							nSavedMyBlockSize = pParams->nMyBlockSize;
+							pParams->myBlock = pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream;
+
 							pParams->nLastParsedFontObjNum = nTemp;
 
 							pParams->pCurrFontGlyphsWidths = pParams->myObjsTable[nTemp]->pGlyphsWidths;
@@ -6949,6 +6932,9 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 							pParams->bStringIsDecoded = 0;
 							pParams->myStreamsStack[pParams->nStreamsStackTop].blockCurPos = pParams->blockCurPos;
 
+							pParams->myBlock = pSavedMyBlock;
+							pParams->nMyBlockSize = nSavedMyBlockSize;
+
 							if ( !ParseGsObject(pParams, nTemp) )
 							{
 								snprintf(pParams->szError, 8192, "ERRORE ManageDecodedContent ParseGsObject.\n");
@@ -7027,6 +7013,10 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 								wprintf(L"\tL'oggetto GS %d 0 R non contiene riferimenti a oggetti FONT.\n\n", nTemp);
 							}
 							#endif
+
+							pSavedMyBlock = pParams->myBlock;
+							nSavedMyBlockSize = pParams->nMyBlockSize;
+							pParams->myBlock = pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream;
 
 							pParams->bStreamState = pParams->myStreamsStack[pParams->nStreamsStackTop].bStreamState;
 							pParams->bStringIsDecoded = pParams->myStreamsStack[pParams->nStreamsStackTop].bStringIsDecoded;
@@ -7436,6 +7426,10 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 	}
 
 uscita:
+
+	pParams->myBlock = pSavedMyBlock;
+	pParams->nMyBlockSize = nSavedMyBlockSize;
+
 
 	// In the event of unclosed markers, it restores and frees all the annihilated ActualText contexts.
 	while (nMarkedContentStackTop >= 0)
@@ -7867,32 +7861,27 @@ int ManageContent(Params *pParams, int nPageNumber)
 	// 
 	pParams->nStreamsStackTop = 0;
 
-	DecodedStreamSize = ( totalLengthFromPdf * sizeof(unsigned char) ) * 55 + sizeof(unsigned char);
+	// Allocazione iniziale prudente (la realloc sotto espanderà se necessario)
+	DecodedStreamSize = ( totalLengthFromPdf * 4 ) + 65536;
 
-	if ( DecodedStreamSize > 409600000 )
-		DecodedStreamSize = 409600000;
+	if ( DecodedStreamSize > 16777216 ) // Tetto iniziale 16 MB
+		DecodedStreamSize = 16777216;
 
 	if ( DecodedStreamSize < totalLengthFromPdf )
-		DecodedStreamSize = totalLengthFromPdf + (4096 * 89);
+		DecodedStreamSize = totalLengthFromPdf + 65536;
 
 	pParams->pMyBlockSrc = NULL;
-	pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = (unsigned char *)malloc( DecodedStreamSize );
+	pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = (unsigned char *)calloc( 1, DecodedStreamSize );
 	if ( NULL == pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream )
 	{
 		snprintf(pParams->szError, 8192, "ERRORE ManageContent: impossibile allocare la memoria per pszDecodedStream sullo stack %d.\n", pParams->nStreamsStackTop);
 		myShowErrorMessage(pParams, pParams->szError, 1);
-		//wprintf(L"ERRORE ManageContent: impossible to allocate memory for pszDecodedStream on the %d stack. \n, pParams->nStreamsStackTop);
-		//fwprintf(pParams->fpErrors, L"ERRORE ManageContent: impossible to allocate memory for pszDecodedStream on the %d stack. \n, pParams->nStreamsStackTop);
 		pParams->nStreamsStackTop--;
 		retValue = 0;
 		goto uscita;
 	}
-	for ( unsigned long int x = 0; x < DecodedStreamSize; x++ )
-		pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream[x] = '\0';
 
 	bytesAllocatedForDecodedStreamOnStack = DecodedStreamSize;
-
-
 
 	myContent.bExternalFile = 0;
 	myContent.LengthFromPdf = 0;
@@ -7931,27 +7920,23 @@ int ManageContent(Params *pParams, int nPageNumber)
 			goto uscita;
 		}
 
-		if ( DecodedStreamSize > (bytesAllocatedForDecodedStreamOnStack - offsetDecodedStream) )
+		if ( DecodedStreamSize >= (bytesAllocatedForDecodedStreamOnStack - offsetDecodedStream) )
 		{
-			bytesAllocatedForDecodedStreamOnStack = DecodedStreamSize * 3;
+			size_t needed = offsetDecodedStream + DecodedStreamSize + 1;
+			while ( bytesAllocatedForDecodedStreamOnStack < needed )
+			{
+				bytesAllocatedForDecodedStreamOnStack *= 2;
+			}
 
 			pszDecodedStreamNew = (unsigned char*)realloc(pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream, bytesAllocatedForDecodedStreamOnStack);
 			if ( NULL == pszDecodedStreamNew )
 			{
 				snprintf(pParams->szError, 8192, "ERRORE ManageContent: impossibile reallocare %lu byte per leggere lo stream\n", bytesAllocatedForDecodedStreamOnStack);
 				myShowErrorMessage(pParams, pParams->szError, 1);
-				//wprintf(L"ERRORE ManageContent: impossible to reallocate %lu bytes to read the stream\n", bytesAllocatedForDecodedStreamOnStack);
-				//fwprintf(pParams->fpErrors, L"ERRORE ManageContent: impossible to reallocate %lu bytes to read the stream\n", bytesAllocatedForDecodedStreamOnStack);
 
 				retValue = 0;
 				goto uscita;
 			}
-			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_FN)
-			else
-			{
-				wprintf(L"\nManageContent Y (PAGE %d) -> REALLOCATI CORRETTAMENTE %lu BYTES\n", nPageNumber, bytesAllocatedForDecodedStreamOnStack);
-			}
-			#endif
 
 			pParams->pMyBlockSrc = NULL;
 			pParams->myStreamsStack[pParams->nStreamsStackTop].pszDecodedStream = pszDecodedStreamNew;
