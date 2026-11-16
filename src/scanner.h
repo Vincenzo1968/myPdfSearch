@@ -546,7 +546,7 @@ typedef struct tag_vlrbtData
 
 
 #ifndef FONT_CACHE_SIZE
-#define FONT_CACHE_SIZE 128
+#define FONT_CACHE_SIZE 32
 #endif
 
 typedef struct tagFontCacheEntry
