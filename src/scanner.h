@@ -379,6 +379,7 @@ typedef struct tagGlyphsWidths
 	int FirstChar;
 	int LastChar;
 	int WidthsArraySize;
+	int WidthsPhysSize; // elementi realmente allocati in pWidths (<= WidthsArraySize); oltre, il valore logico e' -1.0
 	double *pWidths;
 	double MissingWidth;
 	double AvgWidth;
@@ -544,7 +545,9 @@ typedef struct tag_vlrbtData
 } vlrbtData_t;
 
 
+#ifndef FONT_CACHE_SIZE
 #define FONT_CACHE_SIZE 128
+#endif
 
 typedef struct tagFontCacheEntry
 {

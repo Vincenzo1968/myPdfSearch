@@ -4209,7 +4209,7 @@ double getCurrCharWidth(Params *pParams, wchar_t c, wchar_t cEncoding)
 			//if (cEncoding < 0)
 			// cEncoding = 0;
 			//dblCurrCharWidth = pParams->pCurrFontGlyphsWidths->pWidths[cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar];
-			dblCurrCharWidth = pParams->pCurrFontGlyphsWidths->pWidths[cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar];
+			dblCurrCharWidth = ( (cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar) < pParams->pCurrFontGlyphsWidths->WidthsPhysSize ) ? pParams->pCurrFontGlyphsWidths->pWidths[cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar] : -1.0;
 
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_COORD4)
 			if ( L'\n' != c )
@@ -4244,7 +4244,7 @@ double getCurrCharWidth(Params *pParams, wchar_t c, wchar_t cEncoding)
 				// cEncoding = 0;
 
 				//dblCurrCharWidth = pParams->pCurrFontGlyphsWidths->pWidths[cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar];
-				dblCurrCharWidth = pParams->pCurrFontGlyphsWidths->pWidths[cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar];
+				dblCurrCharWidth = ( (cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar) < pParams->pCurrFontGlyphsWidths->WidthsPhysSize ) ? pParams->pCurrFontGlyphsWidths->pWidths[cEncoding - pParams->pCurrFontGlyphsWidths->FirstChar] : -1.0;
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_SINGLE_CHAR_COORD4)
 				if ( L'\n' != c )
@@ -19745,6 +19745,7 @@ int contentfontobj(Params *pParams)
 	}
 	pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths = NULL;
 	pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize = 0;
+	pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize = 0;
 
 	pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->FirstChar = -1;
 	pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->LastChar = -1;
@@ -20325,6 +20326,7 @@ uscita:
 		}
 
 		pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths = (double*)malloc(sizeof(double) * pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize);
+		pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize;
 		if ( NULL == pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths )
 		{
 			snprintf(pParams->szError, 8192, "ERROR contentfontobj: malloc failed for pParams->myObjsTable[%d]->pGlyphsWidths->pWidths.\n", pParams->nCurrentParsingFontObjNum);
@@ -21253,6 +21255,25 @@ int cidfontobj(Params *pParams)
 		pParams->dCurrFontAvgWidth = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->DW;
 	}
 
+	// L'array delle larghezze dei font CID e' dimensionato per 0x10000 CID, ma di solito ne usa pochi: lo accorciamo
+	// all'ultimo elemento valorizzato. Oltre WidthsPhysSize il valore logico resta -1.0 (vedi getCurrCharWidth).
+	if ( NULL != pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths && pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize > 0 )
+	{
+		int nLastUsed = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize - 1;
+		while ( nLastUsed >= 0 && pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths[nLastUsed] == -1.0 )
+			nLastUsed--;
+
+		if ( nLastUsed + 1 < pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize )
+		{
+			double *pWidthsNew = (double*)realloc(pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths, sizeof(double) * ( (nLastUsed + 1) > 0 ? (nLastUsed + 1) : 1 ));
+			if ( NULL != pWidthsNew )
+			{
+				pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths = pWidthsNew;
+				pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize = nLastUsed + 1;
+			}
+		}
+	}
+
 	if ( pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->AvgWidth <= 0.0 )
 		pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->AvgWidth = pParams->dCurrFontAvgWidth;
 
@@ -21367,6 +21388,7 @@ int cidfontobjdictitems(Params *pParams)
 			pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->LastChar - pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->FirstChar + 1;
 
 			pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths = (double*)malloc(sizeof(double) * pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize);
+			pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize;
 			if ( NULL == pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths )
 			{
 				snprintf(pParams->szError, 8192, "ERROR cidfontobjdictitems: malloc failed for pParams->myObjsTable[%d]->pGlyphsWidths->pWidths.\n", pParams->nCurrentParsingFontObjNum);
@@ -21389,6 +21411,7 @@ int cidfontobjdictitems(Params *pParams)
 			pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->LastChar - pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->FirstChar + 1;
 
 			pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths = (double*)malloc(sizeof(double) * pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize);
+			pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsPhysSize = pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->WidthsArraySize;
 			if ( NULL == pParams->myObjsTable[pParams->nCurrentParsingFontObjNum]->pGlyphsWidths->pWidths )
 			{
 				snprintf(pParams->szError, 8192, "ERROR cidfontobjdictitems: malloc failed for pParams->myObjsTable[%d]->pGlyphsWidths->pWidths.\n", pParams->nCurrentParsingFontObjNum);
