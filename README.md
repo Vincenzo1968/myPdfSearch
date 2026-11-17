@@ -135,14 +135,167 @@ For the complete and current list of options, run `mypdfsearch --help`.
 
 MyPdfSearch undergoes rigorous regression testing to ensure cross-platform consistency and syntactic reliability. 
 
-### CMap & Unicode Encoding Verification
-The engine has been validated against complex multi-lingual document structures, including Right-to-Left (RTL) scripts such as Arabic and Hebrew, East Asian CJK character sets via N-gram tokenization, and ancient/vertical writing systems.
-
 ### Isartor PDF/A Test Suite Compliance
-The parsing engine was stress-tested against the industry-standard **Isartor Test Suite (PDF/A-1b Compliance)**, analyzing 205 structural compliance files. The parser demonstrated enterprise-grade robustness with **0 crashes (no segmentation faults)** and **0 memory leaks**, while successfully catching and isolating deliberate syntax violations:
+The parsing engine was stress-tested against the industry-standard **Isartor Test Suite (PDF/A-1b Compliance)**, analyzing 205 structural compliance files. In this test run, the parser completed the 205-file test set with **0 crashes (no segmentation faults)** and **0 memory leaks**. It also detected and isolated deliberate syntax violations, including:
 - **File Header Corruptions:** Properly intercepted and rejected invalid `%PDF-1.x` headers.
 - **Trailer & XRef Anomalies:** Safely caught corrupted cross-reference tables and malformed trailer dictionaries.
 - **Stream Object Violations:** Fully compliant with ISO specifications by identifying and blocking invalid whitespace characters following the `stream` keyword token.
+
+## Text Extraction: Multilingual Support and Comparison Tests
+
+MyPdfSearch is being developed with particular attention to Unicode text extraction from PDF files. The implementation handles PDF character-mapping mechanisms such as CMaps and `ToUnicode` maps, and works with different font encodings and Unicode character sequences.
+
+The following tests use multilingual PDF documents created to exercise a range of writing systems. They provide examples of the text currently extracted by MyPdfSearch and, where available, a comparison with Poppler's `pdftotext` utility.
+
+### A respectful comparison with Poppler
+
+[Poppler](https://poppler.freedesktop.org/) is a mature and widely used PDF rendering and processing library, with a much broader scope than MyPdfSearch. The purpose of these examples is not to claim that MyPdfSearch is generally better than Poppler, or to make a general performance or compatibility comparison.
+
+They document specific test cases in which the text returned by MyPdfSearch is equivalent to, or in some instances closer to, the expected text than the output obtained with `pdftotext`. The results also help identify areas where extraction still needs improvement.
+
+### Individual language tests
+
+The following examples show the first page of each test document. The commands are shown in a simplified form; run `mypdfsearch --help` for the complete list of available options.
+
+#### Bengali
+
+`test_bengalese.pdf`
+
+Poppler (`pdftotext`):
+
+```text
+নমস্কার িবশ্ব! এিট বাংলা ভাষা পরীক্ষা।
+```
+
+MyPdfSearch:
+
+```text
+নমস্কার বিশ্ব! এটি বাংলা ভাষা পরীক্ষা।
+```
+
+In this test, MyPdfSearch produces the expected placement of the Bengali combining marks more accurately.
+
+#### Traditional Chinese
+
+`test_cinese_tradizionale.pdf`
+
+Both Poppler and MyPdfSearch produce:
+
+```text
+你好世界！這是一個中文測試。
+```
+
+#### Korean
+
+`test_coreano.pdf`
+
+Both Poppler and MyPdfSearch produce:
+
+```text
+안녕하세요 세계! 이것은 한국어 테스트입니다.
+```
+
+#### Hindi
+
+`test_hindi.pdf`
+
+Both Poppler and MyPdfSearch produce:
+
+```text
+नमस्ते दुनिया! यह हिंदी पाठ का एक परीक्षण है।
+```
+
+#### Kannada
+
+`test_kannada.pdf`
+
+Poppler (`pdftotext`):
+
+```text
+ನಮಸ್ಕಾರ ವಿಶ್ವ! ಇದು ಕನ್ನಡ ಭಾಷೆ ಪರೀಕ್ಷೆ.
+```
+
+MyPdfSearch:
+
+```text
+ನಮಸ್ಕಾರ ವಿಶ್ವ! ಇದು ಕನ್ನಡ ಭಾಷೆ ಪರೀಕ್ಷೆ.
+```
+
+The two outputs differ in the representation of the word for “test”. The MyPdfSearch output matches the spelling used in the test document.
+
+#### Tamil
+
+`test_tamil.pdf`
+
+Poppler (`pdftotext`):
+
+```text
+வணக்கம் உலகம்! இது தமிழ் ெமாழி ேசாதைன.
+```
+
+MyPdfSearch:
+
+```text
+வணக்கம் உலகம்! இது தமிழ் மொழி சோதனை.
+```
+
+In this example, MyPdfSearch reconstructs the Tamil words in the expected form, whereas the Poppler output contains combining characters in positions that do not produce the expected words.
+
+#### Telugu
+
+`test_telugu.pdf`
+
+Both Poppler and MyPdfSearch produce:
+
+```text
+నమస్కారం ప్రపంచం! ఇది తెలుగు భాష పరీక్ష.
+```
+
+### Multilingual documents
+
+In addition to the individual language tests, two documents exercise several writing systems in a single PDF.
+
+#### `test_multilingua_all.pdf`
+
+This document contains examples in 16 language/script groups:
+
+- Italian and Spanish
+- Japanese
+- Simplified and Traditional Chinese
+- Korean
+- Arabic and Hebrew
+- Hindi (Devanagari)
+- Bengali
+- Thai
+- Russian (Cyrillic)
+- Modern Greek
+- Amharic / Ge'ez
+- Georgian
+- Armenian
+
+MyPdfSearch extracts text from both pages, including the scripts listed above. The test is useful for checking that different font encodings and writing systems can coexist within the same document. The output is not reproduced here in full.
+
+#### `test_multilingua.pdf`
+
+This document contains Italian, Arabic, Hebrew, Hindi, Thai, Japanese, and Simplified Chinese. MyPdfSearch extracts text from all these language sections.
+
+These aggregate tests demonstrate the range of scripts covered by the current test material. They should not be interpreted as proof of complete support for every PDF using those writing systems: results can vary with the PDF producer, embedded fonts, character maps, and text encoding.
+
+### Current limitations and areas for improvement
+
+The examples above are encouraging, but they represent a limited set of test documents. Further testing is needed with PDFs produced by different applications, using different fonts and encoding strategies.
+
+Some areas still require attention:
+
+- **Reading order and layout:** MyPdfSearch extracts text but does not reproduce the original page layout. Multi-column pages, mixed text and images, and complex positioning can result in an order that differs from the intended reading order.
+- **Right-to-left writing:** Arabic and Hebrew extraction requires particular care. Correct character decoding does not by itself guarantee correct visual ordering or spacing.
+- **Combining characters and normalization:** Unicode characters can be represented by different sequences. Combining marks and normalization forms need to be handled consistently.
+- **CJK and vertical writing:** East Asian text, vertical writing modes, and less common font encodings remain important areas for additional testing.
+- **OCR-generated PDFs:** MyPdfSearch does not perform OCR. It can extract text only when a usable text layer is present in the PDF; image-only pages are outside its scope.
+
+The comparison examples should therefore be read as observations about these particular files, not as a general ranking of PDF extraction tools. Poppler remains a valuable and much broader project, and its developers and contributors have produced software that serves a wide range of PDF use cases.
+
+The goal of MyPdfSearch is to provide an independent implementation focused on understanding PDF structures, extracting text, and searching directly within PDF files. Correctness, standards-aware parsing, and continued improvement are more important than claiming to outperform other tools.
 
 ## Feedback and bug reports
 
