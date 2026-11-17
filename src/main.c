@@ -1854,6 +1854,14 @@ int main(int argc, char **argv)
 {
 	int retValue = EXIT_SUCCESS;
 
+	#if defined(__GLIBC__)
+	// Con le impostazioni predefinite glibc alza dinamicamente la soglia oltre la quale usa mmap() (fino a 32 MB) e
+	// tiene nell'heap i grandi buffer liberati: il picco di RAM resta quello del buffer piu' grande mai allocato.
+	// Fissando la soglia, i buffer grandi (stream decodificati, array dei font) tornano al sistema appena liberati.
+	// Stesso output, stessi tempi; picchi di RAM molto piu' bassi sui PDF con stream grandi.
+	mallopt(M_MMAP_THRESHOLD, 128 * 1024);
+	#endif
+
 	Params myParams = {0};
 
 	FilesList* myFilesList = NULL;
