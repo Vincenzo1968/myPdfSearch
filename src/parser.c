@@ -325,6 +325,20 @@ static wchar_t KangxiToIdeograph(wchar_t c)
     return c;
 }
 
+// Ritorna 1 se il font appartiene a una collezione di caratteri (Adobe-Japan1, GB1, ...) per cui ConvertCIDToUnicode
+// conosce la tabella CID -> Unicode. Per gli altri font (per esempio il GlyphLessFont dei motori OCR, CIDOrdering vuoto
+// o Identity) una voce /ToUnicode con CID == Unicode e' una mappatura vera, non un CID "non mappato".
+static int CIDCollectionHasUnicodeMap(const Params *pParams)
+{
+    return ( strncmp(pParams->szCIDOrdering, "Japan1",  6) == 0 ||
+             strncmp(pParams->szCIDOrdering, "CNS1",    4) == 0 ||
+             strncmp(pParams->szCIDOrdering, "GB1",     3) == 0 ||
+             strncmp(pParams->szCIDOrdering, "Korea1",  6) == 0 ||
+             strncmp(pParams->szCIDOrdering, "KR",      2) == 0 ||
+             strncmp(pParams->szCIDOrdering, "Manga1",  6) == 0 ||
+             strncmp(pParams->szCIDOrdering, "Japan2",  6) == 0 );
+}
+
 wchar_t ConvertCIDToUnicode(Params *pParams, int cid)
 {
     CidToUnicodeMap key;
@@ -4759,7 +4773,7 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
 				c         = (wchar_t)cid;
 				cEncoding = (wchar_t)cid;
 
-				if (pParams->nToUnicodeStreamObjRef > 0 && pParams->paCustomizedFont_CharSet != NULL && cid < 0x10000) { wchar_t uc = pParams->paCustomizedFont_CharSet[cid]; if (uc == (wchar_t)cid || uc == 0xFFFD) { wchar_t conv = ConvertCIDToUnicode(pParams, (int)cid); finalChar = (conv != 0xFFFD && conv != 0xFFFF && conv != 0xFFFE && conv != (wchar_t)cid) ? conv : (wchar_t)0xFFFD; } else if (uc == 0xFFFF || uc == 0xFFFE) finalChar = L' '; else finalChar = uc; } else finalChar = ConvertCIDToUnicode(pParams, (int)cid);
+				if (pParams->nToUnicodeStreamObjRef > 0 && pParams->paCustomizedFont_CharSet != NULL && cid < 0x10000) { wchar_t uc = pParams->paCustomizedFont_CharSet[cid]; if ((uc == (wchar_t)cid && CIDCollectionHasUnicodeMap(pParams)) || uc == 0xFFFD) { wchar_t conv = ConvertCIDToUnicode(pParams, (int)cid); finalChar = (conv != 0xFFFD && conv != 0xFFFF && conv != 0xFFFE && conv != (wchar_t)cid) ? conv : (wchar_t)0xFFFD; } else if (uc == 0xFFFF || uc == 0xFFFE) finalChar = L' '; else finalChar = uc; } else finalChar = ConvertCIDToUnicode(pParams, (int)cid);
 
 				dblCurrCharWidth = -1.0;
 				dblCurrCharWidth = getCurrCharWidth(pParams, c, cEncoding);
@@ -4835,7 +4849,7 @@ int ManageShowTextOperator(Params *pParams, const char *szOpName,
                 {
                     wchar_t uc = pParams->paCustomizedFont_CharSet[cid];
 
-                    if ( uc == (wchar_t)cid )
+                    if ( uc == (wchar_t)cid && CIDCollectionHasUnicodeMap(pParams) )
                     {
                         // identity = not mapped by CMap
                         wchar_t conv = ConvertCIDToUnicode(pParams, cid);
