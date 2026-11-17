@@ -2223,7 +2223,7 @@ int GetLenNextInput(Params *pParams, int startxref, int *len)
 	}
 
 	*len = 0;
-	while ( (blockLen = fread(myBlock, 1, BLOCK_SIZE, pParams->fp)) )
+	while ( !eofOK && (blockLen = fread(myBlock, 1, BLOCK_SIZE, pParams->fp)) )
 	{
 		index1 = 0;
 		while ( index1 < blockLen )
@@ -2234,38 +2234,29 @@ int GetLenNextInput(Params *pParams, int startxref, int *len)
 			switch ( state )
 			{
 				case S0:
-					if ( c == '%' )
-						state = S1;
+					if ( c == '%' ) state = S1;
 					break;
 				case S1:
-					if ( c == '%' )
-						state = S2;
-					else
-						state = S0;
+					if ( c == '%' ) state = S2;
+					else state = S0;
 					break;
 				case S2:
-					if ( c == 'E' )
-						state = S3;
-					else
-						state = S0;
+					if ( c == 'E' ) state = S3;
+					else state = S0;
 					break;
 				case S3:
-					if ( c == 'O' )
-						state = S4;
-					else
-						state = S0;
+					if ( c == 'O' ) state = S4;
+					else state = S0;
 					break;
 				case S4:
 					if ( c == 'F' )
-						state = S5;
-					else
-						state = S0;
-					break;
-				case S5:
-					if ( c == '\r' || c == '\n' )
+					{
 						eofOK = 1;
+					}
 					else
+					{
 						state = S0;
+					}
 					break;
 				default:
 					state = S0;
@@ -3157,6 +3148,56 @@ int ReadTrailer(Params *pParams)
 		//fwprintf(pParams->fpErrors, L"Errore ReadTrailer: missing the offset for xref. \n);
 		return 0;
 	}
+	
+unsigned char szPeek[256];
+	int peekReads;
+
+	if ( fseek(pParams->fp, byteOffsetXRef, SEEK_SET) )
+	{
+		snprintf(pParams->szError, 8192, "Errore ReadTrailer: fseek byteOffsetXRef\n");
+		myShowErrorMessage(pParams, pParams->szError, 1);
+		return 0;
+	}
+
+	memset(szPeek, 0, sizeof(szPeek));
+	peekReads = (int)fread(szPeek, 1, sizeof(szPeek) - 1, pParams->fp);
+	if ( peekReads <= 0 )
+	{
+		snprintf(pParams->szError, 8192, "Errore ReadTrailer: fread peek\n");
+		myShowErrorMessage(pParams, pParams->szError, 1);
+		return 0;
+	}
+	szPeek[peekReads] = '\0';
+
+	pParams->myPdfTrailer.Size = 0;
+	pParams->myPdfTrailer.Root.Number = 0;
+	pParams->myPdfTrailer.Root.Generation = 0;
+	pParams->myPdfTrailer.Encrypt.Number = 0;
+	pParams->myPdfTrailer.Encrypt.Generation = 0;
+	pParams->myPdfTrailer.Info.Number = 0;
+	pParams->myPdfTrailer.Info.Generation = 0;
+
+	/* Se non inizia con 'x' ("xref"), e' un XRef stream (o errore):
+	   ReadLastTrailer legge al massimo il numero oggetto dai primi byte */
+	if ( szPeek[0] != 'x' )
+	{
+		retReadLastTrailer = ReadLastTrailer(pParams, szPeek);
+		if ( 2 == retReadLastTrailer )
+		{
+			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
+			wprintf(L"ReadTrailer: EHI! ritorno retReadLastTrailer = 2.\n");
+			#endif
+			pParams->offsetXRefObjStream = byteOffsetXRef;
+			return 2;
+		}
+		return 0;
+	}
+
+	/* Tabella xref classica: leggi solo fino a %%EOF di questa sezione */
+	if ( !GetLenNextInput(pParams, byteOffsetXRef, &dimInput) || dimInput <= 0 )
+	{
+		dimInput = pParams->dimFile - byteOffsetXRef;
+	}
 
 	szInput = (unsigned char*)malloc(sizeof(unsigned char)*(dimInput) + 1);
 	if ( !szInput )
@@ -3239,6 +3280,7 @@ int ReadTrailer(Params *pParams)
 	}
 	#endif
 
+	/*
 	pParams->myPdfTrailer.Size = 0;
 
 	pParams->myPdfTrailer.Root.Number = 0;
@@ -3249,6 +3291,7 @@ int ReadTrailer(Params *pParams)
 
 	pParams->myPdfTrailer.Info.Number = 0;
 	pParams->myPdfTrailer.Info.Generation = 0;
+	*/
 
 	retReadLastTrailer = ReadLastTrailer(pParams, szInput);
 	if ( !retReadLastTrailer )
