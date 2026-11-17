@@ -288,16 +288,15 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 
 		*pDecodedStreamSize = EncodedStreamSize + sizeof(unsigned char);
 
-		pszDecodedStream = (unsigned char *)malloc( *pDecodedStreamSize );
+		// calloc: memoria gia' azzerata e, per i blocchi grandi, ottenuta con mmap(): le pagine che non vengono scritte
+		// non occupano RAM reale. Il ciclo di azzeramento che c'era prima le toccava tutte (55 volte la dimensione compressa).
+		pszDecodedStream = (unsigned char *)calloc( 1, *pDecodedStreamSize );
 		if ( NULL == pszDecodedStream )
 		{
 			wprintf(L"ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStream.\n");
 			fwprintf(fpErrors, L"ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStream.\n");
 			goto uscita;
 		}
-
-		for ( unsigned long int i = 0; i < *pDecodedStreamSize; i++ )
-			pszDecodedStream[i] = '\0';
 
 		memcpy(pszDecodedStream, pszEncodedStream, EncodedStreamSize);
 	}
@@ -323,7 +322,8 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 					if ( *pDecodedStreamSize < EncodedStreamSize )
 						*pDecodedStreamSize = EncodedStreamSize + (4096 * 89);
 
-					pszDecodedStream = (unsigned char *)malloc( *pDecodedStreamSize );
+					// calloc: vedi sopra. Con il fattore 55 il buffer e' molto piu' grande dello stream decodificato reale.
+					pszDecodedStream = (unsigned char *)calloc( 1, *pDecodedStreamSize );
 					if ( NULL == pszDecodedStream )
 					{
 						wprintf(L"ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStream.\n");
@@ -331,9 +331,6 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 						retValue = NULL;
 						goto uscita;
 					}
-
-					for ( unsigned long int i = 0; i < *pDecodedStreamSize; i++ )
-						pszDecodedStream[i] = '\0';
 
 					ret = myInflate(
 						&(pszDecodedStream),
