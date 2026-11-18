@@ -18,135 +18,210 @@ GNU General Public License for details.
 You should have received a copy of the GNU General Public License
 along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 
-#ifndef MYPDFSEARCH_INCLUDED
-#define MYPDFSEARCH_INCLUDED
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <errno.h>
-#include <string.h>
-#include <limits.h>
-#include <ctype.h>
-#include <wctype.h>
-#include <stdint.h>
-
-//#define HT SIZE 8191
-#define BLOCK_SIZE 4096
-//#define BLOCK SIZE 4096 #21
-
-#ifndef MAX_LEN_STR
-	#define MAX_LEN_STR 1024
-#endif
-
-#ifndef MAX_WORDS_TO_SEARCH
-	#define MAX_WORDS_TO_SEARCH 100
-#endif
-
-#define UNUSED(x) (void)(x)
-
-// Range of CJK scripts managed with bigram tokenization.
-// NOTE: Thai (U+0E00 - U+0E7F) has been removed intentionally,
-// because Thai separates words with spaces and is to be managed in the branch
-// "Western" (which in turn should be extended with the Thai range, see below).
-// The vertical "rejoining" below uses this same macro, so
-// Even that logic automatically doesn't touch Thai anymore.
-#ifndef IS_ASIAN_SCRIPT
-#define IS_ASIAN_SCRIPT(c) ( \
-    ((c) >= 0x3040 && (c) <= 0x309F) || \
-    ((c) >= 0x30A0 && (c) <= 0x30FF) || \
-    ((c) >= 0x3400 && (c) <= 0x4DBF) || \
-    ((c) >= 0x4E00 && (c) <= 0x9FFF) || \
-    ((c) >= 0xAC00 && (c) <= 0xD7AF) || \
-    ((c) >= 0x20000 && (c) <= 0x2FA1F)    \
-)
-#endif
-
-typedef struct tagFilesList
-{
-	#if !defined(_WIN64) && !defined(_WIN32)
-	char myPathName[PATH_MAX + 1];
-	#endif
-	char myFileName[PATH_MAX + 1];
-	//char relativeName[PATH MAX + 1];
-	struct tagFilesList *next;
-} FilesList;
-
-#endif // MYPDFSEARCH_INCLUDED
-
-
 /*
-MYDEBUG_PRINT_ON_ReadEncrypt_R
+ * mypdfsearch.h  --  API PUBBLICA di libmypdfsearch
+ *
+ * Regole di questa API (valgono per ogni linguaggio: C, C++, Python/ctypes, C#, Rust, Go...):
+ *   - Prefissi:  funzioni mypdf_PascalCase, tipi mypdf_PascalCase, costanti/macro MYPDF_MAIUSCOLO.
+ *   - Tutte le stringhe sono UTF-8 (char *), terminate da '\0'. Mai wchar_t (16 bit su Windows, 32 su Linux).
+ *   - Solo interi a larghezza fissa (int32_t, int64_t, uint32_t) e size_t. Mai long, mai bool C99.
+ *   - Nessun FILE*, nessuna struct passata per valore, nessuna struct pubblica con layout "fragile":
+ *     il contesto e' un puntatore opaco.
+ *   - Ogni funzione che puo' fallire ritorna mypdf_Status (0 = MYPDF_OK).
+ *   - La memoria allocata dalla libreria si libera SOLO con le funzioni della libreria.
+ *   - La libreria non scrive MAI su stdout/stderr e non crea file nella cwd: tutto l'output passa
+ *     dalle callback. (Il CLI, main.c, installa callback che stampano come oggi.)
+ *   - Il chiamante imposta la locale UTF-8 (setlocale) solo se usa le funzioni C di stampa: la
+ *     libreria non chiama setlocale().
+ *   - Thread safety: due mypdf_Context diversi possono essere usati da thread diversi; lo
+ *     stesso contesto NON va usato da due thread insieme. mypdf_Init/Shutdown: una volta per processo.
+ */
 
-MYDEBUG_PRINT_SINGLE_CHAR_ENCODING
-MYDEBUG_PRINT_SINGLE_CHAR_COORD
+#ifndef MYPDFSEARCH_H
+#define MYPDFSEARCH_H
 
-MYDEBUG_PRINT_ON_SHOW_COORDINATE_STRING
-MYDEBUG_PRINT_ON_SHOW_STRING_OPERATOR
-MYDEBUG_PRINT_ON_POSITIONING_STRING_OPERATOR
-MYDEBUG_PRINT_ON_TEXT_STATE_OPERATOR
-MYDEBUG_PRINT_ON_CTM_OPERATOR
+#include <stddef.h>   /* size_t */
+#include <stdint.h>   /* int32_t, int64_t */
 
-MYPDFSEARCH_SHOW_TIME
-MYDEBUG_PRINT_COUNT_CONTENT_TYPE
-MYDEBUG_PRINT_DECODED_CONTENT_TOKENS
-MYDEBUG_PRINT_DECODED_CONTENT_NUMSTACK
+/* ---------------------------------------------------------------------------
+ * 1. Visibilita' / convenzione di chiamata  (UNICO punto in cui compaiono)
+ * -------------------------------------------------------------------------*/
+#if defined(_WIN32) || defined(__CYGWIN__)
+#  if defined(MYPDF_STATIC)
+#    define MYPDF_API
+#  elif defined(MYPDF_BUILDING_DLL)
+#    define MYPDF_API __declspec(dllexport)
+#  else
+#    define MYPDF_API __declspec(dllimport)
+#  endif
+#  define MYPDF_CALL __cdecl
+#else
+#  if defined(__GNUC__) && __GNUC__ >= 4
+#    define MYPDF_API __attribute__((visibility("default")))
+#  else
+#    define MYPDF_API
+#  endif
+#  define MYPDF_CALL
+#endif
 
-MYDEBUG_PRINT_ALL
-MYDEBUG_PRINT_ON_MATCH
-MYDEBUG_PRINT_ON_PARSE_OBJ
-MYDEBUG_PRINT_ON_PARSE_XREF_STREAMOBJ
-MYDEBUG_PRINT_ON_PARSE_STMOBJ
-MYDEBUG_PRINT_ON_PARSE_STREAMOBJ
-MYDEBUG_PRINT_ON_PARSE_STREAMXOBJ
-MYDEBUG_PRINT_ON_PARSE_TOUNICODE_STREAM
-MYDEBUG_PRINT_ON_PARSE_CMAP_STREAM
-MYDEBUG_PRINT_ON_PARSE_PAGETREEOBJ
-MYDEBUG_PRINT_ON_PARSE_LENGTHOBJ
-MYDEBUG_PRINT_ON_PARSE_INTEGEROBJ
-MYDEBUG_PRINT_ON_PARSE_RESOURCESDICT
-MYDEBUG_PRINT_ON_PARSE_FONTDESCRIPTOROBJ
-MYDEBUG_PRINT_ON_PARSE_FONTOBJ
-MYDEBUG_PRINT_ON_PARSE_FONTOBJ_WIDTHS
-MYDEBUG_PRINT_ON_PARSE_ENCODINGOBJ
-MYDEBUG_PRINT_ON_PARSE_COT
+#ifdef __cplusplus
+#  define MYPDF_BEGIN_DECLS extern "C" {
+#  define MYPDF_END_DECLS   }
+#else
+#  define MYPDF_BEGIN_DECLS
+#  define MYPDF_END_DECLS
+#endif
 
-MYDEBUG_PRINT_TST
+MYPDF_BEGIN_DECLS
 
-MYDEBUG_PRINT_ON_GetNextToken_FN
+/* ---------------------------------------------------------------------------
+ * 2. Versione
+ * -------------------------------------------------------------------------*/
+#define MYPDF_VERSION_MAJOR 0
+#define MYPDF_VERSION_MINOR 1
+#define MYPDF_VERSION_PATCH 0
 
-MYDEBUG_PRINT_ON_getObjsOffsets_FN
+/* Versione a runtime (stringa statica, non liberare), es. "0.1.0".
+ * Utile per verificare che la .so/.dll caricata corrisponda agli header usati. */
+MYPDF_API const char * MYPDF_CALL mypdf_GetVersion(void);
 
-MYDEBUG_PRINT_ON_ReadHeader_FN
-MYDEBUG_PRINT_ON_ReadTrailer_FN
-MYDEBUG_PRINT_ON_ReadTrailer_OBJ
-MYDEBUG_PRINT_ON_ReadLastTrailer_FN
-MYDEBUG_PRINT_ON_ReadLastTrailer_FN_BLOCCO
-MYDEBUG_PRINT_ON_ReadTrailerBody_FN
+/* ---------------------------------------------------------------------------
+ * 3. Stato / errori
+ * -------------------------------------------------------------------------*/
+typedef enum mypdf_Status
+{
+	MYPDF_OK                    = 0,
+	MYPDF_ERR_INVALID_ARGUMENT  = 1,   /* puntatore NULL, parametro fuori range */
+	MYPDF_ERR_OUT_OF_MEMORY     = 2,
+	MYPDF_ERR_FILE_OPEN         = 3,   /* file inesistente / non leggibile */
+	MYPDF_ERR_NOT_A_PDF         = 4,
+	MYPDF_ERR_CORRUPTED         = 5,   /* struttura PDF danneggiata */
+	MYPDF_ERR_ENCRYPTED         = 6,   /* cifrato e password mancante/errata */
+	MYPDF_ERR_UNSUPPORTED       = 7,
+	MYPDF_ERR_CANCELLED         = 8,   /* una callback ha chiesto di interrompere */
+	MYPDF_ERR_FILE_ERRORS       = 9,   /* elaborato, ma con errori non fatali (equivale all'exit code 2 del CLI) */
+	MYPDF_ERR_INTERNAL          = 99,
+	MYPDF_STATUS_FORCE_INT32    = 0x7fffffff   /* forza enum a 32 bit su tutti i compilatori */
+} mypdf_Status;
 
-MYDEBUG_PRINT_ON_ParseInfoObject_FN
+/* Stringa statica che descrive lo status (non liberare). */
+MYPDF_API const char * MYPDF_CALL mypdf_StatusString(mypdf_Status status);
 
-MYDEBUG_PRINT_ON_ReadTrailerEncryptObject
-MYDEBUG_PRINT_ON_PARSE_ENCRYPT_OBJ
-MYDEBUG_PRINT_ON_Decrypt
+/* Ultimo messaggio d'errore dettagliato del contesto (UTF-8). Valido fino alla
+ * prossima chiamata sullo stesso contesto. Mai NULL ("" se nessun errore). */
+struct mypdf_Context;
+typedef struct mypdf_Context mypdf_Context;
+MYPDF_API const char * MYPDF_CALL mypdf_GetLastError(const mypdf_Context *ctx);
 
-MYDEBUG_PRINT_ON_ManageDecodeParams_FN
-MYDEBUG_PRINT_ON_ParseTrailerXRefStreamObject_FN
+/* ---------------------------------------------------------------------------
+ * 4. Inizializzazione globale (una volta per processo)
+ *    Inizializza OpenSSL (provider per RC4/AES/MD5 dei PDF cifrati).
+ * -------------------------------------------------------------------------*/
+MYPDF_API mypdf_Status MYPDF_CALL mypdf_Init(void);
+MYPDF_API void         MYPDF_CALL mypdf_Shutdown(void);
 
-MYDEBUG_PRINT_ON_PARSE_FN
-MYDEBUG_PRINT_ON_ParseStmObj_FN
-MYDEBUG_PRINT_ON_ManageContent_FN
-MYDEBUG_PRINT_ON_ManageContent_FN_ShowResourceSelected
-MYDEBUG_PRINT_ON_ManageContent_FN_ShowFontSelected
-MYDEBUG_PRINT_ON_ManageContent_FN_ShowGsSelected
-MYDEBUG_PRINT_ON_ManageContent_PrintPageNum
-MYDEBUG_PRINT_ON_ManageContent_PrintContent
-MYDEBUG_PRINT_ON_ManageContent_PrintContent_HEXCODECHAR
-MYDEBUG_PRINT_ON_ManageContent_PrintStrings
-MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL
-MYDEBUG_PRINT_ON_ParseObject_FN
-MYDEBUG_PRINT_ON_myTreeTraversePostOrderLeafOnly_FN
-MYDEBUG_PRINT_ON_ParseStreamObject_FN
-MYDEBUG_PRINT_ON_ParseDictionaryObject_FN
-MYDEBUG_PRINT_ON_ParseLengthObject_FN
-*/
+/* ---------------------------------------------------------------------------
+ * 5. Contesto (handle opaco)
+ * -------------------------------------------------------------------------*/
+MYPDF_API mypdf_Context * MYPDF_CALL mypdf_CreateContext(void);   /* NULL se memoria esaurita */
+MYPDF_API void            MYPDF_CALL mypdf_DestroyContext(mypdf_Context *ctx);  /* accetta NULL */
+
+/* ---------------------------------------------------------------------------
+ * 6. Callback
+ *    Tutte ricevono user_data cosi' come passato in fase di registrazione
+ *    (in Python: ctypes.py_object / id; in C#: GCHandle; in Rust: Box::into_raw).
+ *    Le stringhe ricevute sono valide SOLO durante la callback: copiarle se servono dopo.
+ *    Le callback NON devono sollevare eccezioni/longjmp verso la libreria.
+ * -------------------------------------------------------------------------*/
+
+/* Testo di una pagina. text e' UTF-8 (NON NUL-terminato garantito: usare byte_len,
+ * ma c'e' comunque un '\0' finale). Ritorno: 0 = continua, != 0 = interrompi (MYPDF_ERR_CANCELLED). */
+typedef int (MYPDF_CALL *mypdf_PageTextCallback)(void *user_data,
+                                                 const char *file_path,
+                                                 int32_t page_number,      /* 1-based */
+                                                 const char *text,
+                                                 size_t byte_len);
+
+/* Parola cercata trovata in una pagina (una chiamata per parola per pagina, come oggi). */
+typedef int (MYPDF_CALL *mypdf_WordFoundCallback)(void *user_data,
+                                                  const char *file_path,
+                                                  int32_t page_number,
+                                                  const char *word);
+
+typedef enum mypdf_MessageLevel
+{
+	MYPDF_MSG_INFO    = 0,
+	MYPDF_MSG_WARNING = 1,
+	MYPDF_MSG_ERROR   = 2,
+	MYPDF_MSG_FORCE_INT32 = 0x7fffffff
+} mypdf_MessageLevel;
+
+/* Messaggi diagnostici (oggi: myShowErrorMessage + file di log). */
+typedef void (MYPDF_CALL *mypdf_MessageCallback)(void *user_data,
+                                                 mypdf_MessageLevel level,
+                                                 const char *file_path,
+                                                 const char *message);
+
+/* Richiesta password per PDF cifrati (oggi: OnUserPasswordCallback).
+ * Scrivere la password UTF-8 in out_password (max_len compreso il '\0'),
+ * lunghezza (senza '\0') in *out_len. Ritorno: 1 = password fornita, 0 = rinuncia. */
+typedef int (MYPDF_CALL *mypdf_PasswordCallback)(void *user_data,
+                                                 const char *file_path,
+                                                 const char *reason,        /* es. "password errata" */
+                                                 char *out_password,
+                                                 size_t max_len,
+                                                 size_t *out_len);
+
+MYPDF_API void MYPDF_CALL mypdf_SetPageTextCallback(mypdf_Context *ctx, mypdf_PageTextCallback cb, void *user_data);
+MYPDF_API void MYPDF_CALL mypdf_SetWordFoundCallback(mypdf_Context *ctx, mypdf_WordFoundCallback cb, void *user_data);
+MYPDF_API void MYPDF_CALL mypdf_SetMessageCallback(mypdf_Context *ctx, mypdf_MessageCallback cb, void *user_data);
+MYPDF_API void MYPDF_CALL mypdf_SetPasswordCallback(mypdf_Context *ctx, mypdf_PasswordCallback cb, void *user_data);
+
+/* ---------------------------------------------------------------------------
+ * 7. Opzioni (setter, non struct pubblica: aggiungere opzioni non rompe l'ABI)
+ * -------------------------------------------------------------------------*/
+
+/* Parole da cercare: stringa UTF-8 con parole separate da spazi (come l'opzione CLI).
+ * NULL o "" = nessuna ricerca. La libreria ne tiene una copia. */
+MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetSearchWords(mypdf_Context *ctx, const char *utf8_words);
+
+/* Intervallo di pagine 1-based, inclusivo. first=1, last=0 -> tutte. */
+MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetPageRange(mypdf_Context *ctx, int32_t first, int32_t last);
+
+/* Opzioni booleane / numeriche del CLI mappate una per una (elenco definitivo da
+ * concordare leggendo myParseOption: -s ordinamento glifi, -w, ecc.). */
+typedef enum mypdf_Option
+{
+	MYPDF_OPT_SORT_GLYPHS = 1,   /* int32: modalita' ordinamento glifi (come oggi) */
+	MYPDF_OPT_FORCE_INT32 = 0x7fffffff
+} mypdf_Option;
+
+MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetOptionInt(mypdf_Context *ctx, mypdf_Option option, int64_t value);
+
+/* ---------------------------------------------------------------------------
+ * 8. Elaborazione
+ * -------------------------------------------------------------------------*/
+
+/* Elabora un singolo PDF (path UTF-8; su Windows la libreria lo converte in UTF-16 internamente).
+ * Per ogni pagina chiama PageTextCallback (se impostata) e, per ogni parola trovata, WordFoundCallback. */
+MYPDF_API mypdf_Status MYPDF_CALL mypdf_ProcessFile(mypdf_Context *ctx, const char *utf8_path);
+
+/* Elabora tutti i PDF di una cartella (ricorsivo se recursive != 0). Prosegue dopo errori sui
+ * singoli file; ritorna MYPDF_ERR_FILE_ERRORS se almeno un file ha avuto errori. */
+MYPDF_API mypdf_Status MYPDF_CALL mypdf_ProcessDirectory(mypdf_Context *ctx, const char *utf8_dir, int32_t recursive);
+
+/* Contatori dall'ultima mypdf_Process*: file elaborati, con errori, con avvisi. */
+MYPDF_API void MYPDF_CALL mypdf_GetStats(const mypdf_Context *ctx,
+                                         int64_t *files_processed,
+                                         int64_t *files_with_errors,
+                                         int64_t *files_with_warnings);
+
+/* ---------------------------------------------------------------------------
+ * 9. Memoria
+ * -------------------------------------------------------------------------*/
+/* Per eventuali funzioni future che restituiscono buffer allocati dalla libreria. */
+MYPDF_API void MYPDF_CALL mypdf_Free(void *ptr);
+
+MYPDF_END_DECLS
+
+#endif /* MYPDFSEARCH_H */

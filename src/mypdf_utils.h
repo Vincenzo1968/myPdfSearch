@@ -27,7 +27,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include <stddef.h>
 #include <wchar.h>
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "scanner.h"
 
 /* Lista dei file PDF da elaborare. */

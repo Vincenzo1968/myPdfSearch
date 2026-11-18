@@ -29,7 +29,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #  define END_C_DECLS
 #endif //  
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 
 typedef struct tagTree
 {

@@ -26,7 +26,7 @@
 #include <string.h>
 
 
-//#include "mypdfsearch.h"
+//#include "mypdf_internal.h"
 //#include "scanner.h"
 #include "parser.h"
 //#include "mydecode.h"

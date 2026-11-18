@@ -24,7 +24,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MYPDF_CLI_INCLUDED
 #define MYPDF_CLI_INCLUDED
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "scanner.h"
 
 void PrintHelpCommandLine(void);
@@ -36,5 +36,12 @@ int myParseCommandLine(Params *pParams, int argc, char **argv);
 int MakeAndOpenOutputFile(Params *pParams);
 
 void PrintHardwareInfo(void);
+
+
+// Exit codes:
+//   0 (EXIT_SUCCESS)  all files processed without errors
+//   1 (EXIT_FAILURE)  fatal error or invalid command line
+//   2                 at least one file could not be processed (the others have been processed anyway)
+#define MYPDFSEARCH_EXIT_FILE_ERRORS 2
 
 #endif /* MYPDF_CLI_INCLUDED */

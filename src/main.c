@@ -67,18 +67,12 @@ make clean
 #include <windows.h>
 #endif
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "mytime.h"
 #include "parser.h"
 #include "myUnicodeNFC.h"
 #include "mypdf_utils.h"
 #include "mypdf_cli.h"
-
-// Exit codes:
-//   0 (EXIT_SUCCESS)  all files processed without errors
-//   1 (EXIT_FAILURE)  fatal error or invalid command line
-//   2                 at least one file could not be processed (the others have been processed anyway)
-#define MYPDFSEARCH_EXIT_FILE_ERRORS 2
 
 //#if !defined(_WIN64) && !defined(_WIN32)
 //#include <sys/sysinfo.h>

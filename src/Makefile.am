@@ -28,6 +28,7 @@ mypdfsearch_SOURCES = \
     vlEncoding.c vlEncoding.h \
     vlRedBlackTrees.c vlRedBlackTrees.h \
     mypdfsearch.h \
+    mypdf_internal.h \
     cmap/cmap_Adobe-CNS1-7.h \
     cmap/cmap_Adobe-GB1-6.h \
     cmap/cmap_Adobe-Japan1-7.h \

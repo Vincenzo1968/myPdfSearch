@@ -49,14 +49,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 
 
 
-#define HI_SURROGATE_START   0xD800
-#define LO_SURROGATE_START   0xDC00
-
-#define HI_SURROGATE_END     0xDBFF
-#define LO_SURROGATE_END     0xDFFF
-
-#define LEAD_OFFSET          (0xD800 - (0x10000 >> 10))
-#define SURROGATE_OFFSET     (0x10000 - (0xD800 << 10) - 0xDC00)
+// (macro dei surrogati UTF-16 spostate in mypdf_internal.h)
 
 static int CopyEncryptTokenToBytes(const Token *pToken, unsigned char **ppBytes, size_t *pBytesLen);
 
@@ -3939,14 +3932,6 @@ int VlRbtCompareFuncOrd(const void* pKey1, uint32_t keysize1, const void* pKey2,
 	}
 }
 
-#define IS_CJK(c) ( \
-    ((c) >= 0x2E80 && (c) <= 0x9FFF) || \
-    ((c) >= 0x3400 && (c) <= 0x4DBF) || \
-    ((c) >= 0xF900 && (c) <= 0xFAFF) || \
-    ((c) >= 0xFF00 && (c) <= 0xFFEF) || \
-    ((c) >= 0x3000 && (c) <= 0x303F) || \
-    ((c) >= 0x3040 && (c) <= 0x30FF)    \
-) ? 1 : 0
 
 int VlRbtOnTraverseFunc(void* pCurrNode)
 {
@@ -23529,7 +23514,6 @@ int xrefstream_keyarrayinternal(Params *pParams)
 
 // Limite massimo di oggetti indirettamente indirizzabili (PDF 32000-1, Annex C: 8.388.607). Evita che un file corrotto
 // o ostile ci faccia allocare tabelle enormi.
-#define MYPDF_MAX_OBJS_TABLE_SIZE 8388608u
 
 // Espande, se serve, la tabella degli oggetti fino a contenere 'requiredSize' elementi.
 // Ritorna 1 se ok; 0 se requiredSize supera il limite o la memoria e' insufficiente.

@@ -21,7 +21,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MYPARSER_INCLUDED
 #define MYPARSER_INCLUDED
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "scanner.h"
 
 typedef enum tagPreParseStates

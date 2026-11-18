@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 
 #include <math.h>
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "myoctal.h"
 #include "mydecode.h"
 #include "vlEncoding.h"

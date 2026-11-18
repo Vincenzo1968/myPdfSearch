@@ -21,7 +21,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MYSCANNER_INCLUDED
 #define MYSCANNER_INCLUDED
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "myTree.h"
 #include "myobjrefqueuelist.h"
 #include "mynumstacklist.h"

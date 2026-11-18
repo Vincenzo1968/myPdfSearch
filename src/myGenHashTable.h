@@ -45,7 +45,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 //#define GENHT SIZE 32749
 
 #include <stdint.h>
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 
 typedef struct tagGenHashTable* GENHTptr;
 

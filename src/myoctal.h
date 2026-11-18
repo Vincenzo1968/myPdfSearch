@@ -21,7 +21,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MYOCTAL_INCLUDED
 #define MYOCTAL_INCLUDED
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 
 int GetOctalChar(unsigned char c1, unsigned char c2, unsigned char c3, unsigned char *pChar, int *bOctalOverflow);
 

@@ -32,19 +32,6 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include "myoctal.h"
 #include "scanner.h"
 
-#define MY_BYTE  uint8_t
-#define MY_WORD  uint16_t
-#define MY_DWORD uint32_t
-#define MY_LONG  uint32_t
-
-#define MY_MAKEWORD(a, b) ((MY_WORD)(((MY_BYTE)((MY_DWORD)(a) & 0xff)) | ((MY_WORD)((MY_BYTE)((MY_DWORD)(b) & 0xff))) << 8))
-
-#define MY_MAKELONG(a, b) ((MY_LONG)(((MY_WORD)((MY_DWORD)(a) & 0xffff)) | ((MY_DWORD)((MY_WORD)((MY_DWORD)(b) & 0xffff))) << 16))
-
-#define MY_LOWORD(l) ((MY_WORD)((MY_DWORD)(l) & 0xFFFF))
-#define MY_HIWORD(l) ((MY_WORD)((MY_DWORD)(l) >> 16))
-#define MY_LOBYTE(w) ((MY_BYTE)((MY_DWORD)(w) & 0xFF))
-#define MY_HIBYTE(w) ((MY_BYTE)((MY_DWORD)(w) >> 8))
 
 // typedef uint32 t* MY DWORD PTR;
 

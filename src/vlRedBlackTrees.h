@@ -36,7 +36,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #endif
 
 #include <stdint.h>
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 
 typedef int (*pfnVlRbtOnTraverse)(void* pCurrNode);
 

@@ -44,7 +44,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include <windows.h>
 #endif
 
-#include "mypdfsearch.h"
+#include "mypdf_internal.h"
 #include "scanner.h"
 #include "myUnicodeNFC.h"
 #include "mypdf_utils.h"
