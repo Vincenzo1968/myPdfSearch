@@ -24,10 +24,10 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #ifdef __cplusplus
 #  define BEGIN_C_DECLS extern "C" {
 #  define END_C_DECLS   }
-#else // ! 
+#else  
 #  define BEGIN_C_DECLS
 #  define END_C_DECLS
-#endif //  
+#endif 
 
 #define BUFFER_SIZE 4096
 
