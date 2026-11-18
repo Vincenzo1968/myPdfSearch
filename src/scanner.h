@@ -599,6 +599,17 @@ typedef int (*OnUserPasswordCallback)(const char *pdf_filename,
                                       size_t max_password_len,
                                       size_t *out_password_len);
 
+// Stato per decidere, riga per riga, se il testo RTL e' memorizzato in ordine visuale o logico (usato da parser.c).
+// Sta dentro Params, cosi' non ci sono variabili globali.
+typedef struct tagBidiState
+{
+	int    *pLineVisual;   // per riga: 1 = visuale, 0 = logico, -1 = sconosciuto
+	size_t nLines;
+	size_t nCap;
+	int    nVis;
+	int    nLog;
+} BidiState;
+
 typedef struct tagParams
 {
 	Token myToken;
@@ -974,6 +985,8 @@ typedef struct tagParams
 	MyData_t myDataDecodeParams;
 	int nCountDecodeParams;
 	int nCountFilters;
+
+	BidiState myBidi;   // stato della decisione ordine visuale/logico per il testo RTL (vedi parser.c)
 } Params;
 
 typedef enum tagStates

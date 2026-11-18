@@ -121,40 +121,39 @@ static void ReverseRTLRuns(wchar_t *s, size_t len)
 }
 
 // ------------ Visual/logical Vote per line (Decision by col/ord) ------------ 
-static int   *s_bidiLineVisual = NULL;  // per line: 1 = visual, 0 = logical, -1 = unknown 
-static size_t s_bidiLines = 0, s_bidiCap = 0;
-static int    s_bidiVis = 0, s_bidiLog = 0;
-
-static void BidiReset(void)
+// Lo stato (BidiState, in scanner.h) sta in pParams->myBidi: nessuna variabile globale, quindi piu' elaborazioni
+// indipendenti possono convivere nello stesso processo.
+//   pLineVisual: per riga 1 = ordine visuale, 0 = logico, -1 = sconosciuto.
+static void BidiReset(BidiState *b)
 {
-    free(s_bidiLineVisual);
-    s_bidiLineVisual = NULL;
-    s_bidiLines = s_bidiCap = 0;
-    s_bidiVis = s_bidiLog = 0;
+    free(b->pLineVisual);
+    b->pLineVisual = NULL;
+    b->nLines = b->nCap = 0;
+    b->nVis = b->nLog = 0;
 }
 
 // Closes the current line and records the verdict. 
-static void BidiEndLine(void)
+static void BidiEndLine(BidiState *b)
 {
-    if (s_bidiLines == s_bidiCap)
+    if (b->nLines == b->nCap)
     {
-        size_t nc = s_bidiCap ? s_bidiCap * 2 : 64;
-        int *p = (int*)realloc(s_bidiLineVisual, nc * sizeof(int));
-        if (p == NULL) { s_bidiVis = s_bidiLog = 0; return; }
-        s_bidiLineVisual = p;
-        s_bidiCap = nc;
+        size_t nc = b->nCap ? b->nCap * 2 : 64;
+        int *p = (int*)realloc(b->pLineVisual, nc * sizeof(int));
+        if (p == NULL) { b->nVis = b->nLog = 0; return; }
+        b->pLineVisual = p;
+        b->nCap = nc;
     }
-    s_bidiLineVisual[s_bidiLines++] =
-        (s_bidiVis > s_bidiLog) ? 1 : (s_bidiLog > s_bidiVis ? 0 : -1);
-    s_bidiVis = s_bidiLog = 0;
+    b->pLineVisual[b->nLines++] =
+        (b->nVis > b->nLog) ? 1 : (b->nLog > b->nVis ? 0 : -1);
+    b->nVis = b->nLog = 0;
 }
 
 // Vote: two consecutive RTL glifi in the stream. with growing -> visual order. 
-static void BidiVote(wchar_t prev, wchar_t cur, double prevCol, double curCol)
+static void BidiVote(BidiState *b, wchar_t prev, wchar_t cur, double prevCol, double curCol)
 {
     if (!IsRTLCodepoint(prev) || !IsRTLCodepoint(cur)) return;
-    if      (curCol > prevCol + 0.5) s_bidiVis++;
-    else if (curCol + 0.5 < prevCol) s_bidiLog++;
+    if      (curCol > prevCol + 0.5) b->nVis++;
+    else if (curCol + 0.5 < prevCol) b->nLog++;
 }
 
 static void ReverseRange(wchar_t *s, size_t a, size_t b)   // extremes included 
@@ -200,14 +199,14 @@ static void ReverseRTLPhrases(wchar_t *s, size_t len)
     }
 }
 
-static void ReverseRTLRunsInText(wchar_t *text)
+static void ReverseRTLRunsInText(const BidiState *b, wchar_t *text)
 {
     if (text == NULL) return;
 
     // The verdicts only apply if the number of rows coincides. 
     size_t nl = 1;
     for (wchar_t *p = text; *p; p++) if (*p == L'\n') nl++;
-    int useVotes = (s_bidiLineVisual != NULL && nl == s_bidiLines);
+    int useVotes = (b->pLineVisual != NULL && nl == b->nLines);
 
     size_t lineIdx = 0;
     wchar_t *lineStart = text;
@@ -238,7 +237,7 @@ static void ReverseRTLRunsInText(wchar_t *text)
             else if ((ch >= L'A' && ch <= L'Z') || (ch >= L'a' && ch <= L'z')) ltrCount++;
         }
 
-        int verdict = (useVotes && lineIdx < s_bidiLines) ? s_bidiLineVisual[lineIdx] : -1;
+        int verdict = (useVotes && lineIdx < b->nLines) ? b->pLineVisual[lineIdx] : -1;
 
         if (rtlCount > 0)
         {
@@ -2986,6 +2985,9 @@ uscita:
 		pParams->pArrayUnicode = NULL;
 	}
 
+	// Stato bidi: normalmente gia' azzerato a fine pagina; qui copriamo i percorsi di errore.
+	BidiReset(&(pParams->myBidi));
+
 	if ( NULL != pParams->fpOutput )
 	{
 		fclose(pParams->fpOutput);
@@ -4089,7 +4091,7 @@ int VlRbtOnTraverseFunc(void* pCurrNode)
 	if ( rowDiff < 0.5 )   // tolerance: same visual line
 	{
 		if ( pMyKeyPredecessor != NULL && SORT_GLYPHS_BY_ROW != pMyData->pParams->nSortGlyphs )
-			BidiVote(prevChar, pMyData->c, pMyKeyPredecessor->col, pMyKey->col);
+			BidiVote(&(pMyData->pParams->myBidi), prevChar, pMyData->c, pMyKeyPredecessor->col, pMyKey->col);
 
 		// distingui LTR from RTL comparing positions 
 		int bRTL = 0;
@@ -4131,7 +4133,7 @@ int VlRbtOnTraverseFunc(void* pCurrNode)
 				pMyData->pParams->pTextFromActualText[pMyData->pParams->TextLength] = 0;
 			pMyData->pParams->TextLength++;
 
-			BidiEndLine();
+			BidiEndLine(&(pMyData->pParams->myBidi));
 		}
 
 		xDiff = 0.0;
@@ -8042,7 +8044,7 @@ int ManageContent(Params *pParams, int nPageNumber)
 
 	pParams->TextLength = 0;
 	//retValue = ManageDecodedContent(pParams, nPageNumber);
-	BidiReset();
+	BidiReset(&(pParams->myBidi));
 	retValue = ManageDecodedContentText(pParams, nPageNumber);
 
 	if ( retValue && pParams->myRedBlackTree.count > 0 )
@@ -8077,7 +8079,7 @@ int ManageContent(Params *pParams, int nPageNumber)
 
 		vlrbtTraverseInOrder(&(pParams->myRedBlackTree));
 
-		BidiEndLine();
+		BidiEndLine(&(pParams->myBidi));
 
 		//NormalizeIndicVisualOrder(pParams);
 		//ComposeTamilKannadaMatras(pParams);
@@ -8092,8 +8094,8 @@ int ManageContent(Params *pParams, int nPageNumber)
 		NormalizeBengaliSpuriousSpace(pParams);
 
         /* PATCH 4: reversal of RTL run per line */
-        ReverseRTLRunsInText(pParams->pText);
-        BidiReset();
+        ReverseRTLRunsInText(&(pParams->myBidi), pParams->pText);
+        BidiReset(&(pParams->myBidi));
         /* PATCH 4 */
 
 		//(pParams->bOptVersionOrHelp) && (pParams->szFilePdf[0] == '\0' && pParams->szPath[0] == '\0')
