@@ -134,8 +134,8 @@ MYPDF_API void            MYPDF_CALL mypdf_DestroyContext(mypdf_Context *ctx);  
  *    Le callback NON devono sollevare eccezioni/longjmp verso la libreria.
  * -------------------------------------------------------------------------*/
 
-/* Testo di una pagina. text e' UTF-8 (NON NUL-terminato garantito: usare byte_len,
- * ma c'e' comunque un '\0' finale). Ritorno: 0 = continua, != 0 = interrompi (MYPDF_ERR_CANCELLED). */
+/* Testo di una pagina, chiamata per ogni pagina elaborata (text e' "" se la pagina non ha testo).
+ * text e' UTF-8, terminato da '\0' (byte_len non lo include). Ritorno: 0 = continua, != 0 = interrompi (MYPDF_ERR_CANCELLED). */
 typedef int (MYPDF_CALL *mypdf_PageTextCallback)(void *user_data,
                                                  const char *file_path,
                                                  int32_t page_number,      /* 1-based */
@@ -172,6 +172,14 @@ typedef int (MYPDF_CALL *mypdf_PasswordCallback)(void *user_data,
                                                  size_t max_len,
                                                  size_t *out_len);
 
+/* Inizio elaborazione di un file (una chiamata per file, prima delle callback delle sue pagine). */
+typedef void (MYPDF_CALL *mypdf_FileStartCallback)(void *user_data, const char *file_path);
+
+/* Inizio elaborazione di una pagina (prima che ne siano emessi testo e messaggi). */
+typedef void (MYPDF_CALL *mypdf_PageStartCallback)(void *user_data, const char *file_path, int32_t page_number);
+
+MYPDF_API void MYPDF_CALL mypdf_SetPageStartCallback(mypdf_Context *ctx, mypdf_PageStartCallback cb, void *user_data);
+MYPDF_API void MYPDF_CALL mypdf_SetFileStartCallback(mypdf_Context *ctx, mypdf_FileStartCallback cb, void *user_data);
 MYPDF_API void MYPDF_CALL mypdf_SetPageTextCallback(mypdf_Context *ctx, mypdf_PageTextCallback cb, void *user_data);
 MYPDF_API void MYPDF_CALL mypdf_SetWordFoundCallback(mypdf_Context *ctx, mypdf_WordFoundCallback cb, void *user_data);
 MYPDF_API void MYPDF_CALL mypdf_SetMessageCallback(mypdf_Context *ctx, mypdf_MessageCallback cb, void *user_data);
@@ -185,14 +193,17 @@ MYPDF_API void MYPDF_CALL mypdf_SetPasswordCallback(mypdf_Context *ctx, mypdf_Pa
  * NULL o "" = nessuna ricerca. La libreria ne tiene una copia. */
 MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetSearchWords(mypdf_Context *ctx, const char *utf8_words);
 
-/* Intervallo di pagine 1-based, inclusivo. first=1, last=0 -> tutte. */
+/* Intervallo di pagine 1-based, inclusivo. first<=0 = dalla prima; last<=0 = fino all'ultima.
+ * Se entrambi > 0 e first > last: MYPDF_ERR_INVALID_ARGUMENT. */
 MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetPageRange(mypdf_Context *ctx, int32_t first, int32_t last);
 
 /* Opzioni booleane / numeriche del CLI mappate una per una (elenco definitivo da
  * concordare leggendo myParseOption: -s ordinamento glifi, -w, ecc.). */
 typedef enum mypdf_Option
 {
-	MYPDF_OPT_SORT_GLYPHS = 1,   /* int32: modalita' ordinamento glifi (come oggi) */
+	MYPDF_OPT_SORT_GLYPHS   = 1,   /* 1 = ordina i glifi per riga (CLI: -s); 0 = ordine di apparizione (predefinito) */
+	MYPDF_OPT_SHOW_ERRORS   = 2,   /* 1 = invia alla callback dei messaggi il riepilogo degli errori per file (CLI: --show_errors) */
+	MYPDF_OPT_SHOW_WARNINGS = 3,   /* 1 = idem per i warning (CLI: --show_warnings) */
 	MYPDF_OPT_FORCE_INT32 = 0x7fffffff
 } mypdf_Option;
 
@@ -206,8 +217,9 @@ MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetOptionInt(mypdf_Context *ctx, mypdf_O
  * Per ogni pagina chiama PageTextCallback (se impostata) e, per ogni parola trovata, WordFoundCallback. */
 MYPDF_API mypdf_Status MYPDF_CALL mypdf_ProcessFile(mypdf_Context *ctx, const char *utf8_path);
 
-/* Elabora tutti i PDF di una cartella (ricorsivo se recursive != 0). Prosegue dopo errori sui
- * singoli file; ritorna MYPDF_ERR_FILE_ERRORS se almeno un file ha avuto errori. */
+/* Elabora tutti i PDF di una cartella (ricorsivo se recursive != 0); utf8_dir puo' essere anche un
+ * singolo file. Prosegue dopo errori sui singoli file; ritorna MYPDF_ERR_FILE_ERRORS se almeno un
+ * file ha avuto errori. */
 MYPDF_API mypdf_Status MYPDF_CALL mypdf_ProcessDirectory(mypdf_Context *ctx, const char *utf8_dir, int32_t recursive);
 
 /* Contatori dall'ultima mypdf_Process*: file elaborati, con errori, con avvisi. */

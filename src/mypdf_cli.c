@@ -1120,3 +1120,86 @@ void PrintHardwareInfo(void)
 // Non stampiamo il numero di thread attivi a fine main(): a quel punto
 // eventuali worker sono già stati terminati e uniti.
 }
+
+
+/* ------------------------------------------------------------------------------------------------ */
+/* Callback di uscita (stesso output di prima: con -o il testo va sia nel file sia a video,          */
+/* intestazioni e "Key found" vanno nel file se c'e' -o, altrimenti a video).                          */
+/* ------------------------------------------------------------------------------------------------ */
+
+void MYPDF_CALL CliOnFileStart(void *pUser, const char *pszFile)
+{
+	CliOutput *pOut = (CliOutput*)pUser;
+	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
+
+	#if !defined(_WIN64) && !defined(_WIN32)
+	if ( NULL != fp )
+		fwprintf(fp, L"File: '%s'\n", pszFile);
+	else
+		wprintf(L"File: '%s'\n", pszFile);
+	#else
+	{
+		size_t lung = strnlen(pszFile, PATH_MAX);
+		size_t idx;
+
+		if ( NULL != fp )
+		{
+			fwprintf(fp, L"FILE = <");
+			for ( idx = 0; idx < lung; idx++ )
+				fwprintf(fp, L"%c", pszFile[idx]);
+			fwprintf(fp, L">\n");
+		}
+		else
+		{
+			wprintf(L"FILE = <");
+			for ( idx = 0; idx < lung; idx++ )
+				wprintf(L"%c", pszFile[idx]);
+			wprintf(L">\n");
+		}
+	}
+	#endif
+}
+
+void MYPDF_CALL CliOnPageStart(void *pUser, const char *pszFile, int32_t nPage)
+{
+	CliOutput *pOut = (CliOutput*)pUser;
+	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
+
+	UNUSED(pszFile);
+
+	if ( NULL != fp )
+		fwprintf(fp, L"\n\nTEXT EXTRACTED FROM PAGE %d:\n\n", (int)nPage);
+	else
+		wprintf(L"\n\nTEXT EXTRACTED FROM PAGE %d:\n\n", (int)nPage);
+}
+
+int MYPDF_CALL CliOnPageText(void *pUser, const char *pszFile, int32_t nPage, const char *pszText, size_t nLen)
+{
+	CliOutput *pOut = (CliOutput*)pUser;
+	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
+
+	UNUSED(pszFile);
+	UNUSED(nPage);
+	UNUSED(nLen);
+
+	if ( NULL != fp )
+		fwprintf(fp, L"%s", pszText);
+	wprintf(L"%s", pszText);
+
+	return 0;
+}
+
+int MYPDF_CALL CliOnWordFound(void *pUser, const char *pszFile, int32_t nPage, const char *pszWord)
+{
+	CliOutput *pOut = (CliOutput*)pUser;
+	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
+
+	UNUSED(pszFile);
+
+	if ( NULL != fp )
+		fwprintf(fp, L"\tKey '%s' found on page %d\n", pszWord, (int)nPage);
+	else
+		wprintf(L"\tKey '%s' found on page %d\n", pszWord, (int)nPage);
+
+	return 0;
+}

@@ -4,6 +4,7 @@ mypdfsearch_SOURCES = \
     main.c \
     mycontentqueuelist.c mycontentqueuelist.h \
     mypdf_cli.c mypdf_cli.h \
+    mypdf_api.c \
     mypdf_utils.c mypdf_utils.h \
     mycrypt.c mycrypt.h \
     mycrypt_rc4.c mycrypt_rc4.h \

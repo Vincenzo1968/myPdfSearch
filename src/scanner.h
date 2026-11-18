@@ -593,7 +593,8 @@ typedef struct tagFontCacheEntry
 } FontCacheEntry;
 
 
-typedef int (*OnUserPasswordCallback)(const char *pdf_filename,
+typedef int (*OnUserPasswordCallback)(void *pUser,
+                                      const char *pdf_filename,
                                       const char *error_msg,
                                       char *out_password,
                                       size_t max_password_len,
@@ -630,6 +631,7 @@ typedef struct tagParams
 
 	// Pointer to callback function for password
     OnUserPasswordCallback pOnUserPassword;
+    void *pOnUserPasswordUser;   // argomento 'pUser' passato alla callback della password
 
 	GenHashTable_t myHT_ImageObjs;
 
@@ -917,6 +919,23 @@ typedef struct tagParams
 	int nFileWarningCount;  // warning (messages starting with "WARNING") written in the log file for current file
 	int bShowErrors;        // option --show errors: show to video (stderr) the number of errors per file
 	int bShowWarnings;      // option --show warnings: show to video (stderr) the number of warnings for file
+	int64_t nTotFilesProcessed;       // contatori totali dell'ultima chiamata a Parse (vedi mypdf_GetStats)
+	int64_t nTotFilesWithErrors;
+	int64_t nTotFilesWithWarnings;
+
+	// Uscita del testo (callback dell'API pubblica; NULL = non richiesto)
+	mypdf_FileStartCallback pfnFileStart;
+	void *pFileStartUser;
+	mypdf_PageStartCallback pfnPageStart;
+	void *pPageStartUser;
+	mypdf_PageTextCallback pfnPageText;
+	void *pPageTextUser;
+	mypdf_WordFoundCallback pfnWordFound;
+	void *pWordFoundUser;
+	int nCurrentPage;         // pagina in elaborazione (1-based)
+	int bPageTextEmitted;     // la callback del testo e' gia' stata chiamata per la pagina corrente
+	int bCancelRequested;     // una callback ha chiesto di interrompere
+	int nOctalFilterState;    // stato del filtro dei residui ottali "\ddd" nel testo finale (0..3)
 	MyNumStackList_t myNumStack;
 	char szCurrKeyName[MAX_STRLEN];
 	char szCurrResourcesKeyName[MAX_STRLEN];
@@ -1017,7 +1036,7 @@ typedef enum tagStates
 
 
 // It states the Set function somewhere in the header
-void SetOnUserPasswordCallback(Params *pParams, OnUserPasswordCallback callback);
+void SetOnUserPasswordCallback(Params *pParams, OnUserPasswordCallback callback, void *pUser);
 
 int MakeAndOpenErrorsFile(Params *pParams, int bBom);
 int myShowErrorMessage(Params *pParams, const char *szMsg, int bPrintToErrorFile);

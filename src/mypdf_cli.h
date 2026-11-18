@@ -44,4 +44,16 @@ void PrintHardwareInfo(void);
 //   2                 at least one file could not be processed (the others have been processed anyway)
 #define MYPDFSEARCH_EXIT_FILE_ERRORS 2
 
+// Uscita del programma a riga di comando: callback che stampano esattamente come prima del refactoring.
+// 'pUser' deve essere un puntatore a CliOutput (fpOutput = file di -o, oppure NULL per stampare solo a video).
+typedef struct tagCliOutput
+{
+	FILE *fpOutput;
+} CliOutput;
+
+void MYPDF_CALL CliOnFileStart(void *pUser, const char *pszFile);
+void MYPDF_CALL CliOnPageStart(void *pUser, const char *pszFile, int32_t nPage);
+int  MYPDF_CALL CliOnPageText(void *pUser, const char *pszFile, int32_t nPage, const char *pszText, size_t nLen);
+int  MYPDF_CALL CliOnWordFound(void *pUser, const char *pszFile, int32_t nPage, const char *pszWord);
+
 #endif /* MYPDF_CLI_INCLUDED */

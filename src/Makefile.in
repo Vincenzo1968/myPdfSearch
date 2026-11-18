@@ -100,8 +100,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_mypdfsearch_OBJECTS = main.$(OBJEXT) mycontentqueuelist.$(OBJEXT) \
-	mypdf_cli.$(OBJEXT) mypdf_utils.$(OBJEXT) mycrypt.$(OBJEXT) \
-	mycrypt_rc4.$(OBJEXT) mydecode.$(OBJEXT) \
+	mypdf_cli.$(OBJEXT) mypdf_api.$(OBJEXT) mypdf_utils.$(OBJEXT) \
+	mycrypt.$(OBJEXT) mycrypt_rc4.$(OBJEXT) mydecode.$(OBJEXT) \
 	mydictionaryqueuelist.$(OBJEXT) myGenHashTable.$(OBJEXT) \
 	myinitarray.$(OBJEXT) myInitPredefCMapHT.$(OBJEXT) \
 	myintqueuelist.$(OBJEXT) mynumstacklist.$(OBJEXT) \
@@ -138,11 +138,11 @@ am__depfiles_remade = ./$(DEPDIR)/main.Po \
 	./$(DEPDIR)/mydecode.Po ./$(DEPDIR)/mydictionaryqueuelist.Po \
 	./$(DEPDIR)/myinitarray.Po ./$(DEPDIR)/myintqueuelist.Po \
 	./$(DEPDIR)/mynumstacklist.Po ./$(DEPDIR)/myobjrefqueuelist.Po \
-	./$(DEPDIR)/myoctal.Po ./$(DEPDIR)/mypdf_cli.Po \
-	./$(DEPDIR)/mypdf_utils.Po ./$(DEPDIR)/mystringqueuelist.Po \
-	./$(DEPDIR)/mytime.Po ./$(DEPDIR)/parser.Po \
-	./$(DEPDIR)/scanner.Po ./$(DEPDIR)/vlEncoding.Po \
-	./$(DEPDIR)/vlRedBlackTrees.Po
+	./$(DEPDIR)/myoctal.Po ./$(DEPDIR)/mypdf_api.Po \
+	./$(DEPDIR)/mypdf_cli.Po ./$(DEPDIR)/mypdf_utils.Po \
+	./$(DEPDIR)/mystringqueuelist.Po ./$(DEPDIR)/mytime.Po \
+	./$(DEPDIR)/parser.Po ./$(DEPDIR)/scanner.Po \
+	./$(DEPDIR)/vlEncoding.Po ./$(DEPDIR)/vlRedBlackTrees.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -274,6 +274,7 @@ mypdfsearch_SOURCES = \
     main.c \
     mycontentqueuelist.c mycontentqueuelist.h \
     mypdf_cli.c mypdf_cli.h \
+    mypdf_api.c \
     mypdf_utils.c mypdf_utils.h \
     mycrypt.c mycrypt.h \
     mycrypt_rc4.c mycrypt_rc4.h \
@@ -419,6 +420,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mynumstacklist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myobjrefqueuelist.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myoctal.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdf_api.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdf_cli.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdf_utils.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mystringqueuelist.Po@am__quote@ # am--include-marker
@@ -591,6 +593,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/mynumstacklist.Po
 	-rm -f ./$(DEPDIR)/myobjrefqueuelist.Po
 	-rm -f ./$(DEPDIR)/myoctal.Po
+	-rm -f ./$(DEPDIR)/mypdf_api.Po
 	-rm -f ./$(DEPDIR)/mypdf_cli.Po
 	-rm -f ./$(DEPDIR)/mypdf_utils.Po
 	-rm -f ./$(DEPDIR)/mystringqueuelist.Po
@@ -661,6 +664,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/mynumstacklist.Po
 	-rm -f ./$(DEPDIR)/myobjrefqueuelist.Po
 	-rm -f ./$(DEPDIR)/myoctal.Po
+	-rm -f ./$(DEPDIR)/mypdf_api.Po
 	-rm -f ./$(DEPDIR)/mypdf_cli.Po
 	-rm -f ./$(DEPDIR)/mypdf_utils.Po
 	-rm -f ./$(DEPDIR)/mystringqueuelist.Po

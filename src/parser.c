@@ -29,6 +29,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include <unistd.h>
 #endif
 
+#include "mypdf_utils.h"
 #include "parser.h"
 #include "mycrypt.h"
 #include "mydecode.h"
@@ -53,11 +54,12 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 
 static int CopyEncryptTokenToBytes(const Token *pToken, unsigned char **ppBytes, size_t *pBytesLen);
 
-void SetOnUserPasswordCallback(Params *pParams, OnUserPasswordCallback callback)
+void SetOnUserPasswordCallback(Params *pParams, OnUserPasswordCallback callback, void *pUser)
 {
     if (pParams != NULL)
     {
         pParams->pOnUserPassword = callback;
+        pParams->pOnUserPasswordUser = pUser;
     }
 }
 
@@ -2344,6 +2346,9 @@ int Parse(Params *pParams, FilesList* myFilesList)
 	n = myFilesList;
 	while( n != NULL )
 	{
+		if ( pParams->bCancelRequested )
+			break;
+
 		pParams->nLastParsedFontObjNum = -1;
 		
 		pParams->isEncrypted = 0;
@@ -2433,34 +2438,11 @@ int Parse(Params *pParams, FilesList* myFilesList)
 			goto successivo;
 		}
 
-		if ( pParams->szOutputFile[0] != '\0' )
-		{
-			#if !defined(_WIN64) && !defined(_WIN32)
-			fwprintf(pParams->fpOutput, L"File: '%s'\n", pParams->szFileName);
-			#else
-			fwprintf(pParams->fpOutput, L"FILE = <");
-			lung = strnlen(pParams->szFileName, PATH_MAX);
-			for ( int idx = 0; idx < lung; idx++ )
-			{
-				fwprintf(pParams->fpOutput, L"%c", pParams->szFileName[idx]);
-			}
-			fwprintf(pParams->fpOutput, L">\n");
-			#endif
-		}
-		else
-		{
-			#if !defined(_WIN64) && !defined(_WIN32)
-			wprintf(L"File: '%s'\n", pParams->szFileName);
-			#else
-			lung = strnlen(pParams->szFileName, PATH_MAX);
-			wprintf(L"FILE = <");
-			for ( int idx = 0; idx < lung; idx++ )
-			{
-				wprintf(L"%c", pParams->szFileName[idx]);
-			}
-			wprintf(L">\n");
-			#endif
-		}
+		if ( NULL != pParams->pfnFileStart )
+			pParams->pfnFileStart(pParams->pFileStartUser, pParams->szFileName);
+
+		pParams->nOctalFilterState = 0;
+
 
 		// ****************************************** PRE PARSING FILE ***************************************************************
 		getObjsOffsets(pParams, pParams->szFileName);
@@ -2652,6 +2634,12 @@ int Parse(Params *pParams, FilesList* myFilesList)
 		}
 
 successivo:
+
+		pParams->nTotFilesProcessed++;
+		if ( pParams->nFileErrorCount > 0 )
+			pParams->nTotFilesWithErrors++;
+		if ( pParams->nFileWarningCount > 0 )
+			pParams->nTotFilesWithWarnings++;
 
 		// Video Summary (on stderr), only if required by command line.
 		if ( pParams->bShowErrors && pParams->nFileErrorCount > 0 )
@@ -2981,11 +2969,7 @@ uscita:
 	// Stato bidi: normalmente gia' azzerato a fine pagina; qui copriamo i percorsi di errore.
 	BidiReset(&(pParams->myBidi));
 
-	if ( NULL != pParams->fpOutput )
-	{
-		fclose(pParams->fpOutput);
-		pParams->fpOutput = NULL;
-	}
+	// (il file di output, se c'e', e' del chiamante: lo chiude il programma a riga di comando)
 
 	if ( NULL != pParams->fpErrors )
 	{
@@ -7710,7 +7694,7 @@ static int AuthenticateCurrentPdf(Params *pParams)
     {
         // Call to the client function!
         // Note: If the client wants to cancel, return 0 or set out len to 0.
-        if (!pParams->pOnUserPassword(pParams->szFileName, error_msg, password, sizeof(password), &passwordLength))
+        if (!pParams->pOnUserPassword(pParams->pOnUserPasswordUser, pParams->szFileName, error_msg, password, sizeof(password), &passwordLength))
         {
             memset(password, 0, sizeof(password));
             ReportPasswordWarning(pParams, L"Richiesta della password annullata.");
@@ -8089,9 +8073,9 @@ int ManageContent(Params *pParams, int nPageNumber)
 		// return 0;
 		//}
 
-		if ( '\0' != pParams->szFilePdf[0] )
+		if ( NULL != pParams->pfnPageText )
 				bPrint = 1;
-		if ( '\0' != pParams->szPath[0] )
+		if ( NULL != pParams->pfnWordFound && pParams->countWordsToSearch > 0 )
 				bSearch = 1;
 
 		ManageExtractedText(pParams, bPrint, bSearch);
@@ -8374,95 +8358,88 @@ int ManageExtractedText(Params *pParams, int bPrint, int bSearch)
 
     if ( bPrint )
     {
-        for ( k = 0; k < pParams->TextLength; k++ )
+        // Il testo finale viene raccolto in un buffer e consegnato alla callback (in UTF-8) in un colpo solo.
+        size_t nOut = 0;
+        wchar_t *pOut = (wchar_t*)malloc(sizeof(wchar_t) * (2 * (size_t)pParams->TextLength + 2));
+
+        if ( NULL != pOut )
         {
-            c = pParams->pText[k];
+            for ( k = 0; k < pParams->TextLength; k++ )
+            {
+                c = pParams->pText[k];
 
-            // PULISHING CONTROL CHARACTERISTICS:
-            // excludes all characters from 0x00 to 0x1F, MA preserves
-            // \t (0x09), \n (0x0A) e \r (0x0D).
-            if ( c < 0x0020 && c != 0x0009 && c != 0x000A && c != 0x000D )
-            {
-                continue;
-            }
+                // PULISHING CONTROL CHARACTERISTICS:
+                // excludes all characters from 0x00 to 0x1F, MA preserves
+                // \t (0x09), \n (0x0A) e \r (0x0D).
+                if ( c < 0x0020 && c != 0x0009 && c != 0x000A && c != 0x000D )
+                {
+                    continue;
+                }
 
-            // It also excludes the control character of DEL (127) and invalid replacements.
-            if (
-                c == 0xFFFD ||
-                (c >= 0xD800 && c <= 0xDFFF) ||
-                c == 0x007F
-            )
-            {
-                continue;
-            }
+                // It also excludes the control character of DEL (127) and invalid replacements.
+                if (
+                    c == 0xFFFD ||
+                    (c >= 0xD800 && c <= 0xDFFF) ||
+                    c == 0x007F
+                )
+                {
+                    continue;
+                }
 
-            //if ( NULL!= pParams->fpOutput)
-            //    fwprintf(pParams->fpOutput, L"%lc", c);
-            //else
-            //    wprintf(L"%lc", c);
+                // FINAL OUTPUT FILTER: Cleans Unprintable Control Characters
+                // and octal residues before writing on screen or on files, resetting regressions.
+                if ( c < 32 && c != L'\n' && c != L'\r' && c != L'\t' )
+                {
+                    c = L' ';
+                }
 
-            // FINAL OUTPUT FILTER: Cleans Unprintable Control Characters 
-            // and octal residues before writing on screen or on files, resetting regressions.
-            if ( c < 32 && c != L'\n' && c != L'\r' && c != L'\t' )
-            {
-                c = L' ';
-            }
+                // LETTERAL EXAPE FILTER (e.g. \030, \027)
+                // stato: 0 normale, 1 trovato '\', 2 prima cifra, 3 seconda cifra
+                {
+                    int bSkipWrite = 0;
 
-            //if ( NULL!= pParams->fpOutput)
-            //    fwprintf(pParams->fpOutput, L"%lc", c);
-            //wprintf(L"%lc", c);
-            
-            // LETTERAL EXAPE FILTER (e.g. \030, \027)
-            static int stateOctal = 0; // 0: normal, 1: found \, 2: first digit, 3: second digit
-            int bSkipWrite = 0;
+                    if ( pParams->nOctalFilterState == 0 && c == L'\\' )
+                    {
+                        pParams->nOctalFilterState = 1;
+                        bSkipWrite = 1; // Stop writing to see if it follows an octal number
+                    }
+                    else if ( pParams->nOctalFilterState == 1 )
+                    {
+                        if ( c >= L'0' && c <= L'7' ) pParams->nOctalFilterState = 2;
+                        else { pParams->nOctalFilterState = 0; pOut[nOut++] = L'\\'; }
+                    }
+                    else if ( pParams->nOctalFilterState == 2 )
+                    {
+                        if ( c >= L'0' && c <= L'7' ) pParams->nOctalFilterState = 3;
+                        else { pParams->nOctalFilterState = 0; pOut[nOut++] = L'\\'; pOut[nOut++] = L' '; }
+                    }
+                    else if ( pParams->nOctalFilterState == 3 )
+                    {
+                        pParams->nOctalFilterState = 0;
+                        bSkipWrite = 1;
+                        pOut[nOut++] = L' ';
+                    }
 
-            if (stateOctal == 0 && c == L'\\')
-            {
-                stateOctal = 1;
-                bSkipWrite = 1; // Stop writing to see if it follows an octal number
-            }
-            else if (stateOctal == 1)
-            {
-                if (c >= L'0' && c <= L'7') stateOctal = 2;
-                else { stateOctal = 0; if (NULL != pParams->fpOutput) fwprintf(pParams->fpOutput, L"\\"); wprintf(L"\\"); }
-            }
-            else if (stateOctal == 2)
-            {
-                if (c >= L'0' && c <= L'7') stateOctal = 3;
-                else { stateOctal = 0; if (NULL != pParams->fpOutput) fwprintf(pParams->fpOutput, L"\\ "); wprintf(L"\\ "); }
-            }
-            else if (stateOctal == 1)
-            {
-                if (c >= L'0' && c <= L'7') stateOctal = 2;
-                else { 
-                    stateOctal = 0; 
-                    if (NULL != pParams->fpOutput) fwprintf(pParams->fpOutput, L"\\"); 
-                    wprintf(L"\\"); 
+                    if ( !bSkipWrite )
+                        pOut[nOut++] = c;
                 }
             }
-            else if (stateOctal == 2)
+
+            if ( NULL != pParams->pfnPageText )
             {
-                if (c >= L'0' && c <= L'7') stateOctal = 3;
-                else { 
-                    stateOctal = 0; 
-                    if (NULL != pParams->fpOutput) fwprintf(pParams->fpOutput, L"\\"); 
-                    wprintf(L"\\"); 
+                size_t nUtf8Len = 0;
+                char *pUtf8 = myWideToUtf8(pOut, nOut, &nUtf8Len);
+
+                if ( NULL != pUtf8 )
+                {
+                    pParams->bPageTextEmitted = 1;
+                    if ( pParams->pfnPageText(pParams->pPageTextUser, pParams->szFileName, pParams->nCurrentPage, pUtf8, nUtf8Len) )
+                        pParams->bCancelRequested = 1;
+                    free(pUtf8);
                 }
             }
-            else if (stateOctal == 3)
-            {
-                stateOctal = 0;
-                bSkipWrite = 1;
-                if (NULL != pParams->fpOutput) fwprintf(pParams->fpOutput, L" "); 
-                wprintf(L" ");
-            }
 
-            if (!bSkipWrite)
-            {
-                if ( NULL != pParams->fpOutput )
-                    fwprintf(pParams->fpOutput, L"%lc", c);
-                wprintf(L"%lc", c);
-            }
+            free(pOut);
         }
     }
 
@@ -9782,6 +9759,9 @@ int ParseObject(Params *pParams, int objNum)
 	#endif
 	for ( nInt = nFromPage; nInt <= nToPage; nInt++ )
 	{
+		if ( pParams->bCancelRequested )
+			break;
+
 		pParams->nCurrentPageNum = nInt;
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN) || defined(MYDEBUG_PRINT_COUNT_CONTENT_TYPE)
@@ -9863,15 +9843,21 @@ int ParseObject(Params *pParams, int objNum)
 		wprintf(L"\nPAGINA %d ------------------------------------------------------------------------------------------------------------------\n", nInt);
 		#endif
 
-		if ( pParams->szFilePdf[0] != '\0' )
-		{
-			if ( pParams->szOutputFile[0] != '\0' )
-				fwprintf(pParams->fpOutput, L"\n\nTEXT EXTRACTED FROM PAGE %d:\n\n", nInt);
-			else
-				wprintf(L"\n\nTEXT EXTRACTED FROM PAGE %d:\n\n", nInt);
-		}
+		pParams->nCurrentPage = nInt;
+		pParams->bPageTextEmitted = 0;
+
+		if ( NULL != pParams->pfnPageStart )
+			pParams->pfnPageStart(pParams->pPageStartUser, pParams->szFileName, nInt);
 
 		ManageContent(pParams, nInt);
+
+		// Pagina senza testo: la callback viene comunque chiamata (con testo vuoto).
+		if ( NULL != pParams->pfnPageText && !pParams->bPageTextEmitted )
+		{
+			pParams->bPageTextEmitted = 1;
+			if ( pParams->pfnPageText(pParams->pPageTextUser, pParams->szFileName, nInt, "", 0) )
+				pParams->bCancelRequested = 1;
+		}
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ParseObject_FN)
 		wprintf(L"}\n\n");
@@ -9892,25 +9878,20 @@ int ParseObject(Params *pParams, int objNum)
 		wprintf(L"TERNARY SEARCH TREE (Page %d) -> TRAVERSE COUNT = %u\n", nInt, count);
 		#endif
 
-		for ( idxWord = 0; idxWord < pParams->countWordsToSearch; idxWord++ )
+		for ( idxWord = 0; NULL != pParams->pfnWordFound && idxWord < pParams->countWordsToSearch; idxWord++ )
 		{
-			//wprintf(L"\tsearching Key '%ls' on page %d\n", pParams->pWordsToSearchArray[idxWord], nInt);
 			res = tstSearchRecursive(pParams->myTST.pRoot, pParams->pWordsToSearchArray[idxWord], NULL, NULL);
 			if ( res )
 			{
-				if ( pParams->szOutputFile[0] != '\0' )
+				char *pUtf8Word = myWideToUtf8(pParams->pWordsToSearchArray[idxWord], wcslen(pParams->pWordsToSearchArray[idxWord]), NULL);
+
+				if ( NULL != pUtf8Word )
 				{
-					fwprintf(pParams->fpOutput, L"\tKey '%ls' found on page %d\n", pParams->pWordsToSearchArray[idxWord], nInt);
-				}
-				else
-				{
-					wprintf(L"\tKey '%ls' found on page %d\n", pParams->pWordsToSearchArray[idxWord], nInt);
+					if ( pParams->pfnWordFound(pParams->pWordFoundUser, pParams->szFileName, nInt, pUtf8Word) )
+						pParams->bCancelRequested = 1;
+					free(pUtf8Word);
 				}
 			}
-			//else
-			//{
-			// wprintf(L"\tKey '%ls' NOT found\n", pParams->pWordsToSearchArray[idxWord]);
-			//}
 		}
 	}
 

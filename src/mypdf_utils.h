@@ -52,4 +52,8 @@ int mySplitWords(Params *pParams, wchar_t *pwszOption);
 /* Imposta pParams->nThisMachineEndianness in base alla macchina. */
 void checkEndianness(Params *pParams);
 
+// Converte una stringa wchar_t in UTF-8 (indipendente dalla locale). Ritorna un buffer allocato con malloc
+// (terminato da '\0'; liberare con free) oppure NULL se la memoria e' esaurita. *pOutLen (se non NULL) = byte scritti.
+char *myWideToUtf8(const wchar_t *pwsz, size_t len, size_t *pOutLen);
+
 #endif /* MYPDF_UTILS_INCLUDED */

@@ -585,3 +585,58 @@ void checkEndianness(Params *pParams)
 
 	//wprintf(L"\n");
 }
+
+
+char *myWideToUtf8(const wchar_t *pwsz, size_t len, size_t *pOutLen)
+{
+	size_t i;
+	size_t n = 0;
+	char *out = (char*)malloc(len * 4 + 1);
+
+	if ( NULL == out )
+		return NULL;
+
+	for ( i = 0; i < len; i++ )
+	{
+		uint32_t cp = (uint32_t)pwsz[i];
+
+		#if defined(_WIN32) || defined(_WIN64)
+		// wchar_t a 16 bit: ricompone le coppie surrogate
+		if ( cp >= 0xD800 && cp <= 0xDBFF && (i + 1) < len && (uint32_t)pwsz[i + 1] >= 0xDC00 && (uint32_t)pwsz[i + 1] <= 0xDFFF )
+		{
+			cp = 0x10000 + ((cp - 0xD800) << 10) + ((uint32_t)pwsz[i + 1] - 0xDC00);
+			i++;
+		}
+		#endif
+
+		if ( cp > 0x10FFFF || (cp >= 0xD800 && cp <= 0xDFFF) )
+			cp = 0xFFFD;
+
+		if ( cp < 0x80 )
+			out[n++] = (char)cp;
+		else if ( cp < 0x800 )
+		{
+			out[n++] = (char)(0xC0 | (cp >> 6));
+			out[n++] = (char)(0x80 | (cp & 0x3F));
+		}
+		else if ( cp < 0x10000 )
+		{
+			out[n++] = (char)(0xE0 | (cp >> 12));
+			out[n++] = (char)(0x80 | ((cp >> 6) & 0x3F));
+			out[n++] = (char)(0x80 | (cp & 0x3F));
+		}
+		else
+		{
+			out[n++] = (char)(0xF0 | (cp >> 18));
+			out[n++] = (char)(0x80 | ((cp >> 12) & 0x3F));
+			out[n++] = (char)(0x80 | ((cp >> 6) & 0x3F));
+			out[n++] = (char)(0x80 | (cp & 0x3F));
+		}
+	}
+
+	out[n] = '\0';
+	if ( NULL != pOutLen )
+		*pOutLen = n;
+
+	return out;
+}

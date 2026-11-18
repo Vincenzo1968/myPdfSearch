@@ -180,12 +180,15 @@ static int ReadPasswordFromTerminal(char *pszPassword, size_t capacity, size_t *
     return 1;
 }
 
-static int MyConsolePasswordCallback(const char *pdf_filename,
+static int MyConsolePasswordCallback(void *pUser,
+                                     const char *pdf_filename,
                                      const char *error_msg,
                                      char *out_password,
                                      size_t max_len,
                                      size_t *out_len)
 {
+    UNUSED(pUser);
+
     // Se stdin non e' un terminale interattivo, non c'e' modo di
     // chiedere una password. Annulla subito, senza prompt.
     // Questo copre la modalita' BATCH (es. `mypdfsearch ... < /dev/null`,
@@ -242,6 +245,7 @@ int main(int argc, char **argv)
 	#endif
 
 	Params myParams = {0};
+	CliOutput cliOutput = { NULL };
 
 	FilesList* myFilesList = NULL;
 
@@ -461,7 +465,24 @@ int main(int argc, char **argv)
 
 	wprintf(L"\n");
 
-	SetOnUserPasswordCallback(&myParams, MyConsolePasswordCallback);
+	SetOnUserPasswordCallback(&myParams, MyConsolePasswordCallback, NULL);
+
+	// Uscita: -e (estrazione del testo) -> testo delle pagine; -p (ricerca) -> parole trovate.
+	cliOutput.fpOutput = myParams.fpOutput;
+	myParams.pfnFileStart = CliOnFileStart;
+	myParams.pFileStartUser = &cliOutput;
+	if ( myParams.szFilePdf[0] != '\0' )
+	{
+		myParams.pfnPageStart = CliOnPageStart;
+		myParams.pPageStartUser = &cliOutput;
+		myParams.pfnPageText = CliOnPageText;
+		myParams.pPageTextUser = &cliOutput;
+	}
+	else
+	{
+		myParams.pfnWordFound = CliOnWordFound;
+		myParams.pWordFoundUser = &cliOutput;
+	}
 
 	//Parse(&myParams, myFilesList, 0);
 	if ( !Parse(&myParams, myFilesList) )
@@ -490,6 +511,12 @@ uscita:
 
 	if ( NULL != myParams.fpErrors )
 		fclose(myParams.fpErrors);
+
+	if ( NULL != myParams.fpOutput )
+	{
+		fclose(myParams.fpOutput);
+		myParams.fpOutput = NULL;
+	}
 
     // Rilascio del provider globale OpenSSL.
     // A questo punto tutte le elaborazioni crittografiche
