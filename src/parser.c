@@ -12920,6 +12920,49 @@ int ParseToUnicodeStream(Params *pParams, int objNum, unsigned char *pszDecodedS
 					{
 						bfRange3 = myValue;
 
+						// Destinazione con piu' di 4 cifre esadecimali (es. <00660069> = "fi"): sono piu' unita' UTF-16,
+						// non un unico numero. Va trattata come una sequenza di caratteri (ligature ff, fi, fl...).
+						{
+							size_t destLen = strnlen(pParams->myToken.vString, 1024);
+							size_t seqLen = 0;
+							wchar_t *seqDest = NULL;
+
+							if ( destLen > 4 && bfRange1 <= 0xFFFF && bfRange2 <= 0xFFFF && bfRange2 >= bfRange1 && pParams->sequences != NULL )
+								seqDest = ParseUTF16BEHexToWcharSeq(pParams->myToken.vString, destLen, &seqLen);
+
+							if ( seqDest != NULL && seqLen > 1 )
+							{
+								for ( uint32_t idx = bfRange1; idx <= bfRange2; idx++ )
+								{
+									wchar_t *pCopy = (wchar_t*)calloc(seqLen + 1, sizeof(wchar_t));
+
+									if ( NULL == pCopy )
+										break;
+
+									memcpy(pCopy, seqDest, seqLen * sizeof(wchar_t));
+									pCopy[seqLen - 1] += (wchar_t)(idx - bfRange1);   // come da specifica: si incrementa l'ultima unita'
+
+									if ( pParams->sequences[idx] != NULL )
+										free(pParams->sequences[idx]);
+
+									pParams->paCustomizedFont_CharSet[idx] = pCopy[0];
+									pParams->sequences[idx] = pCopy;
+								}
+
+								free(seqDest);
+								seqDest = NULL;
+
+								bfRange1 = 0;
+								bfRange2 = 0;
+								bfRange3 = 0;
+								nCountBfRangeValues = 0;
+								break;
+							}
+
+							if ( seqDest != NULL )
+								free(seqDest);
+						}
+
 						if ( bfRange1 <= 0xFFFF && bfRange2 <= 0xFFFF )
 						{
 							for ( uint32_t i = bfRange1; i <= bfRange2; i++ )
