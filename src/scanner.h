@@ -922,6 +922,7 @@ typedef struct tagParams
 	int64_t nTotFilesProcessed;       // contatori totali dell'ultima chiamata a Parse (vedi mypdf_GetStats)
 	int64_t nTotFilesWithErrors;
 	int64_t nTotFilesWithWarnings;
+	int64_t nTotFilesSkippedForPassword;
 
 	// Uscita del testo (callback dell'API pubblica; NULL = non richiesto)
 	mypdf_FileStartCallback pfnFileStart;

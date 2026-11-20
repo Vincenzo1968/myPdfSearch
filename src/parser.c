@@ -70,6 +70,8 @@ static void ReportPasswordWarning(
 {
     char *pUtf8Reason = myWideToUtf8(pszReason, wcslen(pszReason), NULL);
 
+    pParams->nTotFilesSkippedForPassword++;
+
     if ( NULL != pUtf8Reason )
     {
         myReportWarning(pParams, "WARNING: %s", pUtf8Reason);

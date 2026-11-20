@@ -346,7 +346,8 @@ static FilesList *MakeSingleFileList(const char *path)
 
 		if ( NULL == pSlash )
 		{
-			pList->myPathName[0] = '\0';
+			// Nome senza cartella: Parse compone "cartella/nome", quindi serve "./nome" (con "" diventerebbe "/nome").
+			strcpy(pList->myPathName, ".");
 			strcpy(pList->myFileName, path);
 		}
 		else
@@ -364,13 +365,14 @@ static FilesList *MakeSingleFileList(const char *path)
 	return pList;
 }
 
-static mypdf_Status RunParse(mypdf_Context *ctx, FilesList *pList)
+static mypdf_Status RunParse(mypdf_Context *ctx, FilesList *pList, int bSingleFile)
 {
 	mypdf_Status st = MYPDF_OK;
 
 	ctx->params.nTotFilesProcessed = 0;
 	ctx->params.nTotFilesWithErrors = 0;
 	ctx->params.nTotFilesWithWarnings = 0;
+	ctx->params.nTotFilesSkippedForPassword = 0;
 	ctx->params.bCancelRequested = 0;
 	ctx->szLastError[0] = '\0';
 
@@ -378,6 +380,13 @@ static mypdf_Status RunParse(mypdf_Context *ctx, FilesList *pList)
 	{
 		st = MYPDF_ERR_FILE_ERRORS;
 		snprintf(ctx->szLastError, sizeof(ctx->szLastError), "one or more files could not be processed");
+	}
+
+	// Un solo file saltato perche' cifrato (password mancante/errata/annullata): stato specifico.
+	if ( MYPDF_OK == st && 1 == bSingleFile && ctx->params.nTotFilesSkippedForPassword > 0 )
+	{
+		st = MYPDF_ERR_ENCRYPTED;
+		snprintf(ctx->szLastError, sizeof(ctx->szLastError), "encrypted file skipped: password missing, wrong or request cancelled");
 	}
 
 	if ( ctx->params.bCancelRequested )
@@ -404,7 +413,7 @@ mypdf_Status MYPDF_CALL mypdf_ProcessFile(mypdf_Context *ctx, const char *utf8_p
 	if ( NULL == pList )
 		return MYPDF_ERR_OUT_OF_MEMORY;
 
-	st = RunParse(ctx, pList);
+	st = RunParse(ctx, pList, 1);
 
 	freeFilesList(pList);
 
@@ -466,7 +475,7 @@ mypdf_Status MYPDF_CALL mypdf_ProcessDirectory(mypdf_Context *ctx, const char *u
 			return MYPDF_ERR_OUT_OF_MEMORY;
 	}
 
-	st = RunParse(ctx, pList);
+	st = RunParse(ctx, pList, !bIsDir);
 
 	freeFilesList(pList);
 

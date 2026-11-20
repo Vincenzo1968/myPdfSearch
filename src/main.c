@@ -67,11 +67,8 @@ make clean
 #include <windows.h>
 #endif
 
-#include "mypdf_internal.h"
+#include "mypdfsearch.h"     // API pubblica: unico header della libreria
 #include "mytime.h"
-#include "parser.h"
-#include "myUnicodeNFC.h"
-#include "mypdf_utils.h"
 #include "mypdf_cli.h"
 
 //#if !defined(_WIN64) && !defined(_WIN32)
@@ -80,44 +77,6 @@ make clean
 
 
 /* -------------------------------------------------------------------------------------------------- */
-
-/*
-Per generare le dipendenze per il Makefile, usare -MM:
-
-[vincenzo]$ gcc -MM -D_GNU_SOURCE myoctal.c mydictionaryqueuelist.c mystringqueuelist.c mycontentqueuelist.c mynumstacklist.c myintqueuelist.c mydecode.c scanner.c parser.c main.c -lz
-
-myoctal.o: myoctal.c myoctal.h mypdfsearch.h
-
-mydictionaryqueuelist.o: mydictionaryqueuelist.c scanner.h mypdfsearch.h \
- myobjrefqueuelist.h mynumstacklist.h myintqueuelist.h \
- mystringqueuelist.h mydictionaryqueuelist.h mycontentqueuelist.h \
- myScopeHashTable.h myTernarySearchTree.h mydecode.h
-
-mystringqueuelist.o: mystringqueuelist.c mystringqueuelist.h
-
-mycontentqueuelist.o: mycontentqueuelist.c mycontentqueuelist.h \
- mystringqueuelist.h mydictionaryqueuelist.h
-
-mynumstacklist.o: mynumstacklist.c mynumstacklist.h
-
-myintqueuelist.o: myintqueuelist.c myintqueuelist.h
-
-mydecode.o: mydecode.c mydecode.h myoctal.h mypdfsearch.h
-scanner.o: scanner.c myoctal.h mypdfsearch.h scanner.h \
- myobjrefqueuelist.h mynumstacklist.h myintqueuelist.h \
- mystringqueuelist.h mydictionaryqueuelist.h mycontentqueuelist.h \
- myScopeHashTable.h myTernarySearchTree.h mydecode.h
-
-parser.o: parser.c parser.h mypdfsearch.h scanner.h myobjrefqueuelist.h \
- mynumstacklist.h myintqueuelist.h mystringqueuelist.h \
- mydictionaryqueuelist.h mycontentqueuelist.h myScopeHashTable.h \
- myTernarySearchTree.h mydecode.h
-
-main.o: main.c mypdfsearch.h parser.h scanner.h myobjrefqueuelist.h \
- mynumstacklist.h myintqueuelist.h mystringqueuelist.h \
- mydictionaryqueuelist.h mycontentqueuelist.h myScopeHashTable.h \
- myTernarySearchTree.h mydecode.h
-*/
 
 /* -------------------------------------------------------------------------------------------------- */
 
@@ -180,14 +139,14 @@ static int ReadPasswordFromTerminal(char *pszPassword, size_t capacity, size_t *
     return 1;
 }
 
-static int MyConsolePasswordCallback(void *pUser,
+static int MYPDF_CALL MyConsolePasswordCallback(void *pUser,
                                      const char *pdf_filename,
                                      const char *error_msg,
                                      char *out_password,
                                      size_t max_len,
                                      size_t *out_len)
 {
-    UNUSED(pUser);
+    CLI_UNUSED(pUser);
 
     // Se stdin non e' un terminale interattivo, non c'e' modo di
     // chiedere una password. Annulla subito, senza prompt.
@@ -244,18 +203,12 @@ int main(int argc, char **argv)
 	mallopt(M_MMAP_THRESHOLD, 128 * 1024);
 	#endif
 
-	Params myParams = {0};
+	CliOptions cliOptions;
 	CliOutput cliOutput = { NULL, NULL };
 
-	FilesList* myFilesList = NULL;
-
-	#if !defined(_WIN64) && !defined(_WIN32)
-	struct stat entryInfo;
-	#endif
-
-	//long numProcessors;
-
-	int len;
+	mypdf_Context *ctx = NULL;
+	mypdf_Status status;
+	int bInitDone = 0;
 
 	#if defined(MYPDFSEARCH_SHOW_TIME)
 	myTimes mt_start;
@@ -270,30 +223,6 @@ int main(int argc, char **argv)
 	}
 	bTimeStartValid = 1;
 	#endif
-
-	myParams.countWordsToSearch = 0;
-	myParams.pWordsToSearchArray = NULL;
-
-	myParams.bOptVersionOrHelp = 0;
-	myParams.szPath[0] = '\0';
-	myParams.szFilePdf[0] = '\0';
-	myParams.fromPage = 0;
-	myParams.toPage = 0;
-	myParams.bNoSubDirs = 0;
-	myParams.nSortGlyphs = SORT_GLYPHS_BY_APPEARANCE;
-	myParams.szOutputFile[0] = '\0';
-	//myParams.szWordsToSearch[0] = '\0';
-	myParams.countWordsToSearch = 0;
-
-	for ( int k = 0; k < MAX_LEN_STR + 1; k++ )
-		myParams.szWordsToSearch[k] = '\0';
-
-	myParams.fpOutput = NULL;
-
-	myParams.fpErrors = NULL;
-	cliOutput.pParams = &myParams;
-	myParams.pfnMessage = CliOnMessage;
-	myParams.pMessageUser = &cliOutput;
 
 #if defined(_WIN64) || defined(_WIN32)
 	//SetConsoleOutputCP(65001);
@@ -310,228 +239,110 @@ int main(int argc, char **argv)
 	}
 #endif
 
-	if (!PdfCryptoInitialize())
+	if ( MYPDF_OK != mypdf_Init() )
 	{
 		fprintf(stderr, "ERRORE: inizializzazione globale OpenSSL fallita.\n");
 
 		retValue = EXIT_FAILURE;
 		goto uscita;
 	}
+	bInitDone = 1;
 
-	checkEndianness(&myParams);
-
-	if ( !myParseCommandLine(&myParams, argc, argv) )
+	if ( !myParseCommandLine(&cliOptions, argc, argv) )
 	{
 		retValue = EXIT_FAILURE;
 		goto uscita;
 	}
 
-	if ( myParams.bOptVersionOrHelp )
+	if ( cliOptions.bOptVersionOrHelp )
 	{
 		retValue = EXIT_SUCCESS;
 		goto uscita;
 	}
 
-	if ( myParams.szOutputFile[0] != '\0' )
+	if ( cliOptions.szOutputFile[0] != '\0' )
 	{
-		if ( !MakeAndOpenOutputFile(&myParams) )
+		if ( !MakeAndOpenOutputFile(cliOptions.szOutputFile, &(cliOutput.fpOutput)) )
 		{
 			retValue = EXIT_FAILURE;
 			goto uscita;
 		}
 	}
 
-	if ( myParams.szFilePdf[0] != '\0' )
+	ctx = mypdf_CreateContext();
+	if ( NULL == ctx )
 	{
-		#if !defined(_WIN64) && !defined(_WIN32)
-		char* psz = NULL;
-		int x;
-		int y;
-		#endif
+		fprintf(stderr, "ERRORE: impossibile creare il contesto della libreria.\n");
+		retValue = EXIT_FAILURE;
+		goto uscita;
+	}
 
-		myFilesList = (FilesList*)malloc(sizeof(FilesList));
+	// Opzioni
+	if ( MYPDF_OK != mypdf_SetSearchWords(ctx, cliOptions.szWords) ||
+	     MYPDF_OK != mypdf_SetPageRange(ctx, cliOptions.fromPage, cliOptions.toPage) ||
+	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SORT_GLYPHS, cliOptions.bSortGlyphs) ||
+	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_ERRORS, cliOptions.bShowErrors) ||
+	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_WARNINGS, cliOptions.bShowWarnings) )
+	{
+		fprintf(stderr, "ERRORE: %s\n", mypdf_GetLastError(ctx));
+		retValue = EXIT_FAILURE;
+		goto uscita;
+	}
 
-		if( myFilesList == NULL )
-		{
-			wprintf(L"Errore main: impossibile aggiungere il file alla lista.\n");
-			retValue = EXIT_FAILURE;
-			goto uscita;
-		}
-
-		#if !defined(_WIN64) && !defined(_WIN32)
-		strcpy(myFilesList->myPathName, myParams.szFilePdf);
-		myFilesList->next = NULL;
-
-		x = strlen(myFilesList->myPathName);
-		while ( x >= 0 )
-		{
-			if ( myFilesList->myPathName[x] == '/' )
-			{
-				myFilesList->myPathName[x] = '\0';
-				break;
-			}
-			x--;
-		}
-
-		if ( x > 0 )
-			x++;
-		psz = &(myParams.szFilePdf[x]);
-		y = 0;
-		while ( *psz != '\0' )
-			myFilesList->myFileName[y++] = *(psz++);
-		myFilesList->myFileName[y] = '\0';
-		#else
-		strcpy(myFilesList->myFileName, myParams.szFilePdf);
-		myFilesList->next = NULL;
-		#endif
+	// Callback: messaggi sempre; password; uscita: -e (estrazione del testo) -> testo delle pagine; -p (ricerca) -> parole trovate.
+	mypdf_SetMessageCallback(ctx, CliOnMessage, &cliOutput);
+	mypdf_SetPasswordCallback(ctx, MyConsolePasswordCallback, NULL);
+	mypdf_SetFileStartCallback(ctx, CliOnFileStart, &cliOutput);
+	if ( cliOptions.szFilePdf[0] != '\0' )
+	{
+		mypdf_SetPageStartCallback(ctx, CliOnPageStart, &cliOutput);
+		mypdf_SetPageTextCallback(ctx, CliOnPageText, &cliOutput);
 	}
 	else
 	{
-		#if !defined(_WIN64) && !defined(_WIN32)
-		if( lstat(myParams.szPath, &entryInfo) == 0 )
-		{
-			if( S_ISDIR(entryInfo.st_mode) )		// directory
-			{
-				len = strnlen(myParams.szPath, MAX_LEN_STR);
-				myFilesList = getFilesRecursive(&myParams, myParams.szPath, len, myParams.bNoSubDirs, myFilesList);
-				if ( !myFilesList )
-				{
-					wprintf(L"Errore: impossibile ottenere la lista dei file.\n");
-					retValue = EXIT_FAILURE;
-					goto uscita;
-				}
-			}
-			else if( S_ISREG(entryInfo.st_mode) )	// regular file
-			{
-				char* psz = NULL;
-				int x;
-				int y;
-
-				myFilesList = (FilesList*)malloc(sizeof(FilesList));
-
-				if( myFilesList == NULL )
-				{
-					wprintf(L"Errore main: impossibile aggiungere il file alla lista.\n");
-					retValue = EXIT_FAILURE;
-					goto uscita;
-				}
-
-				strcpy(myFilesList->myPathName, myParams.szPath);
-				myFilesList->next = NULL;
-
-				x = strlen(myFilesList->myPathName);
-				while ( x >= 0 )
-				{
-					if ( myFilesList->myPathName[x] == '/' )
-					{
-						myFilesList->myPathName[x] = '\0';
-						break;
-					}
-					x--;
-				}
-
-				if ( x > 0 )
-					x++;
-				psz = &(myParams.szPath[x]);
-				y = 0;
-				while ( *psz != '\0' )
-					myFilesList->myFileName[y++] = *(psz++);
-				myFilesList->myFileName[y] = '\0';
-			}
-		}
-		#else
-		if ( GetFileAttributesA(myParams.szPath) & FILE_ATTRIBUTE_DIRECTORY )
-		{
-			len = strnlen(myParams.szPath, MAX_LEN_STR);
-			myFilesList = getFilesRecursive(&myParams, myParams.szPath, len, myParams.bNoSubDirs, myFilesList);
-			if ( !myFilesList )
-			{
-				wprintf(L"Errore: impossibile ottenere la lista dei file.\n");
-				retValue = EXIT_FAILURE;
-				goto uscita;
-			}
-		}
-		else
-		{
-			myFilesList = (FilesList*)malloc(sizeof(FilesList));
-			if( myFilesList == NULL )
-			{
-				wprintf(L"Errore main: impossibile aggiungere il file alla lista.\n");
-				retValue = EXIT_FAILURE;
-				goto uscita;
-			}
-			strcpy(myFilesList->myFileName, myParams.szPath);
-			myFilesList->next = NULL;
-		}
-		#endif
+		mypdf_SetWordFoundCallback(ctx, CliOnWordFound, &cliOutput);
 	}
 
 	wprintf(L"\n");
 
-	SetOnUserPasswordCallback(&myParams, MyConsolePasswordCallback, NULL);
-
-	// Uscita: -e (estrazione del testo) -> testo delle pagine; -p (ricerca) -> parole trovate.
-	cliOutput.fpOutput = myParams.fpOutput;
-	myParams.pfnFileStart = CliOnFileStart;
-	myParams.pFileStartUser = &cliOutput;
-	if ( myParams.szFilePdf[0] != '\0' )
-	{
-		myParams.pfnPageStart = CliOnPageStart;
-		myParams.pPageStartUser = &cliOutput;
-		myParams.pfnPageText = CliOnPageText;
-		myParams.pPageTextUser = &cliOutput;
-	}
+	if ( cliOptions.szFilePdf[0] != '\0' )
+		status = mypdf_ProcessFile(ctx, cliOptions.szFilePdf);
 	else
-	{
-		myParams.pfnWordFound = CliOnWordFound;
-		myParams.pWordFoundUser = &cliOutput;
-	}
+		status = mypdf_ProcessDirectory(ctx, cliOptions.szPath, !(cliOptions.bNoSubDirs));
 
-	//Parse(&myParams, myFilesList, 0);
-	if ( !Parse(&myParams, myFilesList) )
-		retValue = MYPDFSEARCH_EXIT_FILE_ERRORS;
+	switch ( status )
+	{
+		case MYPDF_OK:
+		case MYPDF_ERR_ENCRYPTED:      // saltato per la password: l'avviso e' gia' stato mostrato da CliOnMessage
+			break;
+		case MYPDF_ERR_FILE_ERRORS:
+			retValue = MYPDFSEARCH_EXIT_FILE_ERRORS;
+			break;
+		default:
+			fprintf(stderr, "ERRORE: %s\n", mypdf_GetLastError(ctx));
+			retValue = EXIT_FAILURE;
+			break;
+	}
 
 uscita:
 
-	freeFilesList(myFilesList);
+	mypdf_DestroyContext(ctx);
 
-	if ( NULL != myParams.pWordsToSearchArray )
+	if ( NULL != cliOutput.fpErrors )
+		fclose(cliOutput.fpErrors);
+
+	if ( NULL != cliOutput.fpOutput )
 	{
-		int myIndex;
-
-		for ( myIndex = 0; myIndex < myParams.countWordsToSearch; myIndex++ )
-		{
-			if ( NULL != myParams.pWordsToSearchArray[myIndex] )
-			{
-				free(myParams.pWordsToSearchArray[myIndex]);
-				myParams.pWordsToSearchArray[myIndex] = NULL;
-			}
-
-		}
-		free(myParams.pWordsToSearchArray);
-		myParams.pWordsToSearchArray = NULL;
+		fclose(cliOutput.fpOutput);
+		cliOutput.fpOutput = NULL;
 	}
 
-	if ( NULL != myParams.fpErrors )
-		fclose(myParams.fpErrors);
-
-	if ( NULL != myParams.fpOutput )
-	{
-		fclose(myParams.fpOutput);
-		myParams.fpOutput = NULL;
-	}
-
-    // Rilascio del provider globale OpenSSL.
-    // A questo punto tutte le elaborazioni crittografiche
-    // devono essere terminate.
-    if (!PdfCryptoShutdown())
-    {
-        fprintf(stderr, "ERRORE: rilascio del provider globale OpenSSL fallito.\n");
-        retValue = EXIT_FAILURE;
-    }
+	// Rilascio del provider globale OpenSSL: a questo punto tutte le elaborazioni crittografiche sono terminate.
+	if ( bInitDone )
+		mypdf_Shutdown();
 
 	#if defined(MYPDFSEARCH_SHOW_TIME)
-	if ( !(myParams.bOptVersionOrHelp) && bTimeStartValid )
+	if ( !(cliOptions.bOptVersionOrHelp) && bTimeStartValid )
 	{
 		double elapsedReal;
 		double elapsedUser;

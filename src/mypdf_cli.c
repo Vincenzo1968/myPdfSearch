@@ -54,9 +54,6 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include <windows.h>
 #endif
 
-#include "mypdf_internal.h"
-#include "scanner.h"
-#include "mypdf_utils.h"
 #include "mypdf_cli.h"
 
 
@@ -124,7 +121,23 @@ void PrintVersionInfo(void)
 	wprintf(L"\n");
 }
 
-int myParseOption(Params *pParams, char *pszOption)
+// Aggiunge il carattere wide 'c' (convertito in UTF-8 dalla locale corrente) a dst[*pLen]; 0 se non converte o se non c'e' spazio.
+static int CliAppendWide(char *dst, size_t cap, int *pLen, wchar_t c)
+{
+	char tmp[MB_LEN_MAX + 1];
+	int nLen = wctomb(tmp, c);
+
+	if ( nLen < 0 || (size_t)(*pLen + nLen) + 1 > cap )
+		return 0;
+
+	memcpy(dst + *pLen, tmp, (size_t)nLen);
+	*pLen += nLen;
+	dst[*pLen] = '\0';
+
+	return 1;
+}
+
+int myParseOption(CliOptions *pParams, char *pszOption)
 {
 	int retValue = 1;
 
@@ -137,9 +150,7 @@ int myParseOption(Params *pParams, char *pszOption)
 
 	int n;
 
-	int nLen;
-
-	wchar_t szName[MAX_LEN_STR + 1];
+	wchar_t szName[CLI_MAX_STR + 1];
 
 	wchar_t *pwszOption = NULL;
 
@@ -151,7 +162,7 @@ int myParseOption(Params *pParams, char *pszOption)
 
 	//wprintf(L"pszOption = <%s>\n", pszOption);
 
-	n = strnlen(pszOption, MAX_LEN_STR);
+	n = strnlen(pszOption, CLI_MAX_STR);
 	if ( n < 2 )
 	{
 		retValue = 0;
@@ -223,7 +234,7 @@ int myParseOption(Params *pParams, char *pszOption)
 		}
 		else if ( c == L's' )
 		{
-			pParams->nSortGlyphs = SORT_GLYPHS_BY_ROW;
+			pParams->bSortGlyphs = 1;
 			goto uscita;
 		}
 
@@ -243,7 +254,7 @@ int myParseOption(Params *pParams, char *pszOption)
 			szName[y] = c;
 			y++;
 
-			if ( y > MAX_LEN_STR )
+			if ( y > CLI_MAX_STR )
 			{
 				retValue = 0;
 				wprintf(L"Error: option string too long.\n");
@@ -270,67 +281,67 @@ int myParseOption(Params *pParams, char *pszOption)
 		szName[y] = L'\0';
 
 
-		if ( wcsncmp(szName, L"path", MAX_LEN_STR) == 0 )
+		if ( wcsncmp(szName, L"path", CLI_MAX_STR) == 0 )
 		{
 			goto readvalue;
 		}
-		else if ( wcsncmp(szName, L"words", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"words", CLI_MAX_STR) == 0 )
 		{
 			goto readvalue;
 		}
-		else if ( wcsncmp(szName, L"nosubdirs", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"nosubdirs", CLI_MAX_STR) == 0 )
 		{
 			pParams->bNoSubDirs = 1;
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"sortglyphsbyrow", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"sortglyphsbyrow", CLI_MAX_STR) == 0 )
 		{
-			pParams->nSortGlyphs = SORT_GLYPHS_BY_ROW;
+			pParams->bSortGlyphs = 1;
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"show_errors", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"show_errors", CLI_MAX_STR) == 0 )
 		{
 			pParams->bShowErrors = 1;
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"show_warnings", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"show_warnings", CLI_MAX_STR) == 0 )
 		{
 			pParams->bShowWarnings = 1;
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"extracttextfrom", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"extracttextfrom", CLI_MAX_STR) == 0 )
 		{
 			goto readvalue;
 		}
-		else if ( wcsncmp(szName, L"frompage", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"frompage", CLI_MAX_STR) == 0 )
 		{
 			goto readvalue;
 		}
-		else if ( wcsncmp(szName, L"topage", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"topage", CLI_MAX_STR) == 0 )
 		{
 			goto readvalue;
 		}
-		else if ( wcsncmp(szName, L"outputfile", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"outputfile", CLI_MAX_STR) == 0 )
 		{
 			goto readvalue;
 		}
-		else if ( wcsncmp(szName, L"nosubdirs", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"nosubdirs", CLI_MAX_STR) == 0 )
 		{
 			pParams->bNoSubDirs = 1;
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"sortglyphsbyrow", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"sortglyphsbyrow", CLI_MAX_STR) == 0 )
 		{
-			pParams->nSortGlyphs = SORT_GLYPHS_BY_ROW;
+			pParams->bSortGlyphs = 1;
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"version", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"version", CLI_MAX_STR) == 0 )
 		{
 			pParams->bOptVersionOrHelp = 1;
 			PrintVersionInfo();
 			goto uscita;
 		}
-		else if ( wcsncmp(szName, L"help", MAX_LEN_STR) == 0 )
+		else if ( wcsncmp(szName, L"help", CLI_MAX_STR) == 0 )
 		{
 			pParams->bOptVersionOrHelp = 1;
 			PrintHelpCommandLine();
@@ -354,10 +365,12 @@ int myParseOption(Params *pParams, char *pszOption)
 			c = pwszOption[x];
 			while ( c != L'\0' )
 			{
-				nLen = wctomb(&(pParams->szPath[y]), c);
-				y += nLen;
-				//pParams->szPath[y] = (char)c;
-				//y++;
+				if ( !CliAppendWide(pParams->szPath, sizeof(pParams->szPath), &y, c) )
+				{
+					retValue = 0;
+					wprintf(L"\n\nError: invalid or too long value in option '%s'\n\n", pszOption);
+					goto uscita;
+				}
 				if ( c == L'=' )
 				{
 					y = 0;
@@ -372,29 +385,33 @@ int myParseOption(Params *pParams, char *pszOption)
 			c = pwszOption[x];
 			while ( c != L'\0' )
 			{
-				pParams->szWordsToSearch[y] = c;
-				y++;
+				if ( !CliAppendWide(pParams->szWords, sizeof(pParams->szWords), &y, c) )
+				{
+					retValue = 0;
+					wprintf(L"\n\nError: invalid or too long value in option '%s'\n\n", pszOption);
+					goto uscita;
+				}
 				if ( c == L'=' )
 				{
 					y = 0;
-					pParams->szWordsToSearch[0] = L'\0';
+					pParams->szWords[0] = '\0';
 				}
 				x++;
 				c = pwszOption[x];
 			}
-			pParams->szWordsToSearch[y] = '\0';
-
-			mySplitWords(pParams, pParams->szWordsToSearch);
+			pParams->szWords[y] = '\0';
 
 			break;
 		case L'e':   // extracttextfrom
 			c = pwszOption[x];
 			while ( c != '\0' )
 			{
-				nLen = wctomb(&(pParams->szFilePdf[y]), c);
-				y += nLen;
-				//pParams->szFilePdf[y] = (char)c;
-				//y++;
+				if ( !CliAppendWide(pParams->szFilePdf, sizeof(pParams->szFilePdf), &y, c) )
+				{
+					retValue = 0;
+					wprintf(L"\n\nError: invalid or too long value in option '%s'\n\n", pszOption);
+					goto uscita;
+				}
 				if ( c == L'=' )
 				{
 					y = 0;
@@ -473,10 +490,12 @@ int myParseOption(Params *pParams, char *pszOption)
 			c = pwszOption[x];
 			while ( c != L'\0' )
 			{
-				nLen = wctomb(&(pParams->szOutputFile[y]), c);
-				y += nLen;
-				//pParams->szOutputFile[y] = (char)c;
-				//y++;
+				if ( !CliAppendWide(pParams->szOutputFile, sizeof(pParams->szOutputFile), &y, c) )
+				{
+					retValue = 0;
+					wprintf(L"\n\nError: invalid or too long value in option '%s'\n\n", pszOption);
+					goto uscita;
+				}
 				if ( c == L'=' )
 				{
 					y = 0;
@@ -505,36 +524,13 @@ int myParseOption(Params *pParams, char *pszOption)
 	return retValue;
 }
 
-int myParseCommandLine(Params *pParams, int argc, char **argv)
+int myParseCommandLine(CliOptions *pParams, int argc, char **argv)
 {
 	int retValue = 1;
 
 	int x;
-	int n;
 
-	pParams->bOptVersionOrHelp = 0;
-	pParams->szPath[0] = '\0';
-	pParams->szFilePdf[0] = '\0';
-	pParams->fromPage = 0;
-	pParams->toPage = 0;
-	pParams->szOutputFile[0] = '\0';
-	pParams->szWordsToSearch[0] = '\0';
-	pParams->countWordsToSearch = 0;
-
-	pParams->pWordsToSearchArray = NULL;
-
-
-	pParams->pWordsToSearchArray = (wchar_t**)malloc(sizeof(wchar_t*) * MAX_WORDS_TO_SEARCH);
-	if ( NULL == pParams->pWordsToSearchArray )
-	{
-		retValue = 0;
-		wprintf(L"\n\nError myParseOption: memory allocation failed for pWordsToSearchArray\n\n");
-		goto uscita;
-	}
-	for ( n = 0; n < MAX_WORDS_TO_SEARCH; n++ )
-	{
-		pParams->pWordsToSearchArray[n] = NULL;
-	}
+	memset(pParams, 0, sizeof(*pParams));
 
 	x = 1;
 	if ( argc > 1 )
@@ -570,13 +566,13 @@ int myParseCommandLine(Params *pParams, int argc, char **argv)
 		return 0;
 	}
 
-	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] != '\0' && pParams->szWordsToSearch[0] == '\0') )
+	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] != '\0' && pParams->szWords[0] == '\0') )
 	{
 		wprintf(L"\n\nErrore: bisogna specificare le parole da cercare tramite l'opzione '-w (--words)'\n\n");
 		return 0;
 	}
 
-	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] == '\0' && pParams->szWordsToSearch[0] != '\0') )
+	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] == '\0' && pParams->szWords[0] != '\0') )
 	{
 		wprintf(L"\n\nErrore: bisogna specificare la cartella contenente i file pdf tramite l'opzione '-p (--path)'\n\n");
 		return 0;
@@ -587,9 +583,11 @@ uscita:
 	return retValue;
 }
 
-int MakeAndOpenOutputFile(Params *pParams)
+int MakeAndOpenOutputFile(const char *pszOutputFile, FILE **ppFile)
 {
 	int retValue = 1;
+
+	*ppFile = NULL;
 
 	#if !defined(_WIN64) && !defined(_WIN32)
 	unsigned char szBOM[21];
@@ -600,29 +598,31 @@ int MakeAndOpenOutputFile(Params *pParams)
 	szBOM[3] = '\0';
 	#endif
 
-	pParams->fpOutput = fopen(pParams->szOutputFile, "rb");
-	if ( pParams->fpOutput != NULL )
+	(*ppFile) = fopen(pszOutputFile, "rb");
+	if ( (*ppFile) != NULL )
 	{
+		fclose(*ppFile);
+		*ppFile = NULL;
 		wprintf(L"\n\nERRORE: il file specificato per l'output esiste già.\nBisogna indicare il nome di un file non esistente.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
 
-	pParams->fpOutput = fopen(pParams->szOutputFile, "wb");
-	if ( pParams->fpOutput == NULL )
+	(*ppFile) = fopen(pszOutputFile, "wb");
+	if ( (*ppFile) == NULL )
 	{
-		wprintf(L"\n\nERRORE: impossibile creara il file specificato per l'output: '%s'.\n\n", pParams->szOutputFile);
+		wprintf(L"\n\nERRORE: impossibile creara il file specificato per l'output: '%s'.\n\n", pszOutputFile);
 		retValue = 0;
 		goto uscita;
 	}
 
 	#if defined(_WIN64) || defined(_WIN32)
-	_setmode(_fileno(pParams->fpOutput), _O_U8TEXT);
+	_setmode(_fileno((*ppFile)), _O_U8TEXT);
 	#endif
 
 	#if !defined(_WIN64) && !defined(_WIN32)
 	// UTF-8 BOM -> EF BB BF
-	fwprintf(pParams->fpOutput, L"%s", szBOM);
+	fwprintf((*ppFile), L"%s", szBOM);
 	#endif
 
 	uscita:
@@ -1165,7 +1165,7 @@ void MYPDF_CALL CliOnPageStart(void *pUser, const char *pszFile, int32_t nPage)
 	CliOutput *pOut = (CliOutput*)pUser;
 	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
 
-	UNUSED(pszFile);
+	CLI_UNUSED(pszFile);
 
 	if ( NULL != fp )
 		fwprintf(fp, L"\n\nTEXT EXTRACTED FROM PAGE %d:\n\n", (int)nPage);
@@ -1178,9 +1178,9 @@ int MYPDF_CALL CliOnPageText(void *pUser, const char *pszFile, int32_t nPage, co
 	CliOutput *pOut = (CliOutput*)pUser;
 	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
 
-	UNUSED(pszFile);
-	UNUSED(nPage);
-	UNUSED(nLen);
+	CLI_UNUSED(pszFile);
+	CLI_UNUSED(nPage);
+	CLI_UNUSED(nLen);
 
 	if ( NULL != fp )
 		fwprintf(fp, L"%s", pszText);
@@ -1194,7 +1194,7 @@ int MYPDF_CALL CliOnWordFound(void *pUser, const char *pszFile, int32_t nPage, c
 	CliOutput *pOut = (CliOutput*)pUser;
 	FILE *fp = (NULL != pOut) ? pOut->fpOutput : NULL;
 
-	UNUSED(pszFile);
+	CLI_UNUSED(pszFile);
 
 	if ( NULL != fp )
 		fwprintf(fp, L"\tKey '%s' found on page %d\n", pszWord, (int)nPage);
@@ -1238,15 +1238,12 @@ wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen)
 void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *pszFile, const char *pszMessage)
 {
 	CliOutput *pOut = (CliOutput*)pUser;
-	Params *pParams;
 
-	if ( NULL == pOut || NULL == pOut->pParams )
+	if ( NULL == pOut )
 	{
 		fprintf(stderr, "%s\n", pszMessage);
 		return;
 	}
-
-	pParams = pOut->pParams;
 
 	if ( MYPDF_MSG_INFO == level )
 	{
@@ -1267,10 +1264,10 @@ void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *
 	if ( MYPDF_MSG_WARNING == level )
 		fprintf(stderr, "File '%s': %s\n", pszFile, pszMessage);
 
-	if ( NULL == pParams->fpErrors )
+	if ( NULL == pOut->fpErrors )
 	{
-		pParams->fpErrors = fopen("AAA_mypdfsearch_parsing_errors.txt", "a");
-		if ( NULL == pParams->fpErrors )
+		pOut->fpErrors = fopen("AAA_mypdfsearch_parsing_errors.txt", "a");
+		if ( NULL == pOut->fpErrors )
 		{
 			fwprintf(stderr, L"\n\nERRORE: impossibile creare il file specificato per i messaggi d'errore.\n\n");
 			fprintf(stderr, "%s\n", pszMessage);
@@ -1278,26 +1275,26 @@ void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *
 		}
 
 		#if defined(_WIN64) || defined(_WIN32)
-		_setmode(_fileno(pParams->fpErrors), _O_U8TEXT);
+		_setmode(_fileno(pOut->fpErrors), _O_U8TEXT);
 		#else
 		// BOM UTF-8
-		fwprintf(pParams->fpErrors, L"%s", "\xEF\xBB\xBF");
+		fwprintf(pOut->fpErrors, L"%s", "\xEF\xBB\xBF");
 		#endif
 	}
 
 	#if !defined(_WIN64) && !defined(_WIN32)
-	fwprintf(pParams->fpErrors, L"\nFile: '%s'\n", pszFile);
+	fwprintf(pOut->fpErrors, L"\nFile: '%s'\n", pszFile);
 	#else
 	{
 		size_t lung = strnlen(pszFile, PATH_MAX);
 		size_t idx;
 
-		fwprintf(pParams->fpErrors, L"\nFILE = <");
+		fwprintf(pOut->fpErrors, L"\nFILE = <");
 		for ( idx = 0; idx < lung; idx++ )
-			fwprintf(pParams->fpErrors, L"%c", pszFile[idx]);
-		fwprintf(pParams->fpErrors, L">\n");
+			fwprintf(pOut->fpErrors, L"%c", pszFile[idx]);
+		fwprintf(pOut->fpErrors, L">\n");
 	}
 	#endif
 
-	fwprintf(pParams->fpErrors, L"\t%s\n", pszMessage);
+	fwprintf(pOut->fpErrors, L"\t%s\n", pszMessage);
 }

@@ -24,16 +24,41 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #ifndef MYPDF_CLI_INCLUDED
 #define MYPDF_CLI_INCLUDED
 
-#include "mypdf_internal.h"
-#include "scanner.h"
+#include <stdio.h>
+#include <stddef.h>
+#include <wchar.h>
+#include <limits.h>
+
+#include "mypdfsearch.h"      // UNICO header della libreria usato dal programma a riga di comando
+
+#define CLI_UNUSED(x) (void)(x)
+#define CLI_MAX_STR   1024            // lunghezza massima di un'opzione
+#define CLI_MAX_PATH  4096            // buffer per percorsi e parole (UTF-8)
 
 void PrintHelpCommandLine(void);
 void PrintVersionInfo(void);
 
-int myParseOption(Params *pParams, char *pszOption);
-int myParseCommandLine(Params *pParams, int argc, char **argv);
+// Opzioni della riga di comando (nessuna dipendenza dai tipi interni della libreria).
+typedef struct tagCliOptions
+{
+	int  bOptVersionOrHelp;
+	int  bNoSubDirs;
+	int  bSortGlyphs;
+	int  bShowErrors;
+	int  bShowWarnings;
+	int  fromPage;
+	int  toPage;
+	char szPath[CLI_MAX_PATH];
+	char szFilePdf[CLI_MAX_PATH];
+	char szOutputFile[CLI_MAX_PATH];
+	char szWords[CLI_MAX_PATH];       // UTF-8, parole separate da spazi
+} CliOptions;
 
-int MakeAndOpenOutputFile(Params *pParams);
+int myParseOption(CliOptions *pParams, char *pszOption);
+int myParseCommandLine(CliOptions *pParams, int argc, char **argv);
+
+// Crea (senza sovrascrivere) il file di output; *ppFile = NULL in caso di errore.
+int MakeAndOpenOutputFile(const char *pszOutputFile, FILE **ppFile);
 
 void PrintHardwareInfo(void);
 
@@ -50,8 +75,8 @@ wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen);
 // 'pUser' deve essere un puntatore a CliOutput (fpOutput = file di -o, oppure NULL per stampare solo a video).
 typedef struct tagCliOutput
 {
-	FILE *fpOutput;
-	Params *pParams;     // per il file di log degli errori (pParams->fpErrors, aperto al primo messaggio)
+	FILE *fpOutput;      // file di -o (NULL = solo video)
+	FILE *fpErrors;      // log degli errori, aperto al primo messaggio
 } CliOutput;
 
 void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *pszFile, const char *pszMessage);
