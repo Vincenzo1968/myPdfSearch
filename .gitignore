@@ -61,4 +61,20 @@ missing
 *.Po
 *.Plo
 
-src/mypdfsearch
+
+# Libtool and configure: generated at ./configure time
+libtool
+stamp-h1
+mypdfsearch.pc
+*.lo
+*.o
+.dirstamp
+
+# Binaries of the examples
+/examples/c/console/mypdfsearch
+/examples/c/gtk4/mypdfsearch-gtk4
+/examples/cpp/console/mypdfsearch-cpp
+examples/csharp/bin/
+examples/csharp/obj/
+__pycache__/
+*.pyc

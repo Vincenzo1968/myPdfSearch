@@ -55,18 +55,6 @@ libmypdfsearch_la_CPPFLAGS = $(AM_CPPFLAGS) -DMYPDF_BUILDING_DLL=1
 # Only the functions of mypdfsearch.h are visible from outside the library.
 libmypdfsearch_la_CFLAGS = $(AM_CFLAGS) -fvisibility=hidden
 
-# ---------------------------------------------------------------------------
-# Command line program (example 'console'): uses only the public API.
-# ---------------------------------------------------------------------------
-bin_PROGRAMS = mypdfsearch
-
-mypdfsearch_SOURCES = \
-    main.c \
-    mypdf_cli.c mypdf_cli.h \
-    mytime.c mytime.h
-
-mypdfsearch_LDADD = libmypdfsearch.la
-
 AM_CFLAGS = -Wall -W -pedantic -Wno-overlength-strings
 
 if DEBUG_BUILD
@@ -77,10 +65,6 @@ endif
 
 if SHOW_TIME
 AM_CPPFLAGS += -DMYPDFSEARCH_SHOW_TIME=1
-endif
-
-if MYPDF_STATIC_ONLY
-mypdfsearch_CPPFLAGS = $(AM_CPPFLAGS) -DMYPDF_STATIC=1
 endif
 
 # Export list for MSVC (lib.exe /DEF:mypdfsearch.def): generated from the public header.

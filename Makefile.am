@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = src
+SUBDIRS = src examples
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = mypdfsearch.pc
