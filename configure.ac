@@ -2,12 +2,18 @@ AC_PREREQ([2.69])
 
 AC_INIT([mypdfsearch],[ 1.0.0],[vincenzolocicero68@gmail.com])
 AC_CONFIG_SRCDIR([src/main.c])
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile mypdfsearch.pc])
 
-AM_INIT_AUTOMAKE([foreign])
+AC_CONFIG_AUX_DIR([.])
+AC_CONFIG_MACRO_DIRS([m4])
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_PROG_CC
 AC_PROG_INSTALL
+
+dnl Shared and static library (Libtool). 'win32-dll' enables Windows DLLs.
+LT_INIT([win32-dll])
 
 AC_CHECK_HEADERS([zlib.h openssl/evp.h], [],
     [AC_MSG_ERROR([Required development header not found])])
@@ -47,5 +53,9 @@ AS_IF([test "x$ac_env_CFLAGS_set" != "xset"], [
 
 AM_CONDITIONAL([DEBUG_BUILD], [test "x$enable_debug" = "xyes"])
 AM_CONDITIONAL([SHOW_TIME], [test "x$enable_mytime" = "xyes"])
+
+dnl On Windows a program that links the static library must define MYPDF_STATIC
+dnl (see mypdfsearch.h): without a DLL there is nothing to import.
+AM_CONDITIONAL([MYPDF_STATIC_ONLY], [test "x$enable_shared" = "xno"])
 
 AC_OUTPUT

@@ -14,6 +14,8 @@
 
 @SET_MAKE@
 
+
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -86,33 +88,87 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+build_triplet = @build@
+host_triplet = @host@
 bin_PROGRAMS = mypdfsearch$(EXEEXT)
 @SHOW_TIME_TRUE@am__append_1 = -DMYPDFSEARCH_SHOW_TIME=1
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
-DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
+DIST_COMMON = $(srcdir)/Makefile.am $(include_HEADERS) \
+	$(am__DIST_COMMON)
 mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" \
+	"$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_mypdfsearch_OBJECTS = main.$(OBJEXT) mycontentqueuelist.$(OBJEXT) \
-	mypdf_cli.$(OBJEXT) mypdf_api.$(OBJEXT) mypdf_utils.$(OBJEXT) \
-	mycrypt.$(OBJEXT) mycrypt_rc4.$(OBJEXT) mydecode.$(OBJEXT) \
-	mydictionaryqueuelist.$(OBJEXT) myGenHashTable.$(OBJEXT) \
-	myinitarray.$(OBJEXT) myInitPredefCMapHT.$(OBJEXT) \
-	myintqueuelist.$(OBJEXT) mynumstacklist.$(OBJEXT) \
-	myobjrefqueuelist.$(OBJEXT) myoctal.$(OBJEXT) \
-	myScopeHashTable.$(OBJEXT) mystringqueuelist.$(OBJEXT) \
-	myTernarySearchTree.$(OBJEXT) mytime.$(OBJEXT) \
-	myTree.$(OBJEXT) myUnicodeNFC.$(OBJEXT) parser.$(OBJEXT) \
-	scanner.$(OBJEXT) vlEncoding.$(OBJEXT) \
-	vlRedBlackTrees.$(OBJEXT)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+LTLIBRARIES = $(lib_LTLIBRARIES)
+libmypdfsearch_la_DEPENDENCIES =
+am_libmypdfsearch_la_OBJECTS = libmypdfsearch_la-mypdf_api.lo \
+	libmypdfsearch_la-mycontentqueuelist.lo \
+	libmypdfsearch_la-mypdf_utils.lo libmypdfsearch_la-mycrypt.lo \
+	libmypdfsearch_la-mycrypt_rc4.lo libmypdfsearch_la-mydecode.lo \
+	libmypdfsearch_la-mydictionaryqueuelist.lo \
+	libmypdfsearch_la-myGenHashTable.lo \
+	libmypdfsearch_la-myinitarray.lo \
+	libmypdfsearch_la-myInitPredefCMapHT.lo \
+	libmypdfsearch_la-myintqueuelist.lo \
+	libmypdfsearch_la-mynumstacklist.lo \
+	libmypdfsearch_la-myobjrefqueuelist.lo \
+	libmypdfsearch_la-myoctal.lo \
+	libmypdfsearch_la-myScopeHashTable.lo \
+	libmypdfsearch_la-mystringqueuelist.lo \
+	libmypdfsearch_la-myTernarySearchTree.lo \
+	libmypdfsearch_la-myTree.lo libmypdfsearch_la-myUnicodeNFC.lo \
+	libmypdfsearch_la-parser.lo libmypdfsearch_la-scanner.lo \
+	libmypdfsearch_la-vlEncoding.lo \
+	libmypdfsearch_la-vlRedBlackTrees.lo
+libmypdfsearch_la_OBJECTS = $(am_libmypdfsearch_la_OBJECTS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
+libmypdfsearch_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libmypdfsearch_la_CFLAGS) $(CFLAGS) \
+	$(libmypdfsearch_la_LDFLAGS) $(LDFLAGS) -o $@
+am_mypdfsearch_OBJECTS = mypdfsearch-main.$(OBJEXT) \
+	mypdfsearch-mypdf_cli.$(OBJEXT) mypdfsearch-mytime.$(OBJEXT)
 mypdfsearch_OBJECTS = $(am_mypdfsearch_OBJECTS)
-mypdfsearch_DEPENDENCIES =
+mypdfsearch_DEPENDENCIES = libmypdfsearch.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -128,41 +184,60 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/main.Po \
-	./$(DEPDIR)/myGenHashTable.Po \
-	./$(DEPDIR)/myInitPredefCMapHT.Po \
-	./$(DEPDIR)/myScopeHashTable.Po \
-	./$(DEPDIR)/myTernarySearchTree.Po ./$(DEPDIR)/myTree.Po \
-	./$(DEPDIR)/myUnicodeNFC.Po ./$(DEPDIR)/mycontentqueuelist.Po \
-	./$(DEPDIR)/mycrypt.Po ./$(DEPDIR)/mycrypt_rc4.Po \
-	./$(DEPDIR)/mydecode.Po ./$(DEPDIR)/mydictionaryqueuelist.Po \
-	./$(DEPDIR)/myinitarray.Po ./$(DEPDIR)/myintqueuelist.Po \
-	./$(DEPDIR)/mynumstacklist.Po ./$(DEPDIR)/myobjrefqueuelist.Po \
-	./$(DEPDIR)/myoctal.Po ./$(DEPDIR)/mypdf_api.Po \
-	./$(DEPDIR)/mypdf_cli.Po ./$(DEPDIR)/mypdf_utils.Po \
-	./$(DEPDIR)/mystringqueuelist.Po ./$(DEPDIR)/mytime.Po \
-	./$(DEPDIR)/parser.Po ./$(DEPDIR)/scanner.Po \
-	./$(DEPDIR)/vlEncoding.Po ./$(DEPDIR)/vlRedBlackTrees.Po
+am__depfiles_remade =  \
+	./$(DEPDIR)/libmypdfsearch_la-myGenHashTable.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myTree.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mycrypt.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mydecode.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myinitarray.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myintqueuelist.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mynumstacklist.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-myoctal.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mypdf_api.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mypdf_utils.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-parser.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-scanner.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-vlEncoding.Plo \
+	./$(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Plo \
+	./$(DEPDIR)/mypdfsearch-main.Po \
+	./$(DEPDIR)/mypdfsearch-mypdf_cli.Po \
+	./$(DEPDIR)/mypdfsearch-mytime.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
 am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
 am__v_CC_0 = @echo "  CC      " $@;
 am__v_CC_1 = 
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(mypdfsearch_SOURCES)
-DIST_SOURCES = $(mypdfsearch_SOURCES)
+SOURCES = $(libmypdfsearch_la_SOURCES) $(mypdfsearch_SOURCES)
+DIST_SOURCES = $(libmypdfsearch_la_SOURCES) $(mypdfsearch_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -185,6 +260,8 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AR = @AR@
+AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -198,23 +275,41 @@ CTAGS = @CTAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
+DSYMUTIL = @DSYMUTIL@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
+FGREP = @FGREP@
+FILECMD = @FILECMD@
+GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIBTOOL = @LIBTOOL@
+LIPO = @LIPO@
+LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+NM = @NM@
+NMEDIT = @NMEDIT@
+OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -223,6 +318,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -231,21 +328,31 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 bindir = @bindir@
+build = @build@
 build_alias = @build_alias@
+build_cpu = @build_cpu@
+build_os = @build_os@
+build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+host = @host@
 host_alias = @host_alias@
+host_cpu = @host_cpu@
+host_os = @host_os@
+host_vendor = @host_vendor@
 htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
@@ -270,11 +377,17 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-mypdfsearch_SOURCES = \
-    main.c \
-    mycontentqueuelist.c mycontentqueuelist.h \
-    mypdf_cli.c mypdf_cli.h \
+
+# ---------------------------------------------------------------------------
+# Library: libmypdfsearch (shared and static)
+#   Public API: mypdfsearch.h (installed). Everything else is internal.
+# ---------------------------------------------------------------------------
+lib_LTLIBRARIES = libmypdfsearch.la
+include_HEADERS = mypdfsearch.h
+libmypdfsearch_la_SOURCES = \
     mypdf_api.c \
+    mypdf_internal.h \
+    mycontentqueuelist.c mycontentqueuelist.h \
     mypdf_utils.c mypdf_utils.h \
     mycrypt.c mycrypt.h \
     mycrypt_rc4.c mycrypt_rc4.h \
@@ -291,15 +404,12 @@ mypdfsearch_SOURCES = \
     myScopeHashTable.c myScopeHashTable.h \
     mystringqueuelist.c mystringqueuelist.h \
     myTernarySearchTree.c myTernarySearchTree.h \
-    mytime.c mytime.h \
     myTree.c myTree.h \
     myUnicodeNFC.c myUnicodeNFC.h \
     parser.c parser.h \
     scanner.c scanner.h \
     vlEncoding.c vlEncoding.h \
     vlRedBlackTrees.c vlRedBlackTrees.h \
-    mypdfsearch.h \
-    mypdf_internal.h \
     cmap/cmap_Adobe-CNS1-7.h \
     cmap/cmap_Adobe-GB1-6.h \
     cmap/cmap_Adobe-Japan1-7.h \
@@ -311,16 +421,40 @@ mypdfsearch_SOURCES = \
     cmap/cmap_UnicodeNfcData.h \
     cmap/cmap_UnicodeNfkcArabic.h
 
+
+# Version of the binary interface (NOT the package version). Rules:
+#   - code changed, interface unchanged:        REVISION + 1
+#   - functions added (backward compatible):    CURRENT + 1, REVISION = 0, AGE + 1
+#   - functions removed or changed (breaking):  CURRENT + 1, REVISION = 0, AGE = 0
+# Format: -version-info CURRENT:REVISION:AGE
+libmypdfsearch_la_LDFLAGS = -version-info 0:0:0 -no-undefined \
+    -export-symbols-regex '^mypdf_'
+
+libmypdfsearch_la_LIBADD = -lm -lz -lcrypto
+libmypdfsearch_la_CPPFLAGS = $(AM_CPPFLAGS) -DMYPDF_BUILDING_DLL=1
+# Only the functions of mypdfsearch.h are visible from outside the library.
+libmypdfsearch_la_CFLAGS = $(AM_CFLAGS) -fvisibility=hidden
+mypdfsearch_SOURCES = \
+    main.c \
+    mypdf_cli.c mypdf_cli.h \
+    mytime.c mytime.h
+
+mypdfsearch_LDADD = libmypdfsearch.la
 AM_CFLAGS = -Wall -W -pedantic -Wno-overlength-strings
 @DEBUG_BUILD_FALSE@AM_CPPFLAGS = -DMYPDFSEARCH_BUILD_RELEASE=1 \
 @DEBUG_BUILD_FALSE@	$(am__append_1)
 @DEBUG_BUILD_TRUE@AM_CPPFLAGS = -DMYPDFSEARCH_BUILD_DEBUG=1 \
 @DEBUG_BUILD_TRUE@	$(am__append_1)
-mypdfsearch_LDADD = -lm -lz -lcrypto
+@MYPDF_STATIC_ONLY_TRUE@mypdfsearch_CPPFLAGS = $(AM_CPPFLAGS) -DMYPDF_STATIC=1
+CLEANFILES = mypdfsearch.def
+
+# Libreria statica: nasconde i simboli interni (vedi localize-static.sh). Alla installazione
+# e anche nella cartella di compilazione (.libs/).
+EXTRA_DIST = localize-static.sh
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -360,6 +494,7 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	for p in $$list; do echo "$$p $$p"; done | \
 	sed 's/$(EXEEXT)$$//' | \
 	while read p p1; do if test -f $$p \
+	 || test -f $$p1 \
 	  ; then echo "$$p"; echo "$$p"; else :; fi; \
 	done | \
 	sed -e 'p;s,.*/,,;n;h' \
@@ -374,8 +509,8 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	while read type dir files; do \
 	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
 	    test -z "$$files" || { \
-	      echo " $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	      $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
 	    } \
 	; done
 
@@ -391,7 +526,51 @@ uninstall-binPROGRAMS:
 	cd "$(DESTDIR)$(bindir)" && rm -f $$files
 
 clean-binPROGRAMS:
-	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	}
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	done
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
+libmypdfsearch.la: $(libmypdfsearch_la_OBJECTS) $(libmypdfsearch_la_DEPENDENCIES) $(EXTRA_libmypdfsearch_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libmypdfsearch_la_LINK) -rpath $(libdir) $(libmypdfsearch_la_OBJECTS) $(libmypdfsearch_la_LIBADD) $(LIBS)
 
 mypdfsearch$(EXEEXT): $(mypdfsearch_OBJECTS) $(mypdfsearch_DEPENDENCIES) $(EXTRA_mypdfsearch_DEPENDENCIES) 
 	@rm -f mypdfsearch$(EXEEXT)
@@ -403,32 +582,32 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myGenHashTable.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myInitPredefCMapHT.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myScopeHashTable.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myTernarySearchTree.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myTree.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myUnicodeNFC.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mycontentqueuelist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mycrypt.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mycrypt_rc4.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mydecode.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mydictionaryqueuelist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myinitarray.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myintqueuelist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mynumstacklist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myobjrefqueuelist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myoctal.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdf_api.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdf_cli.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdf_utils.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mystringqueuelist.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mytime.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scanner.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlEncoding.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlRedBlackTrees.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myGenHashTable.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myTree.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mycrypt.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mydecode.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myinitarray.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myintqueuelist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mynumstacklist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-myoctal.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mypdf_api.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mypdf_utils.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-parser.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-scanner.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-vlEncoding.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdfsearch-main.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdfsearch-mypdf_cli.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mypdfsearch-mytime.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -437,18 +616,258 @@ $(am__depfiles_remade):
 am--depfiles: $(am__depfiles_remade)
 
 .c.o:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ $<
 
 .c.obj:
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.obj$$||'`;\
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ `$(CYGPATH_W) '$<'` &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Po
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.lo$$||'`;\
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $$depbase.Tpo -c -o $@ $< &&\
+@am__fastdepCC_TRUE@	$(am__mv) $$depbase.Tpo $$depbase.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+libmypdfsearch_la-mypdf_api.lo: mypdf_api.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mypdf_api.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mypdf_api.Tpo -c -o libmypdfsearch_la-mypdf_api.lo `test -f 'mypdf_api.c' || echo '$(srcdir)/'`mypdf_api.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mypdf_api.Tpo $(DEPDIR)/libmypdfsearch_la-mypdf_api.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mypdf_api.c' object='libmypdfsearch_la-mypdf_api.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mypdf_api.lo `test -f 'mypdf_api.c' || echo '$(srcdir)/'`mypdf_api.c
+
+libmypdfsearch_la-mycontentqueuelist.lo: mycontentqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mycontentqueuelist.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Tpo -c -o libmypdfsearch_la-mycontentqueuelist.lo `test -f 'mycontentqueuelist.c' || echo '$(srcdir)/'`mycontentqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Tpo $(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mycontentqueuelist.c' object='libmypdfsearch_la-mycontentqueuelist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mycontentqueuelist.lo `test -f 'mycontentqueuelist.c' || echo '$(srcdir)/'`mycontentqueuelist.c
+
+libmypdfsearch_la-mypdf_utils.lo: mypdf_utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mypdf_utils.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mypdf_utils.Tpo -c -o libmypdfsearch_la-mypdf_utils.lo `test -f 'mypdf_utils.c' || echo '$(srcdir)/'`mypdf_utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mypdf_utils.Tpo $(DEPDIR)/libmypdfsearch_la-mypdf_utils.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mypdf_utils.c' object='libmypdfsearch_la-mypdf_utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mypdf_utils.lo `test -f 'mypdf_utils.c' || echo '$(srcdir)/'`mypdf_utils.c
+
+libmypdfsearch_la-mycrypt.lo: mycrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mycrypt.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mycrypt.Tpo -c -o libmypdfsearch_la-mycrypt.lo `test -f 'mycrypt.c' || echo '$(srcdir)/'`mycrypt.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mycrypt.Tpo $(DEPDIR)/libmypdfsearch_la-mycrypt.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mycrypt.c' object='libmypdfsearch_la-mycrypt.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mycrypt.lo `test -f 'mycrypt.c' || echo '$(srcdir)/'`mycrypt.c
+
+libmypdfsearch_la-mycrypt_rc4.lo: mycrypt_rc4.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mycrypt_rc4.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Tpo -c -o libmypdfsearch_la-mycrypt_rc4.lo `test -f 'mycrypt_rc4.c' || echo '$(srcdir)/'`mycrypt_rc4.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Tpo $(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mycrypt_rc4.c' object='libmypdfsearch_la-mycrypt_rc4.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mycrypt_rc4.lo `test -f 'mycrypt_rc4.c' || echo '$(srcdir)/'`mycrypt_rc4.c
+
+libmypdfsearch_la-mydecode.lo: mydecode.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mydecode.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mydecode.Tpo -c -o libmypdfsearch_la-mydecode.lo `test -f 'mydecode.c' || echo '$(srcdir)/'`mydecode.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mydecode.Tpo $(DEPDIR)/libmypdfsearch_la-mydecode.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mydecode.c' object='libmypdfsearch_la-mydecode.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mydecode.lo `test -f 'mydecode.c' || echo '$(srcdir)/'`mydecode.c
+
+libmypdfsearch_la-mydictionaryqueuelist.lo: mydictionaryqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mydictionaryqueuelist.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Tpo -c -o libmypdfsearch_la-mydictionaryqueuelist.lo `test -f 'mydictionaryqueuelist.c' || echo '$(srcdir)/'`mydictionaryqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Tpo $(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mydictionaryqueuelist.c' object='libmypdfsearch_la-mydictionaryqueuelist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mydictionaryqueuelist.lo `test -f 'mydictionaryqueuelist.c' || echo '$(srcdir)/'`mydictionaryqueuelist.c
+
+libmypdfsearch_la-myGenHashTable.lo: myGenHashTable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myGenHashTable.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myGenHashTable.Tpo -c -o libmypdfsearch_la-myGenHashTable.lo `test -f 'myGenHashTable.c' || echo '$(srcdir)/'`myGenHashTable.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myGenHashTable.Tpo $(DEPDIR)/libmypdfsearch_la-myGenHashTable.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myGenHashTable.c' object='libmypdfsearch_la-myGenHashTable.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myGenHashTable.lo `test -f 'myGenHashTable.c' || echo '$(srcdir)/'`myGenHashTable.c
+
+libmypdfsearch_la-myinitarray.lo: myinitarray.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myinitarray.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myinitarray.Tpo -c -o libmypdfsearch_la-myinitarray.lo `test -f 'myinitarray.c' || echo '$(srcdir)/'`myinitarray.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myinitarray.Tpo $(DEPDIR)/libmypdfsearch_la-myinitarray.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myinitarray.c' object='libmypdfsearch_la-myinitarray.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myinitarray.lo `test -f 'myinitarray.c' || echo '$(srcdir)/'`myinitarray.c
+
+libmypdfsearch_la-myInitPredefCMapHT.lo: myInitPredefCMapHT.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myInitPredefCMapHT.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Tpo -c -o libmypdfsearch_la-myInitPredefCMapHT.lo `test -f 'myInitPredefCMapHT.c' || echo '$(srcdir)/'`myInitPredefCMapHT.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Tpo $(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myInitPredefCMapHT.c' object='libmypdfsearch_la-myInitPredefCMapHT.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myInitPredefCMapHT.lo `test -f 'myInitPredefCMapHT.c' || echo '$(srcdir)/'`myInitPredefCMapHT.c
+
+libmypdfsearch_la-myintqueuelist.lo: myintqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myintqueuelist.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myintqueuelist.Tpo -c -o libmypdfsearch_la-myintqueuelist.lo `test -f 'myintqueuelist.c' || echo '$(srcdir)/'`myintqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myintqueuelist.Tpo $(DEPDIR)/libmypdfsearch_la-myintqueuelist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myintqueuelist.c' object='libmypdfsearch_la-myintqueuelist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myintqueuelist.lo `test -f 'myintqueuelist.c' || echo '$(srcdir)/'`myintqueuelist.c
+
+libmypdfsearch_la-mynumstacklist.lo: mynumstacklist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mynumstacklist.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mynumstacklist.Tpo -c -o libmypdfsearch_la-mynumstacklist.lo `test -f 'mynumstacklist.c' || echo '$(srcdir)/'`mynumstacklist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mynumstacklist.Tpo $(DEPDIR)/libmypdfsearch_la-mynumstacklist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mynumstacklist.c' object='libmypdfsearch_la-mynumstacklist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mynumstacklist.lo `test -f 'mynumstacklist.c' || echo '$(srcdir)/'`mynumstacklist.c
+
+libmypdfsearch_la-myobjrefqueuelist.lo: myobjrefqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myobjrefqueuelist.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Tpo -c -o libmypdfsearch_la-myobjrefqueuelist.lo `test -f 'myobjrefqueuelist.c' || echo '$(srcdir)/'`myobjrefqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Tpo $(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myobjrefqueuelist.c' object='libmypdfsearch_la-myobjrefqueuelist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myobjrefqueuelist.lo `test -f 'myobjrefqueuelist.c' || echo '$(srcdir)/'`myobjrefqueuelist.c
+
+libmypdfsearch_la-myoctal.lo: myoctal.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myoctal.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myoctal.Tpo -c -o libmypdfsearch_la-myoctal.lo `test -f 'myoctal.c' || echo '$(srcdir)/'`myoctal.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myoctal.Tpo $(DEPDIR)/libmypdfsearch_la-myoctal.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myoctal.c' object='libmypdfsearch_la-myoctal.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myoctal.lo `test -f 'myoctal.c' || echo '$(srcdir)/'`myoctal.c
+
+libmypdfsearch_la-myScopeHashTable.lo: myScopeHashTable.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myScopeHashTable.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Tpo -c -o libmypdfsearch_la-myScopeHashTable.lo `test -f 'myScopeHashTable.c' || echo '$(srcdir)/'`myScopeHashTable.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Tpo $(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myScopeHashTable.c' object='libmypdfsearch_la-myScopeHashTable.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myScopeHashTable.lo `test -f 'myScopeHashTable.c' || echo '$(srcdir)/'`myScopeHashTable.c
+
+libmypdfsearch_la-mystringqueuelist.lo: mystringqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-mystringqueuelist.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Tpo -c -o libmypdfsearch_la-mystringqueuelist.lo `test -f 'mystringqueuelist.c' || echo '$(srcdir)/'`mystringqueuelist.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Tpo $(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mystringqueuelist.c' object='libmypdfsearch_la-mystringqueuelist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-mystringqueuelist.lo `test -f 'mystringqueuelist.c' || echo '$(srcdir)/'`mystringqueuelist.c
+
+libmypdfsearch_la-myTernarySearchTree.lo: myTernarySearchTree.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myTernarySearchTree.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Tpo -c -o libmypdfsearch_la-myTernarySearchTree.lo `test -f 'myTernarySearchTree.c' || echo '$(srcdir)/'`myTernarySearchTree.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Tpo $(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myTernarySearchTree.c' object='libmypdfsearch_la-myTernarySearchTree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myTernarySearchTree.lo `test -f 'myTernarySearchTree.c' || echo '$(srcdir)/'`myTernarySearchTree.c
+
+libmypdfsearch_la-myTree.lo: myTree.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myTree.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myTree.Tpo -c -o libmypdfsearch_la-myTree.lo `test -f 'myTree.c' || echo '$(srcdir)/'`myTree.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myTree.Tpo $(DEPDIR)/libmypdfsearch_la-myTree.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myTree.c' object='libmypdfsearch_la-myTree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myTree.lo `test -f 'myTree.c' || echo '$(srcdir)/'`myTree.c
+
+libmypdfsearch_la-myUnicodeNFC.lo: myUnicodeNFC.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-myUnicodeNFC.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Tpo -c -o libmypdfsearch_la-myUnicodeNFC.lo `test -f 'myUnicodeNFC.c' || echo '$(srcdir)/'`myUnicodeNFC.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Tpo $(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='myUnicodeNFC.c' object='libmypdfsearch_la-myUnicodeNFC.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-myUnicodeNFC.lo `test -f 'myUnicodeNFC.c' || echo '$(srcdir)/'`myUnicodeNFC.c
+
+libmypdfsearch_la-parser.lo: parser.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-parser.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-parser.Tpo -c -o libmypdfsearch_la-parser.lo `test -f 'parser.c' || echo '$(srcdir)/'`parser.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-parser.Tpo $(DEPDIR)/libmypdfsearch_la-parser.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='parser.c' object='libmypdfsearch_la-parser.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-parser.lo `test -f 'parser.c' || echo '$(srcdir)/'`parser.c
+
+libmypdfsearch_la-scanner.lo: scanner.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-scanner.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-scanner.Tpo -c -o libmypdfsearch_la-scanner.lo `test -f 'scanner.c' || echo '$(srcdir)/'`scanner.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-scanner.Tpo $(DEPDIR)/libmypdfsearch_la-scanner.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanner.c' object='libmypdfsearch_la-scanner.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-scanner.lo `test -f 'scanner.c' || echo '$(srcdir)/'`scanner.c
+
+libmypdfsearch_la-vlEncoding.lo: vlEncoding.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-vlEncoding.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-vlEncoding.Tpo -c -o libmypdfsearch_la-vlEncoding.lo `test -f 'vlEncoding.c' || echo '$(srcdir)/'`vlEncoding.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-vlEncoding.Tpo $(DEPDIR)/libmypdfsearch_la-vlEncoding.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='vlEncoding.c' object='libmypdfsearch_la-vlEncoding.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-vlEncoding.lo `test -f 'vlEncoding.c' || echo '$(srcdir)/'`vlEncoding.c
+
+libmypdfsearch_la-vlRedBlackTrees.lo: vlRedBlackTrees.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -MT libmypdfsearch_la-vlRedBlackTrees.lo -MD -MP -MF $(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Tpo -c -o libmypdfsearch_la-vlRedBlackTrees.lo `test -f 'vlRedBlackTrees.c' || echo '$(srcdir)/'`vlRedBlackTrees.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Tpo $(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='vlRedBlackTrees.c' object='libmypdfsearch_la-vlRedBlackTrees.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmypdfsearch_la_CPPFLAGS) $(CPPFLAGS) $(libmypdfsearch_la_CFLAGS) $(CFLAGS) -c -o libmypdfsearch_la-vlRedBlackTrees.lo `test -f 'vlRedBlackTrees.c' || echo '$(srcdir)/'`vlRedBlackTrees.c
+
+mypdfsearch-main.o: main.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mypdfsearch-main.o -MD -MP -MF $(DEPDIR)/mypdfsearch-main.Tpo -c -o mypdfsearch-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mypdfsearch-main.Tpo $(DEPDIR)/mypdfsearch-main.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='main.c' object='mypdfsearch-main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mypdfsearch-main.o `test -f 'main.c' || echo '$(srcdir)/'`main.c
+
+mypdfsearch-main.obj: main.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mypdfsearch-main.obj -MD -MP -MF $(DEPDIR)/mypdfsearch-main.Tpo -c -o mypdfsearch-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mypdfsearch-main.Tpo $(DEPDIR)/mypdfsearch-main.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='main.c' object='mypdfsearch-main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mypdfsearch-main.obj `if test -f 'main.c'; then $(CYGPATH_W) 'main.c'; else $(CYGPATH_W) '$(srcdir)/main.c'; fi`
+
+mypdfsearch-mypdf_cli.o: mypdf_cli.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mypdfsearch-mypdf_cli.o -MD -MP -MF $(DEPDIR)/mypdfsearch-mypdf_cli.Tpo -c -o mypdfsearch-mypdf_cli.o `test -f 'mypdf_cli.c' || echo '$(srcdir)/'`mypdf_cli.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mypdfsearch-mypdf_cli.Tpo $(DEPDIR)/mypdfsearch-mypdf_cli.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mypdf_cli.c' object='mypdfsearch-mypdf_cli.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mypdfsearch-mypdf_cli.o `test -f 'mypdf_cli.c' || echo '$(srcdir)/'`mypdf_cli.c
+
+mypdfsearch-mypdf_cli.obj: mypdf_cli.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mypdfsearch-mypdf_cli.obj -MD -MP -MF $(DEPDIR)/mypdfsearch-mypdf_cli.Tpo -c -o mypdfsearch-mypdf_cli.obj `if test -f 'mypdf_cli.c'; then $(CYGPATH_W) 'mypdf_cli.c'; else $(CYGPATH_W) '$(srcdir)/mypdf_cli.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mypdfsearch-mypdf_cli.Tpo $(DEPDIR)/mypdfsearch-mypdf_cli.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mypdf_cli.c' object='mypdfsearch-mypdf_cli.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mypdfsearch-mypdf_cli.obj `if test -f 'mypdf_cli.c'; then $(CYGPATH_W) 'mypdf_cli.c'; else $(CYGPATH_W) '$(srcdir)/mypdf_cli.c'; fi`
+
+mypdfsearch-mytime.o: mytime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mypdfsearch-mytime.o -MD -MP -MF $(DEPDIR)/mypdfsearch-mytime.Tpo -c -o mypdfsearch-mytime.o `test -f 'mytime.c' || echo '$(srcdir)/'`mytime.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mypdfsearch-mytime.Tpo $(DEPDIR)/mypdfsearch-mytime.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mytime.c' object='mypdfsearch-mytime.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mypdfsearch-mytime.o `test -f 'mytime.c' || echo '$(srcdir)/'`mytime.c
+
+mypdfsearch-mytime.obj: mytime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mypdfsearch-mytime.obj -MD -MP -MF $(DEPDIR)/mypdfsearch-mytime.Tpo -c -o mypdfsearch-mytime.obj `if test -f 'mytime.c'; then $(CYGPATH_W) 'mytime.c'; else $(CYGPATH_W) '$(srcdir)/mytime.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mypdfsearch-mytime.Tpo $(DEPDIR)/mypdfsearch-mytime.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='mytime.c' object='mypdfsearch-mytime.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mypdfsearch_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mypdfsearch-mytime.obj `if test -f 'mytime.c'; then $(CYGPATH_W) 'mytime.c'; else $(CYGPATH_W) '$(srcdir)/mytime.c'; fi`
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+install-includeHEADERS: $(include_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
+	done
+
+uninstall-includeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -536,9 +955,11 @@ distdir-am: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) $(LTLIBRARIES) $(HEADERS) all-local
+install-binPROGRAMS: install-libLTLIBRARIES
+
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -563,6 +984,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -573,35 +995,36 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/main.Po
-	-rm -f ./$(DEPDIR)/myGenHashTable.Po
-	-rm -f ./$(DEPDIR)/myInitPredefCMapHT.Po
-	-rm -f ./$(DEPDIR)/myScopeHashTable.Po
-	-rm -f ./$(DEPDIR)/myTernarySearchTree.Po
-	-rm -f ./$(DEPDIR)/myTree.Po
-	-rm -f ./$(DEPDIR)/myUnicodeNFC.Po
-	-rm -f ./$(DEPDIR)/mycontentqueuelist.Po
-	-rm -f ./$(DEPDIR)/mycrypt.Po
-	-rm -f ./$(DEPDIR)/mycrypt_rc4.Po
-	-rm -f ./$(DEPDIR)/mydecode.Po
-	-rm -f ./$(DEPDIR)/mydictionaryqueuelist.Po
-	-rm -f ./$(DEPDIR)/myinitarray.Po
-	-rm -f ./$(DEPDIR)/myintqueuelist.Po
-	-rm -f ./$(DEPDIR)/mynumstacklist.Po
-	-rm -f ./$(DEPDIR)/myobjrefqueuelist.Po
-	-rm -f ./$(DEPDIR)/myoctal.Po
-	-rm -f ./$(DEPDIR)/mypdf_api.Po
-	-rm -f ./$(DEPDIR)/mypdf_cli.Po
-	-rm -f ./$(DEPDIR)/mypdf_utils.Po
-	-rm -f ./$(DEPDIR)/mystringqueuelist.Po
-	-rm -f ./$(DEPDIR)/mytime.Po
-	-rm -f ./$(DEPDIR)/parser.Po
-	-rm -f ./$(DEPDIR)/scanner.Po
-	-rm -f ./$(DEPDIR)/vlEncoding.Po
-	-rm -f ./$(DEPDIR)/vlRedBlackTrees.Po
+		-rm -f ./$(DEPDIR)/libmypdfsearch_la-myGenHashTable.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myTree.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mycrypt.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mydecode.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myinitarray.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myintqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mynumstacklist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myoctal.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mypdf_api.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mypdf_utils.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-parser.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-scanner.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-vlEncoding.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Plo
+	-rm -f ./$(DEPDIR)/mypdfsearch-main.Po
+	-rm -f ./$(DEPDIR)/mypdfsearch-mypdf_cli.Po
+	-rm -f ./$(DEPDIR)/mypdfsearch-mytime.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -618,14 +1041,15 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-includeHEADERS
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
-
+install-exec-am: install-binPROGRAMS install-libLTLIBRARIES
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -647,38 +1071,39 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/main.Po
-	-rm -f ./$(DEPDIR)/myGenHashTable.Po
-	-rm -f ./$(DEPDIR)/myInitPredefCMapHT.Po
-	-rm -f ./$(DEPDIR)/myScopeHashTable.Po
-	-rm -f ./$(DEPDIR)/myTernarySearchTree.Po
-	-rm -f ./$(DEPDIR)/myTree.Po
-	-rm -f ./$(DEPDIR)/myUnicodeNFC.Po
-	-rm -f ./$(DEPDIR)/mycontentqueuelist.Po
-	-rm -f ./$(DEPDIR)/mycrypt.Po
-	-rm -f ./$(DEPDIR)/mycrypt_rc4.Po
-	-rm -f ./$(DEPDIR)/mydecode.Po
-	-rm -f ./$(DEPDIR)/mydictionaryqueuelist.Po
-	-rm -f ./$(DEPDIR)/myinitarray.Po
-	-rm -f ./$(DEPDIR)/myintqueuelist.Po
-	-rm -f ./$(DEPDIR)/mynumstacklist.Po
-	-rm -f ./$(DEPDIR)/myobjrefqueuelist.Po
-	-rm -f ./$(DEPDIR)/myoctal.Po
-	-rm -f ./$(DEPDIR)/mypdf_api.Po
-	-rm -f ./$(DEPDIR)/mypdf_cli.Po
-	-rm -f ./$(DEPDIR)/mypdf_utils.Po
-	-rm -f ./$(DEPDIR)/mystringqueuelist.Po
-	-rm -f ./$(DEPDIR)/mytime.Po
-	-rm -f ./$(DEPDIR)/parser.Po
-	-rm -f ./$(DEPDIR)/scanner.Po
-	-rm -f ./$(DEPDIR)/vlEncoding.Po
-	-rm -f ./$(DEPDIR)/vlRedBlackTrees.Po
+		-rm -f ./$(DEPDIR)/libmypdfsearch_la-myGenHashTable.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myInitPredefCMapHT.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myScopeHashTable.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myTernarySearchTree.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myTree.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myUnicodeNFC.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mycontentqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mycrypt.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mycrypt_rc4.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mydecode.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mydictionaryqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myinitarray.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myintqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mynumstacklist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myobjrefqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-myoctal.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mypdf_api.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mypdf_utils.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-mystringqueuelist.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-parser.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-scanner.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-vlEncoding.Plo
+	-rm -f ./$(DEPDIR)/libmypdfsearch_la-vlRedBlackTrees.Plo
+	-rm -f ./$(DEPDIR)/mypdfsearch-main.Po
+	-rm -f ./$(DEPDIR)/mypdfsearch-mypdf_cli.Po
+	-rm -f ./$(DEPDIR)/mypdfsearch-mytime.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic
+mostlyclean-am: mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -688,26 +1113,41 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-includeHEADERS \
+	uninstall-libLTLIBRARIES
 
-.MAKE: install-am install-strip
+.MAKE: install-am install-exec-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am am--depfiles check check-am clean \
-	clean-binPROGRAMS clean-generic cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic distclean-tags \
-	distdir dvi dvi-am html html-am info info-am install \
-	install-am install-binPROGRAMS install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
-	ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS
+.PHONY: CTAGS GTAGS TAGS all all-am all-local am--depfiles check \
+	check-am clean clean-binPROGRAMS clean-generic \
+	clean-libLTLIBRARIES clean-libtool cscopelist-am ctags \
+	ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-hook install-html \
+	install-html-am install-includeHEADERS install-info \
+	install-info-am install-libLTLIBRARIES install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-includeHEADERS uninstall-libLTLIBRARIES
 
 .PRECIOUS: Makefile
 
+
+# Export list for MSVC (lib.exe /DEF:mypdfsearch.def): generated from the public header.
+#   make mypdfsearch.def
+mypdfsearch.def: mypdfsearch.h
+	( echo "EXPORTS"; sed -n 's/.*MYPDF_CALL *\(mypdf_[A-Za-z0-9_]*\) *(.*/    \1/p' $(srcdir)/mypdfsearch.h ) > $@
+
+all-local: $(lib_LTLIBRARIES)
+	-@if test -f .libs/libmypdfsearch.a; then $(SHELL) $(srcdir)/localize-static.sh .libs/libmypdfsearch.a; fi
+
+install-exec-hook:
+	-@if test -f "$(DESTDIR)$(libdir)/libmypdfsearch.a"; then $(SHELL) $(srcdir)/localize-static.sh "$(DESTDIR)$(libdir)/libmypdfsearch.a"; fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
