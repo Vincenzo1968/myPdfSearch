@@ -69,7 +69,8 @@ typedef enum tagDecodeStates
 	DS7
 } DecodeStates;
 
-void zerr(int ret, FILE *fpErrors);
+struct tagParams;   // dichiarazione anticipata (scanner.h include questo header)
+void zerr(int ret, struct tagParams *pParams);
 
 int myInflate(unsigned char **dest, unsigned long int *destLen, const unsigned char *source, unsigned long int sourceLen);
 
@@ -87,6 +88,6 @@ uint32_t getDecimalValue(uint32_t nMachineEndianness, unsigned char *pStream, ui
 
 int PaethPredictor(int a, int b, int c);
 unsigned char* ManageDecodeParams(const unsigned char *pszDecodedStream, unsigned long int DecodedStreamSize, unsigned char *outBuf, unsigned long int *pOutBufSize, int predictor, int columns, int colors, int bits);
-unsigned char* DecodeStream(unsigned char *pszEncodedStream, unsigned long int EncodedStreamSize, MyContent_t *pContent, FILE *fpErrors, unsigned char *pszDecodedStream, unsigned long int *pDecodedStreamSize);
+unsigned char* DecodeStream(unsigned char *pszEncodedStream, unsigned long int EncodedStreamSize, MyContent_t *pContent, struct tagParams *pParams, unsigned char *pszDecodedStream, unsigned long int *pDecodedStreamSize);
 
 #endif // MYDECODE_INCLUDED

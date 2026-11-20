@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 	#endif
 
 	Params myParams = {0};
-	CliOutput cliOutput = { NULL };
+	CliOutput cliOutput = { NULL, NULL };
 
 	FilesList* myFilesList = NULL;
 
@@ -291,6 +291,9 @@ int main(int argc, char **argv)
 	myParams.fpOutput = NULL;
 
 	myParams.fpErrors = NULL;
+	cliOutput.pParams = &myParams;
+	myParams.pfnMessage = CliOnMessage;
+	myParams.pMessageUser = &cliOutput;
 
 #if defined(_WIN64) || defined(_WIN32)
 	//SetConsoleOutputCP(65001);
@@ -390,7 +393,7 @@ int main(int argc, char **argv)
 			if( S_ISDIR(entryInfo.st_mode) )		// directory
 			{
 				len = strnlen(myParams.szPath, MAX_LEN_STR);
-				myFilesList = getFilesRecursive(myParams.szPath, len, myParams.bNoSubDirs, myFilesList);
+				myFilesList = getFilesRecursive(&myParams, myParams.szPath, len, myParams.bNoSubDirs, myFilesList);
 				if ( !myFilesList )
 				{
 					wprintf(L"Errore: impossibile ottenere la lista dei file.\n");
@@ -440,7 +443,7 @@ int main(int argc, char **argv)
 		if ( GetFileAttributesA(myParams.szPath) & FILE_ATTRIBUTE_DIRECTORY )
 		{
 			len = strnlen(myParams.szPath, MAX_LEN_STR);
-			myFilesList = getFilesRecursive(myParams.szPath, len, myParams.bNoSubDirs, myFilesList);
+			myFilesList = getFilesRecursive(&myParams, myParams.szPath, len, myParams.bNoSubDirs, myFilesList);
 			if ( !myFilesList )
 			{
 				wprintf(L"Errore: impossibile ottenere la lista dei file.\n");

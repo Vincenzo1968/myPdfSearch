@@ -39,8 +39,6 @@ struct mypdf_Context
 {
 	Params params;
 
-	mypdf_MessageCallback pfnMessage;
-	void *pMessageUser;
 	mypdf_PasswordCallback pfnPassword;
 	void *pPasswordUser;
 
@@ -129,7 +127,7 @@ mypdf_Context * MYPDF_CALL mypdf_CreateContext(void)
 	ctx->params.nSortGlyphs = SORT_GLYPHS_BY_APPEARANCE;
 	ctx->params.szOutputFile[0] = '\0';
 	ctx->params.fpOutput = NULL;
-	ctx->params.fpErrors = NULL;
+	ctx->params.fpErrors = NULL;   // il file di log, se serve, e' del chiamante (callback dei messaggi)
 
 	checkEndianness(&(ctx->params));
 
@@ -142,9 +140,6 @@ void MYPDF_CALL mypdf_DestroyContext(mypdf_Context *ctx)
 		return;
 
 	FreeWordsToSearch(&(ctx->params));
-
-	if ( NULL != ctx->params.fpErrors )
-		fclose(ctx->params.fpErrors);
 
 	free(ctx);
 }
@@ -184,8 +179,8 @@ void MYPDF_CALL mypdf_SetFileStartCallback(mypdf_Context *ctx, mypdf_FileStartCa
 void MYPDF_CALL mypdf_SetMessageCallback(mypdf_Context *ctx, mypdf_MessageCallback cb, void *user_data)
 {
 	if ( NULL == ctx ) return;
-	ctx->pfnMessage = cb;
-	ctx->pMessageUser = user_data;
+	ctx->params.pfnMessage = cb;
+	ctx->params.pMessageUser = user_data;
 }
 
 // Adattatore: dalla callback interna (pUser = contesto) a quella pubblica.
@@ -457,7 +452,7 @@ mypdf_Status MYPDF_CALL mypdf_ProcessDirectory(mypdf_Context *ctx, const char *u
 
 	if ( bIsDir )
 	{
-		pList = getFilesRecursive(ctx->params.szPath, (int)strlen(utf8_dir), ctx->params.bNoSubDirs, NULL);
+		pList = getFilesRecursive(&(ctx->params), ctx->params.szPath, (int)strlen(utf8_dir), ctx->params.bNoSubDirs, NULL);
 		if ( NULL == pList )
 		{
 			snprintf(ctx->szLastError, sizeof(ctx->szLastError), "cannot build the file list of '%s'", utf8_dir);

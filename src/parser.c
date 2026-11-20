@@ -68,17 +68,13 @@ static void ReportPasswordWarning(
     Params *pParams,
     const wchar_t *pszReason)
 {
-    if (pParams->fpErrors != NULL)
+    char *pUtf8Reason = myWideToUtf8(pszReason, wcslen(pszReason), NULL);
+
+    if ( NULL != pUtf8Reason )
     {
-        fwprintf(
-            pParams->fpErrors,
-            L"\tWARNING: %ls\n\n",
-            pszReason);
-
-        fflush(pParams->fpErrors);
+        myReportWarning(pParams, "WARNING: %s", pUtf8Reason);
+        free(pUtf8Reason);
     }
-
-    wprintf(L"\nWARNING: %ls\n\n", pszReason);
 }
 
 /* ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -2525,7 +2521,7 @@ int Parse(Params *pParams, FilesList* myFilesList)
 						snprintf(pParams->szError, 8192, "ERRORE Parse 6(CheckObjectType) nella lettura del trailer del file '%s'.\n\n", pParams->szFileName);
 						myShowErrorMessage(pParams, pParams->szError, 1);
 						PrintThisObject(pParams, k, 0, 0, NULL);
-						PrintThisObject(pParams, k, 0, 0, pParams->fpErrors);
+						{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, k, 0, 0, pParams->fpErrors); }
 						retValue = 0;
 						goto successivo;
 					}
@@ -2555,7 +2551,7 @@ int Parse(Params *pParams, FilesList* myFilesList)
 					snprintf(pParams->szError, 8192, "ERRORE Parse 6(ParseStmObj) nella lettura del trailer del file '%s'.\n\n", pParams->szFileName);
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					PrintThisObject(pParams, myObjNum, 0, 0, NULL);
-					PrintThisObject(pParams, myObjNum, 0, 0, pParams->fpErrors);
+					{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, myObjNum, 0, 0, pParams->fpErrors); }
 					myintqueuelist_Free(&myObjsQueue);
 
 					if ( NULL != pParams->currentObjStm.pszDecodedStream )
@@ -2644,13 +2640,15 @@ successivo:
 		// Video Summary (on stderr), only if required by command line.
 		if ( pParams->bShowErrors && pParams->nFileErrorCount > 0 )
 		{
-			fprintf(stderr, "ERRORI (%d) durante l'elaborazione di '%s' (dettagli in AAA_mypdfsearch_parsing_errors.txt)\n",
-					pParams->nFileErrorCount, pParams->szFileName);
+			char szSummary[8192];
+			snprintf(szSummary, sizeof(szSummary), "ERRORI (%d) durante l'elaborazione di '%s'", pParams->nFileErrorCount, pParams->szFileName);
+			myEmitMessage(pParams, MYPDF_MSG_INFO, szSummary);
 		}
 		if ( pParams->bShowWarnings && pParams->nFileWarningCount > 0 )
 		{
-			fprintf(stderr, "WARNING (%d) durante l'elaborazione di '%s' (dettagli in AAA_mypdfsearch_parsing_errors.txt)\n",
-					pParams->nFileWarningCount, pParams->szFileName);
+			char szSummary[8192];
+			snprintf(szSummary, sizeof(szSummary), "WARNING (%d) durante l'elaborazione di '%s'", pParams->nFileWarningCount, pParams->szFileName);
+			myEmitMessage(pParams, MYPDF_MSG_INFO, szSummary);
 		}
 
 //**********************************************************************************************************************************
@@ -2971,12 +2969,6 @@ uscita:
 
 	// (il file di output, se c'e', e' del chiamante: lo chiude il programma a riga di comando)
 
-	if ( NULL != pParams->fpErrors )
-	{
-		fclose(pParams->fpErrors);
-		pParams->fpErrors = NULL;
-	}
-
 	if ( NULL != pParams->myPdfTrailer.pIndexArray )
 	{
 		for ( int i = 0; i < pParams->myPdfTrailer.indexArraySize; i++ )
@@ -3210,7 +3202,7 @@ int match(Params *pParams, TokenTypeEnum ExpectedToken, char *pszFunctionName)
 
 		if ( bValidObj )
 		{
-			PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
+			{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
 		}
 	}
 
@@ -3334,7 +3326,7 @@ int match(Params *pParams, TokenTypeEnum ExpectedToken, char *pszFunctionName)
 			//wprintf(L"\nERROR(OBJ num = %lu, gen = %lu): FUNTION match -> syntax error: Atteso token n° %d, found token n° %d\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]
 		}
 
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
 	}
 
 #if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_MATCH)
@@ -6670,8 +6662,7 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 										myShowErrorMessage(pParams, pParams->szError, 1);
 										//I'm sorry.
 										//fwprintf(pParams->fpErrors, L"\n***** INIZIO DUMP DELL'OGGETTO NON VALIDO:\n");
-										PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors);
-
+										{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors); }
 										snprintf(pParams->szError, 8192, "\n***** FINE DUMP DELL'OGGETTO NON VALIDO:\n");
 										myShowErrorMessage(pParams, pParams->szError, 1);
 										//wprintf(L"\n****
@@ -6828,8 +6819,7 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 								myShowErrorMessage(pParams, pParams->szError, 1);
 								//fwprintf(pParams->fpErrors, L"\n*****
 
-								PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors);
-
+								{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors); }
 								snprintf(pParams->szError, 8192, "\n***** FINE OGGETTO ERRATO:\n");
 								myShowErrorMessage(pParams, pParams->szError, 1);
 								//fwprintf(pParams->fpErrors, L"\n***** FINE OGGETTO ERRATO\n");
@@ -6935,8 +6925,7 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 								myShowErrorMessage(pParams, pParams->szError, 1);
 								//fwprintf(pParams->fpErrors, L"\n*****
 
-								PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors);
-
+								{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors); }
 								snprintf(pParams->szError, 8192, "\n***** FINE OGGETTO ERRATO:\n");
 								myShowErrorMessage(pParams, pParams->szError, 1);
 								//fwprintf(pParams->fpErrors, L"\n***** FINE OGGETTO ERRATO\n");
@@ -6958,8 +6947,7 @@ int ManageDecodedContentText(Params *pParams, int nPageNumber)
 									snprintf(pParams->szError, 8192, "\n***** ECCO L'OGGETTO ERRATO:\n");
 									myShowErrorMessage(pParams, pParams->szError, 1);
 
-									PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors);
-
+									{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, nTemp, 0, 0, pParams->fpErrors); }
 									snprintf(pParams->szError, 8192, "\n***** FINE OGGETTO ERRATO:\n");
 									myShowErrorMessage(pParams, pParams->szError, 1);
 									retValue = 0;
@@ -7823,8 +7811,7 @@ int ManageContent(Params *pParams, int nPageNumber)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(pParams->fpErrors, L"\n*****
 
-			PrintThisObject(pParams, pParams->myPdfTrailer.Encrypt.Number, 0, 0, pParams->fpErrors);
-
+			{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->myPdfTrailer.Encrypt.Number, 0, 0, pParams->fpErrors); }
 			snprintf(pParams->szError, 8192, "\n***** FINE OGGETTO ERRATO:\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(pParams->fpErrors, L"\n***** FINE OGGETTO ERRATO\n");
@@ -9823,8 +9810,7 @@ int ParseObject(Params *pParams, int objNum)
 				//wprintf(L"ECCO L'OGGETTO Y:\n");
 				//fwprintf(pParams->fpErrors, L"ECCO L'OGGETTO Y:\n");
 
-				PrintThisObject(pParams, numObjQueueContent, 0, 0, pParams->fpErrors);
-
+				{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, numObjQueueContent, 0, 0, pParams->fpErrors); }
 				snprintf(pParams->szError, 8192, "FINE DUMP DELL'OGGETTO CHE HA FALLITO.\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"OGGETTO Y:\n");
@@ -10945,7 +10931,7 @@ unsigned char * getDecodedStream(Params *pParams, unsigned long int *pDecodedStr
 		pszStreamForDecode,
 		StreamForDecodeSize,
 		pContent,
-		pParams->fpErrors,
+		pParams,
 		pszDecodedStream,
 		pDecodedStreamSize);
 
@@ -11755,7 +11741,7 @@ int ParseCMapStream(Params *pParams, int objNum, unsigned char *pszDecodedStream
 
 	uint32_t myValue;
 
-	int base;
+	uint32_t base;   // senza segno: base * 16 puo' superare INT_MAX con destinazioni di piu' di 7 cifre (comportamento indefinito con int)
 	int len;
 	int i;
 	char c;
@@ -12543,7 +12529,7 @@ int ParseToUnicodeStream(Params *pParams, int objNum, unsigned char *pszDecodedS
 	uint32_t bContentAlreadyProcessed;
 
 	uint32_t myValue;
-	int base;
+	uint32_t base;   // vedi ParseCMapStream
 	int len;
 	int i;
 	char c;
@@ -13877,8 +13863,7 @@ int ParseDictionaryObject(Params *pParams, int objNum)
 		//wprintf(L)\nERRORE ParseDictionaryObject resourcesdictionary -> pParams->nObjToParse = %d\n", pParams->nObjToParse);
 		//fwprintf(pParams->fpErrors, L"\nERRORE ParseDictionaryObject resourcesdictionary -> pParams->nObjToParse = %d\n", pParams->nObjToParse);
 
-		PrintThisObject(pParams, pParams->nObjToParse, 0, pParams->nCurrentPageNum, pParams->fpErrors);
-
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nObjToParse, 0, pParams->nCurrentPageNum, pParams->fpErrors); }
 		retValue = 0;
 		goto uscita;
 	}
@@ -14117,7 +14102,9 @@ int obj(Params *pParams)
 		snprintf(pParams->szError, 8192, "ERRORE obj: atteso T_INT_LITERAL; trovato token n° pParams->myToken.Type.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//fwprintf(pParams->fpErrors, L"ERRORE obj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -14297,7 +14284,9 @@ int objitem(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing objitem: pParams->myToken.Type = %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"Errore parsing objitem: pParams->myToken.Type = %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -14566,7 +14555,9 @@ int pagetree(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE pagetree: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE pagetree: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -15045,7 +15036,9 @@ int pagetreeobj(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing pagetreeobj: not valid token: %d\n, pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"Errore parsing pagetreeobj: not valid token: %d\n, pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), '\0', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -15142,11 +15135,13 @@ int pagetreearrayobjs(Params *pParams)
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"Errore parsing pagetreearrayobjs: not valid token: %d\n, pParams->myToken.Type);
 				//fwprintf(pParams->fpErrors, L"Errore parsing pagetreearrayobjs: not valid token: %d\n, pParams->myToken.Type);
+				#if defined(MYDEBUG_PRINT_ALL)
 				PrintToken(&(pParams->myToken), '\0', ' ', 1);
+				#endif
 
-				fwprintf(pParams->fpErrors, L"\n***** INIZIO DUMP DELL'OGGETTO NON VALIDO:\n");
-				PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
-				fwprintf(pParams->fpErrors, L"\n***** FINE DUMP DELL'OGGETTO NON VALIDO.\n");
+				if ( NULL != pParams->fpErrors ) fwprintf(pParams->fpErrors, L"\n***** INIZIO DUMP DELL'OGGETTO NON VALIDO:\n");
+				{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
+				if ( NULL != pParams->fpErrors ) fwprintf(pParams->fpErrors, L"\n***** FINE DUMP DELL'OGGETTO NON VALIDO.\n");
 
 				return 0;
 			}
@@ -15227,7 +15222,9 @@ int contentobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE felicibj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE felicibj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -15345,7 +15342,9 @@ int contentobjbody(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE felicibjbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
 		//fwprintf(pParams->fpErrors, L"ERRORE felicibjbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), ' ', ' ', 1);
+		#endif
 		retValue = 0;
 		goto uscita;
 	}
@@ -15609,7 +15608,9 @@ int contentkeyvalue(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE contentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE contentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -15688,7 +15689,9 @@ int contentkeyarray(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE contentkeyarray: Waited for one of these tokens: T NAME, T KW NULL, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE contentkeyarray: Waited for one of these tokens: T NAME, T KW NULL, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -15885,7 +15888,9 @@ int contentkeyvalueinternal(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE contentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE contentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -15947,7 +15952,9 @@ int lengthobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"\nERRORE lengthobj -> syntax error: Expected token T INT LITERAL, found token n° %d\n", pParams->myTokenLengthObj.Type);
 		//fwprintf(pParams->fpErrors, L"\nERROREobj - length syntax error: Expected token T INT LITERAL, found token n° %d\n", pParams->myTokenLengthObj.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myTokenLengthObj), '\0', ' ', 1);
+		#endif
 		return 0;
 	}
 
@@ -15985,7 +15992,9 @@ int integer_obj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"\nERRORE integer obj -> syntax error: Expected token T INT LITERAL, found token n° %d\n", pParams->myTokenLengthObj.Type);
 		//fwprintf(pParams->fpErrors, L"\nERRORE integer obj -> syntax error: Expected token T INT LITERAL, found token n° %d\n", pParams->myTokenLengthObj.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myTokenLengthObj), '\0', ' ', 1);
+		#endif
 		return 0;
 	}
 
@@ -16284,7 +16293,9 @@ int resourcesdictionary(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE resourcesdictionary: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE resourcesdictionary: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -16977,7 +16988,9 @@ int resourcesdictionaryitems(Params *pParams)
 			snprintf(pParams->szError, 8192, "Errore parsing resourcesdictionaryitems: token non valido: %d\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing resourcesdictionaryitems: not valid token: %d\n, pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), '\0', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -17001,7 +17014,9 @@ int resourcesarrayobjs(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing resourcesarrayobjs: not valid token: %d\n, pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"Errore parsing resourcesarrayobjs: not valid token: %d\n, pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), '\0', ' ', 1);
+			#endif
 			return 0;
 		}
 
@@ -17117,7 +17132,9 @@ int contentxobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE contentxobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE contentxobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -17321,7 +17338,9 @@ int contentxobjbody(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE contentxobjbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
 		//fwprintf(pParams->fpErrors, L"ERRORE contentxobjbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), ' ', ' ', 1);
+		#endif
 		retValue = 0;
 		goto uscita;
 	}
@@ -17737,7 +17756,9 @@ int xobjcontentkeyvalue(Params *pParams)
 			snprintf(pParams->szError, 8192, "ERRORE xobjcontentkeyvalue: Atteso uno di questi token: T_INT_LITERAL, T_NAME, T_QOPAREN, TDICT_BEGIN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(pParams->fpErrors, L"ERRORE xobjcontentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -17938,7 +17959,9 @@ int gsobj(Params *pParams)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE gsobj: atteso T_INT_LITERAL; trovato token n° pParams->myToken.Type.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -18057,7 +18080,9 @@ int gsobjbody(Params *pParams)
 			{
 				snprintf(pParams->szError, 8192, "ERRORE gsobjbody: atteso T_INT_LITERAL; trovato token n° pParams->myToken.Type.\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
+				#if defined(MYDEBUG_PRINT_ALL)
 				PrintToken(&(pParams->myToken), '\t', ' ', 1);
+				#endif
 				return 0;
 			}
 
@@ -18134,7 +18159,9 @@ int widthsarrayobj(Params *pParams)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE widthsarrayobj: atteso T_INT_LITERAL; trovato token n° pParams->myToken.Type.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -18287,7 +18314,9 @@ int widthsarrayobjbody(Params *pParams)
 						{
 							snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_QCPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 							myShowErrorMessage(pParams, pParams->szError, 1);
+							#if defined(MYDEBUG_PRINT_ALL)
 							PrintToken(&(pParams->myToken), ' ', ' ', 1);
+							#endif
 							return 0;
 						}
 					}
@@ -18364,7 +18393,9 @@ int widthsarrayobjbody(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 							break;
@@ -18375,7 +18406,9 @@ int widthsarrayobjbody(Params *pParams)
 					{
 						snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 						myShowErrorMessage(pParams, pParams->szError, 1);
+						#if defined(MYDEBUG_PRINT_ALL)
 						PrintToken(&(pParams->myToken), ' ', ' ', 1);
+						#endif
 						return 0;
 					}
 					break;
@@ -18490,7 +18523,9 @@ int widthsarrayobjbody(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 							// v2:
@@ -18502,7 +18537,9 @@ int widthsarrayobjbody(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 						}
@@ -18511,7 +18548,9 @@ int widthsarrayobjbody(Params *pParams)
 						{
 							snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_QCPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 							myShowErrorMessage(pParams, pParams->szError, 1);
+							#if defined(MYDEBUG_PRINT_ALL)
 							PrintToken(&(pParams->myToken), ' ', ' ', 1);
+							#endif
 							return 0;
 						}
 					}
@@ -18565,7 +18604,9 @@ int widthsarrayobjbody(Params *pParams)
 								{
 									snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 									myShowErrorMessage(pParams, pParams->szError, 1);
+									#if defined(MYDEBUG_PRINT_ALL)
 									PrintToken(&(pParams->myToken), ' ', ' ', 1);
+									#endif
 									return 0;
 								}
 								// v2:
@@ -18577,7 +18618,9 @@ int widthsarrayobjbody(Params *pParams)
 								{
 									snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 									myShowErrorMessage(pParams, pParams->szError, 1);
+									#if defined(MYDEBUG_PRINT_ALL)
 									PrintToken(&(pParams->myToken), ' ', ' ', 1);
+									#endif
 									return 0;
 								}
 							}
@@ -18619,7 +18662,9 @@ int widthsarrayobjbody(Params *pParams)
 								{
 									snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 									myShowErrorMessage(pParams, pParams->szError, 1);
+									#if defined(MYDEBUG_PRINT_ALL)
 									PrintToken(&(pParams->myToken), ' ', ' ', 1);
+									#endif
 									return 0;
 								}
 								// v2:
@@ -18631,7 +18676,9 @@ int widthsarrayobjbody(Params *pParams)
 								{
 									snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 									myShowErrorMessage(pParams, pParams->szError, 1);
+									#if defined(MYDEBUG_PRINT_ALL)
 									PrintToken(&(pParams->myToken), ' ', ' ', 1);
+									#endif
 									return 0;
 								}
 							}
@@ -18640,7 +18687,9 @@ int widthsarrayobjbody(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 							break;
@@ -18651,7 +18700,9 @@ int widthsarrayobjbody(Params *pParams)
 					{
 						snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 						myShowErrorMessage(pParams, pParams->szError, 1);
+						#if defined(MYDEBUG_PRINT_ALL)
 						PrintToken(&(pParams->myToken), ' ', ' ', 1);
+						#endif
 						return 0;
 					}
 					break;
@@ -18680,7 +18731,9 @@ int widthsarrayobjbody(Params *pParams)
 			{
 				snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_INT_LITERAL o T_REAL_LITERAL; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 				myShowErrorMessage(pParams, pParams->szError, 1);
+				#if defined(MYDEBUG_PRINT_ALL)
 				PrintToken(&(pParams->myToken), ' ', ' ', 1);
+				#endif
 				return 0;
 			}
 
@@ -18706,7 +18759,9 @@ int widthsarrayobjbody(Params *pParams)
 			{
 				snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: Atteso T_INT_LITERAL o T_REAL_LITERAL; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 				myShowErrorMessage(pParams, pParams->szError, 1);
+				#if defined(MYDEBUG_PRINT_ALL)
 				PrintToken(&(pParams->myToken), ' ', ' ', 1);
+				#endif
 				return 0;
 			}
 		}
@@ -18726,7 +18781,9 @@ int widthsarrayobjbody(Params *pParams)
 				{
 					snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: index %d out of range.\n", x);
 					myShowErrorMessage(pParams, pParams->szError, 1);
+					#if defined(MYDEBUG_PRINT_ALL)
 					PrintToken(&(pParams->myToken), '\t', ' ', 1);
+					#endif
 					return 0;
 				}
 
@@ -18764,7 +18821,9 @@ int widthsarrayobjbody(Params *pParams)
 				{
 					snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: index %d out of range.\n", x);
 					myShowErrorMessage(pParams, pParams->szError, 1);
+					#if defined(MYDEBUG_PRINT_ALL)
 					PrintToken(&(pParams->myToken), '\t', ' ', 1);
+					#endif
 					return 0;
 				}
 
@@ -18805,7 +18864,9 @@ int widthsarrayobjbody(Params *pParams)
 			{
 				snprintf(pParams->szError, 8192, "ERRORE widthsarrayobjbody: atteso T_INT_LITERAL o T_REAL_LITERAL; trovato token n° pParams->myToken.Type.\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
+				#if defined(MYDEBUG_PRINT_ALL)
 				PrintToken(&(pParams->myToken), '\t', ' ', 1);
+				#endif
 				return 0;
 			}
 			break;
@@ -18841,7 +18902,9 @@ int fontdescriptorobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE contentfontobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE contentfontobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -19040,7 +19103,9 @@ int fontdescriptorobjkeyvalue(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE fontobjcontentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE fontobjcontentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -19109,7 +19174,9 @@ int encryptobj(Params *pParams)
 		snprintf(pParams->szError, 8192, "ERRORE encryptobj: atteso T_INT_LITERAL; trovato token n° pParams->myToken.Type.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//fwprintf(pParams->fpErrors, L"ERRORE encryptobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -19548,7 +19615,9 @@ int encryptobjkeyvalue(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing encryptobjkeyvalue: pParams->myToken.Type = %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"Errore parsing obencryptobjkeyvaluejitem: pParams->myToken.Type = %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -19721,7 +19790,9 @@ int contentfontobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE contentfontobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE contentfontobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -20839,7 +20910,9 @@ int fontobjcontentkeyvalue(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE fontobjcontentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE fontobjcontentkeyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -20882,7 +20955,9 @@ int fontdirectencodingobjarray(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE fontdirectencodingobjarray: T NAME, found instead TOKEN n° %d:\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE fontdirectencodingobjarray: T NAME expected, found instead TOKEN n° %d:\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 		}
 
@@ -21132,7 +21207,9 @@ int cidfontobj(Params *pParams)
 	{
 		snprintf(pParams->szError, 8192, "ERRORE cidfontobj: atteso T_INT_LITERAL; trovato token n° pParams->myToken.Type.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -21668,7 +21745,9 @@ int cidfontobjkeyvalue(Params *pParams)
 		default:
 			snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyvalue: Atteso uno di questi token: T_INT_LITERAL, T_NAME, T_STRING_LITERAL, T_STRING_HEXADECIMAL, T_QOPAREN, TDICT_BEGIN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -21789,7 +21868,9 @@ int cidfontobjkeyarray(Params *pParams)
 					{
 						snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_QCPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 						myShowErrorMessage(pParams, pParams->szError, 1);
+						#if defined(MYDEBUG_PRINT_ALL)
 						PrintToken(&(pParams->myToken), ' ', ' ', 1);
+						#endif
 						return 0;
 					}
 				}
@@ -21866,7 +21947,9 @@ int cidfontobjkeyarray(Params *pParams)
 						{
 							snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 							myShowErrorMessage(pParams, pParams->szError, 1);
+							#if defined(MYDEBUG_PRINT_ALL)
 							PrintToken(&(pParams->myToken), ' ', ' ', 1);
+							#endif
 							return 0;
 						}
 						break;
@@ -21877,7 +21960,9 @@ int cidfontobjkeyarray(Params *pParams)
 				{
 					snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 					myShowErrorMessage(pParams, pParams->szError, 1);
+					#if defined(MYDEBUG_PRINT_ALL)
 					PrintToken(&(pParams->myToken), ' ', ' ', 1);
+					#endif
 					return 0;
 				}
 				break;
@@ -21985,7 +22070,9 @@ int cidfontobjkeyarray(Params *pParams)
 						{
 							snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 							myShowErrorMessage(pParams, pParams->szError, 1);
+							#if defined(MYDEBUG_PRINT_ALL)
 							PrintToken(&(pParams->myToken), ' ', ' ', 1);
+							#endif
 							return 0;
 						}
 						// v2:
@@ -21997,7 +22084,9 @@ int cidfontobjkeyarray(Params *pParams)
 						{
 							snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 							myShowErrorMessage(pParams, pParams->szError, 1);
+							#if defined(MYDEBUG_PRINT_ALL)
 							PrintToken(&(pParams->myToken), ' ', ' ', 1);
+							#endif
 							return 0;
 						}
 					}
@@ -22006,7 +22095,9 @@ int cidfontobjkeyarray(Params *pParams)
 					{
 						snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_QCPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 						myShowErrorMessage(pParams, pParams->szError, 1);
+						#if defined(MYDEBUG_PRINT_ALL)
 						PrintToken(&(pParams->myToken), ' ', ' ', 1);
+						#endif
 						return 0;
 					}
 				}
@@ -22060,7 +22151,9 @@ int cidfontobjkeyarray(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 							// v2:
@@ -22072,7 +22165,9 @@ int cidfontobjkeyarray(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 						}
@@ -22114,7 +22209,9 @@ int cidfontobjkeyarray(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 							// v2:
@@ -22126,7 +22223,9 @@ int cidfontobjkeyarray(Params *pParams)
 							{
 								snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso NUMBER; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 								myShowErrorMessage(pParams, pParams->szError, 1);
+								#if defined(MYDEBUG_PRINT_ALL)
 								PrintToken(&(pParams->myToken), ' ', ' ', 1);
+								#endif
 								return 0;
 							}
 						}
@@ -22135,7 +22234,9 @@ int cidfontobjkeyarray(Params *pParams)
 						{
 							snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 							myShowErrorMessage(pParams, pParams->szError, 1);
+							#if defined(MYDEBUG_PRINT_ALL)
 							PrintToken(&(pParams->myToken), ' ', ' ', 1);
+							#endif
 							return 0;
 						}
 						break;
@@ -22146,7 +22247,9 @@ int cidfontobjkeyarray(Params *pParams)
 				{
 					snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_INT_LITERAL o T_QOPAREN; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 					myShowErrorMessage(pParams, pParams->szError, 1);
+					#if defined(MYDEBUG_PRINT_ALL)
 					PrintToken(&(pParams->myToken), ' ', ' ', 1);
+					#endif
 					return 0;
 				}
 				break;
@@ -22175,7 +22278,9 @@ int cidfontobjkeyarray(Params *pParams)
 		{
 			snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_INT_LITERAL o T_REAL_LITERAL; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 		}
 
@@ -22199,7 +22304,9 @@ int cidfontobjkeyarray(Params *pParams)
 		{
 			snprintf(pParams->szError, 8192, "ERRORE cidfontobjkeyarray: Atteso T_INT_LITERAL o T_REAL_LITERAL; trovato invece TOKEN n° %d:\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 		}
 	}
@@ -22278,7 +22385,9 @@ int encodingobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE encodingobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE encodingobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -22413,7 +22522,9 @@ int encodingobjbody(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE encodingobjbody: Waited for one of these tokens: T NAME, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
 		//fwprintf(pParams->fpErrors, L"ERRORE encodingobjbody: Waited for one of these tokens: T NAME, TDICT BEGIN; found instead TOKEN n° %d:\n", pParams->myToken.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), ' ', ' ', 1);
+		#endif
 		return 0;
 	}
 
@@ -22515,7 +22626,9 @@ int encodingobjarray(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE encodingobjarray: Atteso T NAME, found instead TOKEN n° %d:\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE encodingobjarray: T NAME expected, found instead TOKEN n° %d:\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 		}
 
@@ -22603,7 +22716,9 @@ int xrefstream_obj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE xrefstream obj: the key 'Length' is absent. \n);
 		//fwprintf(pParams->fpErrors, L"ERRORE xrefstream obj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -22908,7 +23023,9 @@ int xrefstream_objbody(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE xrefstream objbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
 		//fwprintf(pParams->fpErrors, L"ERRORE xrefstream objbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), ' ', ' ', 1);
+		#endif
 		retValue = 0;
 		goto uscita;
 	}
@@ -23173,7 +23290,9 @@ int xrefstream_keyvalue(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE xrefstream keyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE xrefstream keyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -23287,7 +23406,9 @@ int xrefstream_keyarray(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE xrefstream keyarray: Waited for one of these tokens: T NAME, T KW NULL, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE xrefstream keyarray: Waited for one of these tokens: T INT LITERAL, T NAME, T KW NULL, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -23492,7 +23613,9 @@ int xrefstream_keyvalueinternal(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE xrefstream keyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"ERRORE xrefstream keyvalue: Waited for one of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myToken.Type);
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -23627,7 +23750,7 @@ int getObjStmDataFromDecodedStream(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE getObjStmDataFromDecodedStream(num = %lu, gen = %lu): expected T INT LITERAL; found character(hex) %X. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation, cPrev);
 		//fwprintf(pParams->fpErrors, L"ERRORE getObjStmDataFromDecodedStream(num = %lu, gen = %lu): expected T INT LITERAL; found character(hex) %X. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation, cPrev);
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 1, 0, pParams->fpErrors);
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 1, 0, pParams->fpErrors); }
 		retValue = 0;
 		goto uscita;
 	}
@@ -23652,7 +23775,7 @@ int getObjStmDataFromDecodedStream(Params *pParams)
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"ERRORE getObjStmDataFromDecodedStream(num = %lu, gen = %lu): expected T INT LITERAL; found SPAZIO. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
 				//fwprintf(pParams->fpErrors, L"ERRORE getObjStmDataFromDecodedStream(num = %lu, gen = %lu): expected T INT LITERAL; found SPACE. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
-				PrintThisObject(pParams, pParams->nCurrentParsingObj, 1, 0, pParams->fpErrors);
+				{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 1, 0, pParams->fpErrors); }
 				retValue = 0;
 				goto uscita;
 			}
@@ -23775,7 +23898,7 @@ int getObjStmDataFromDecodedStream(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE getObjStmDataFromDecodedStream(num = %lu, gen = %lu): odd number of integer in ObjStm Decoded Stream. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
 		//fwprintf(pParams->fpErrors, L"ERRORE getObjStmDataFromDecodedStream(num = %lu, gen = %lu): odd number of integer in ObjStm Decoded Stream. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 1, 0, pParams->fpErrors);
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 1, 0, pParams->fpErrors); }
 		retValue = 0;
 		goto uscita;
 	}
@@ -23864,8 +23987,10 @@ int stmobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE stmobj: expected T INT LITERAL; found token n° pParams->myToken.Type.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE stmobj(num = %lu, gen = %lu): expected T INT LITERAL; found token n° %d. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation, pParams->myToken
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
+		#endif
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
 		return 0;
 	}
 	pParams->nCurrentParsingObj = pParams->myToken.vInt;
@@ -23913,7 +24038,7 @@ int stmobj(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE stmobj: the key 'Length' is absent. \n);
 		//fwprintf(pParams->fpErrors, L"ERROR stmobj(num = %lu, gne = %lu): 'Length' key not found.\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
 		return 0;
 	}
 
@@ -23922,7 +24047,7 @@ int stmobj(Params *pParams)
 		snprintf(pParams->szError, 8192, "ERROR parsing stmobj(num = %u, gen = %u): 'N' key not found.\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//fwprintf(pParams->fpErrors, L"ERROR parsing stmobj(num = %d, gen = %d): 'N' key not found. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
 		return 0;
 	}
 
@@ -23931,7 +24056,7 @@ int stmobj(Params *pParams)
 		snprintf(pParams->szError, 8192, "ERROR parsing stmobj(num = %u, gen = %u): 'First' key not found.\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//fwprintf(pParams->fpErrors, L"ERROR parsing stmobj(num = %d, gen = %d): 'First' key not found. \n, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Generation);
-		PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors);
+		{ if ( NULL != pParams->fpErrors ) PrintThisObject(pParams, pParams->nCurrentParsingObj, 0, 0, pParams->fpErrors); }
 		return 0;
 	}
 
@@ -24008,7 +24133,9 @@ int stmobjbody(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE stmobjbody: T KW STREAM, found TOKEN n° %d\n", pParams->myToken.Type);
 		//fwprintf(pParams->fpErrors, L"ERRORE stmobjbody(OBJ num = %lu, gen = %lu): Atteso token T KW STREAM, found TOKEN n° %dX3X", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams-myObjsTable[pParams->nCurrentParsingObj]
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), ' ', ' ', 1);
+		#endif
 		retValue = 0;
 		goto uscita;
 	}
@@ -24266,7 +24393,9 @@ int stmobjkeyvalue(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE stmobjkeyvalue(OBJ num = %lu, gen = %lu): One of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams-my
 			//fwprintf(pParams->fpErrors, L"ERRORE stmobjkeyvalue(OBJ num = %d, gen = %d): One of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams-my
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -24371,7 +24500,9 @@ int stmobjkeyarray(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE stmobjkeyarray(OBJ num = %lu, gen = %lu): One of these tokens: T NAME, T KW NULL, TDICT BEGIN; found instead TOKEN n° %dX3X", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[
 			//fwprintf(pParams->fpErrors, L"ERRORE stmobjkeyarray(OBJ num = %lu, gen = %lu): One of these tokens: T NAME, T KW NULL, TDICT BEGIN; found instead TOKEN n° %dX3X", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams->myObjsTable[
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -24568,7 +24699,9 @@ int stmobjkeyvalueinternal(Params *pParams)
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"ERRORE stmobjkeyvalue(OBJ num = %lu, gen = %lu): One of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams-my
 			//fwprintf(pParams->fpErrors, L"ERRORE stmobjkeyvalue(OBJ num = %lu, gen = %lu): One of these tokens: T INT LITERAL, T NAME, T QOPAREN, TDICT BEGIN; found instead TOKEN n° %d\n", pParams->myObjsTable[pParams->nCurrentParsingObj]->Obj.Number, pParams-my
+			#if defined(MYDEBUG_PRINT_ALL)
 			PrintToken(&(pParams->myToken), ' ', ' ', 1);
+			#endif
 			return 0;
 			break;
 	}
@@ -24626,7 +24759,9 @@ int cot(Params *pParams)
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE cot: expected T INT LITERAL; found token n° %d. \n, pParams->myToken.Type);
 		//fwprintf(pParams->fpErrors, L"ERRORE cot: expected T INT LITERAL; found token n° %d. \n, pParams->myToken.Type);
+		#if defined(MYDEBUG_PRINT_ALL)
 		PrintToken(&(pParams->myToken), '\t', ' ', 1);
+		#endif
 		retValue = 0;
 		goto uscita;
 	}

@@ -38,13 +38,12 @@ void freeFilesList(FilesList *first);
 void GetErrorString(DWORD err, char *szError, int len);
 #endif
 
-FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesList* myFilesList);
+FilesList* getFilesRecursive(Params *pParams, char *dirName, int lenOrig, int bNoSubDirs, FilesList* myFilesList);
 
 /* Numero di processori logici. */
 long GetProcessors(void);
 
 /* Converte una stringa multibyte nella locale corrente in wchar_t (da liberare con free()). */
-wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen);
 
 /* Spezza la stringa delle parole da cercare e riempie pParams->pWordsToSearchArray. */
 int mySplitWords(Params *pParams, wchar_t *pwszOption);

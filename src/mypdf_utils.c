@@ -106,7 +106,7 @@ void GetErrorString(DWORD err, char *szError, int len)
 	LocalFree(lpMsgBuf);
 }
 
-FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesList* myFilesList)
+FilesList* getFilesRecursive(Params *pParams, char *dirName, int lenOrig, int bNoSubDirs, FilesList* myFilesList)
 {
 	char pathName[MAX_PATH + 1];
 
@@ -136,7 +136,7 @@ FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesLi
 					if (strncmp(data.cFileName, ".", _MAX_DIR) != 0 && strncmp(data.cFileName, "..", _MAX_DIR) != 0)
 					{
 						if ( !bNoSubDirs )
-							myFilesList = getFilesRecursive(pathName, lenOrig, bNoSubDirs, myFilesList);
+							myFilesList = getFilesRecursive(pParams, pathName, lenOrig, bNoSubDirs, myFilesList);
 					}
 				}
 			}
@@ -164,7 +164,7 @@ FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesLi
 	return myFilesList;
 }
 #else // Linux
-FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesList* myFilesList)
+FilesList* getFilesRecursive(Params *pParams, char *dirName, int lenOrig, int bNoSubDirs, FilesList* myFilesList)
 {
 	FilesList myFile;
 	DIR *dir = NULL;
@@ -180,7 +180,7 @@ FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesLi
 	dir = opendir(dirName);
 	if( dir == NULL )
 	{
-		wprintf(L"Errore nell'apertura della directory '%s': %s\n", dirName, strerror(errno));
+		myReportError(pParams, "Errore nell'apertura della directory '%s': %s", dirName, strerror(errno));
 		return myFilesList;
 	}
 
@@ -208,7 +208,7 @@ FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesLi
 			if( S_ISDIR(entryInfo.st_mode) )		// directory
 			{
 				if ( !bNoSubDirs )
-					myFilesList = getFilesRecursive(pathName, lenOrig, bNoSubDirs, myFilesList);
+					myFilesList = getFilesRecursive(pParams, pathName, lenOrig, bNoSubDirs, myFilesList);
 			}
 			else if( S_ISREG(entryInfo.st_mode) )	// regular file
 			{
@@ -246,7 +246,7 @@ FilesList* getFilesRecursive(char *dirName, int lenOrig, int bNoSubDirs, FilesLi
 		}
 		else
 		{
-			wprintf(L"Errore lstat %s: %s\n", pathName, strerror(errno));
+			myReportError(pParams, "Errore lstat %s: %s", pathName, strerror(errno));
 		}
 
 		entry = readdir(dir);
@@ -277,31 +277,6 @@ long GetProcessors(void)
 	return nProcs_max;
 }
 
-wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen)
-{
-	wchar_t *wcs = NULL;
-
-	wcs = calloc(mbslen + 1, sizeof(wchar_t));
-	if (wcs == NULL)
-	{
-		//perror("calloc");
-		wprintf(L"ERRORE myMultibyteToWidechar calloc: %s \n", strerror(errno));
-
-		return NULL;
-	}
-
-	if (mbstowcs(wcs, (char*)psz, mbslen + 1) == (size_t) -1)
-	{
-		//perror("mbstowcs");
-		wprintf(L"ERRORE myMultibyteToWidechar mbstowcs: %s \n", strerror(errno));
-
-		free(wcs);
-		wcs = NULL;
-		return NULL;
-	}
-
-	return wcs;
-}
 
 // Riconosce i separatori di parola per la ricerca.
 // Include spazio, punteggiatura latina e punteggiatura Unicode di uso comune
@@ -386,10 +361,7 @@ int mySplitWords(Params *pParams, wchar_t *pwszOption)
     MyUnicodeNFCStatus nfcStatus;
 
     if ( NULL == pParams || NULL == pwszOption )
-    {
-        fprintf(stderr, "ERRORE mySplitWords: argomento NULL.\n");
         return 0;
-    }
 
     // ============================================================
     // PASSAGGIO 1: normalizzazione NFC della query.
@@ -404,7 +376,7 @@ int mySplitWords(Params *pParams, wchar_t *pwszOption)
 
     if ( MY_UNICODE_NFC_OK != nfcStatus )
     {
-        fprintf(stderr, "ERRORE mySplitWords: normalizzazione NFC fallita: %s.\n",
+        myReportError(pParams, "ERRORE mySplitWords: normalizzazione NFC fallita: %s.",
                 myUnicodeNFC_StatusString(nfcStatus));
         retValue = 0;
         goto uscita;
@@ -412,7 +384,7 @@ int mySplitWords(Params *pParams, wchar_t *pwszOption)
 
     if ( normalizedLength > MAX_LEN_STR )
     {
-        fprintf(stderr, "ERRORE mySplitWords: la query normalizzata NFC supera MAX_LEN_STR (%d caratteri).\n",
+        myReportError(pParams, "ERRORE mySplitWords: la query normalizzata NFC supera MAX_LEN_STR (%d caratteri).",
                 MAX_LEN_STR);
         retValue = 0;
         goto uscita;

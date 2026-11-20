@@ -1203,3 +1203,101 @@ int MYPDF_CALL CliOnWordFound(void *pUser, const char *pszFile, int32_t nPage, c
 
 	return 0;
 }
+
+wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen)
+{
+	wchar_t *wcs = NULL;
+
+	wcs = calloc(mbslen + 1, sizeof(wchar_t));
+	if (wcs == NULL)
+	{
+		//perror("calloc");
+		wprintf(L"ERRORE myMultibyteToWidechar calloc: %s \n", strerror(errno));
+
+		return NULL;
+	}
+
+	if (mbstowcs(wcs, (char*)psz, mbslen + 1) == (size_t) -1)
+	{
+		//perror("mbstowcs");
+		wprintf(L"ERRORE myMultibyteToWidechar mbstowcs: %s \n", strerror(errno));
+
+		free(wcs);
+		wcs = NULL;
+		return NULL;
+	}
+
+	return wcs;
+}
+
+
+// Messaggi della libreria:
+//   - ERROR / WARNING relativi a un file  -> file di log "AAA_mypdfsearch_parsing_errors.txt" (aperto al primo messaggio);
+//   - messaggi senza file (opzioni, elenco dei file) -> stderr;
+//   - INFO (riepiloghi richiesti con --show_errors / --show_warnings) -> stderr.
+void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *pszFile, const char *pszMessage)
+{
+	CliOutput *pOut = (CliOutput*)pUser;
+	Params *pParams;
+
+	if ( NULL == pOut || NULL == pOut->pParams )
+	{
+		fprintf(stderr, "%s\n", pszMessage);
+		return;
+	}
+
+	pParams = pOut->pParams;
+
+	if ( MYPDF_MSG_INFO == level )
+	{
+		if ( 0 == strncmp(pszMessage, "ERRORI (", 8) || 0 == strncmp(pszMessage, "WARNING (", 9) )
+			fprintf(stderr, "%s (dettagli in AAA_mypdfsearch_parsing_errors.txt)\n", pszMessage);
+		else
+			fprintf(stderr, "%s\n", pszMessage);
+		return;
+	}
+
+	if ( NULL == pszFile || '\0' == pszFile[0] )
+	{
+		fprintf(stderr, "%s\n", pszMessage);
+		return;
+	}
+
+	// Gli avvisi (es. PDF saltato per la password) si vedono anche a video, su stderr: il testo su stdout resta pulito.
+	if ( MYPDF_MSG_WARNING == level )
+		fprintf(stderr, "File '%s': %s\n", pszFile, pszMessage);
+
+	if ( NULL == pParams->fpErrors )
+	{
+		pParams->fpErrors = fopen("AAA_mypdfsearch_parsing_errors.txt", "a");
+		if ( NULL == pParams->fpErrors )
+		{
+			fwprintf(stderr, L"\n\nERRORE: impossibile creare il file specificato per i messaggi d'errore.\n\n");
+			fprintf(stderr, "%s\n", pszMessage);
+			return;
+		}
+
+		#if defined(_WIN64) || defined(_WIN32)
+		_setmode(_fileno(pParams->fpErrors), _O_U8TEXT);
+		#else
+		// BOM UTF-8
+		fwprintf(pParams->fpErrors, L"%s", "\xEF\xBB\xBF");
+		#endif
+	}
+
+	#if !defined(_WIN64) && !defined(_WIN32)
+	fwprintf(pParams->fpErrors, L"\nFile: '%s'\n", pszFile);
+	#else
+	{
+		size_t lung = strnlen(pszFile, PATH_MAX);
+		size_t idx;
+
+		fwprintf(pParams->fpErrors, L"\nFILE = <");
+		for ( idx = 0; idx < lung; idx++ )
+			fwprintf(pParams->fpErrors, L"%c", pszFile[idx]);
+		fwprintf(pParams->fpErrors, L">\n");
+	}
+	#endif
+
+	fwprintf(pParams->fpErrors, L"\t%s\n", pszMessage);
+}

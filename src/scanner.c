@@ -21,6 +21,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <malloc.h>
 
 #if defined(_WIN64) || defined(_WIN32)
@@ -215,89 +216,97 @@ static int read_pdf_literal_string(const unsigned char *input, int *pIndex, unsi
     return 1;
 }
 
-int MakeAndOpenErrorsFile(Params *pParams, int bBom)
+void myEmitMessage(Params *pParams, mypdf_MessageLevel level, const char *szMsg)
 {
-	int retValue = 1;
+	size_t len;
+	char *pCopy;
+	const char *pStart;
 
-	#if !defined(_WIN64) && !defined(_WIN32)
-	unsigned char szBOM[21];
-	#endif
+	if ( NULL == pParams || NULL == pParams->pfnMessage || NULL == szMsg )
+		return;
 
-	if ( NULL != pParams->fpErrors )
-		goto uscita;
+	// Spazi e a-capo iniziali e finali vengono tolti: il formato lo decide chi riceve il messaggio.
+	pStart = szMsg;
+	while ( *pStart == '\n' || *pStart == '\r' || *pStart == ' ' || *pStart == '\t' )
+		pStart++;
 
-	#if !defined(_WIN64) && !defined(_WIN32)
-	// EF BB BF
-	szBOM[0] = 0xEF;
-	szBOM[1] = 0xBB;
-	szBOM[2] = 0xBF;
-	szBOM[3] = '\0';
-	#endif
+	len = strlen(pStart);
+	while ( len > 0 && (pStart[len - 1] == '\n' || pStart[len - 1] == '\r' || pStart[len - 1] == ' ' || pStart[len - 1] == '\t') )
+		len--;
 
-	//pParams->fpErrors = fopen("AAA mypdfsearch parsing errors.txt", "wb");
-	pParams->fpErrors = fopen("AAA_mypdfsearch_parsing_errors.txt", "a");
-	if ( pParams->fpErrors == NULL )
-	{
-		wprintf(L"\n\nERRORE: impossibile creara il file specificato per i messaggi d'errore.\n\n");
-		retValue = 0;
-		goto uscita;
-	}
+	pCopy = (char*)malloc(len + 1);
+	if ( NULL == pCopy )
+		return;
 
-	if ( !bBom )
-		goto uscita;
+	memcpy(pCopy, pStart, len);
+	pCopy[len] = '\0';
 
-	#if defined(_WIN64) || defined(_WIN32)
-	_setmode(_fileno(pParams->fpErrors), _O_U8TEXT);
-	#endif
+	pParams->pfnMessage(pParams->pMessageUser, level, pParams->szFileName, pCopy);
 
-	#if !defined(_WIN64) && !defined(_WIN32)
-	// EF BB BF
-	fwprintf(pParams->fpErrors, L"%s", szBOM);
-	#endif
-
-	uscita:
-
-	return retValue;
+	free(pCopy);
 }
 
 int myShowErrorMessage(Params *pParams, const char *szMsg, int bPrintToErrorFile)
 {
 	if ( bPrintToErrorFile )
 	{
-		// Log Convention: Messages starting with "WARNING" (possibly
-		// preceded by spaces or a-capo) are warnings; all others are errors.
+		// Convenzione: i messaggi che iniziano con "WARNING" (eventualmente preceduto da spazi o a-capo)
+		// sono avvisi; tutti gli altri sono errori.
 		const char *pMsg = szMsg;
 		while ( *pMsg == '\n' || *pMsg == '\r' || *pMsg == ' ' || *pMsg == '\t' )
 			pMsg++;
 
 		if ( strncmp(pMsg, "WARNING", 7) == 0 )
-			pParams->nFileWarningCount++;
-		else
-			pParams->nFileErrorCount++;
-
-		if ( !MakeAndOpenErrorsFile(pParams, 1) )
-			return 0;
-
-		#if !defined(_WIN64) && !defined(_WIN32)
-		fwprintf(pParams->fpErrors, L"\nFile: '%s'\n", pParams->szFileName);
-		#else
-		int lung = strnlen(pParams->szFileName, MAX_LEN_STR);
-		fwprintf(pParams->fpErrors, L"\nFILE = <");
-		for ( int idx = 0; idx < lung; idx++ )
 		{
-			fwprintf(pParams->fpErrors, L"%c", pParams->szFileName[idx]);
+			pParams->nFileWarningCount++;
+			myEmitMessage(pParams, MYPDF_MSG_WARNING, szMsg);
 		}
-		fwprintf(pParams->fpErrors, L">\n");
-		#endif
-
-		fwprintf(pParams->fpErrors, L"\t%s\n", szMsg);
+		else
+		{
+			pParams->nFileErrorCount++;
+			myEmitMessage(pParams, MYPDF_MSG_ERROR, szMsg);
+		}
 	}
 	else
 	{
-		wprintf(L"%s\n", szMsg);
+		myEmitMessage(pParams, MYPDF_MSG_INFO, szMsg);
 	}
 
 	return 1;
+}
+
+static void myReportV(Params *pParams, int bWarning, const char *szFormat, va_list args)
+{
+	char szBuf[4096];
+
+	vsnprintf(szBuf, sizeof(szBuf), szFormat, args);
+
+	if ( bWarning )
+	{
+		pParams->nFileWarningCount++;
+		myEmitMessage(pParams, MYPDF_MSG_WARNING, szBuf);
+	}
+	else
+	{
+		pParams->nFileErrorCount++;
+		myEmitMessage(pParams, MYPDF_MSG_ERROR, szBuf);
+	}
+}
+
+void myReportError(Params *pParams, const char *szFormat, ...)
+{
+	va_list args;
+	va_start(args, szFormat);
+	myReportV(pParams, 0, szFormat, args);
+	va_end(args);
+}
+
+void myReportWarning(Params *pParams, const char *szFormat, ...)
+{
+	va_list args;
+	va_start(args, szFormat);
+	myReportV(pParams, 1, szFormat, args);
+	va_end(args);
 }
 
 int myCodepointToUtf8(uint32_t codepoint, uint32_t *pUtf8)

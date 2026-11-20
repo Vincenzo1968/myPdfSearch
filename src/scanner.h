@@ -757,7 +757,7 @@ typedef struct tagParams
 	FILE *fpLengthObjRef;
 
 	FILE *fpOutput;
-	FILE *fpErrors;
+	FILE *fpErrors;   // (solo programma a riga di comando) file di log aperto dal chiamante: la libreria lo usa solo per i dump degli oggetti non validi, se non e' NULL
 
 	char szPdfHeader[128];
 	char szPdfVersion[128];
@@ -926,6 +926,8 @@ typedef struct tagParams
 	// Uscita del testo (callback dell'API pubblica; NULL = non richiesto)
 	mypdf_FileStartCallback pfnFileStart;
 	void *pFileStartUser;
+	mypdf_MessageCallback pfnMessage;
+	void *pMessageUser;
 	mypdf_PageStartCallback pfnPageStart;
 	void *pPageStartUser;
 	mypdf_PageTextCallback pfnPageText;
@@ -1038,8 +1040,20 @@ typedef enum tagStates
 // It states the Set function somewhere in the header
 void SetOnUserPasswordCallback(Params *pParams, OnUserPasswordCallback callback, void *pUser);
 
-int MakeAndOpenErrorsFile(Params *pParams, int bBom);
+// Messaggi della libreria: unico punto di uscita (callback dei messaggi; senza callback i messaggi vengono scartati).
+//   myEmitMessage:      invia il messaggio alla callback, senza contarlo.
+//   myShowErrorMessage: classifica (prefisso "WARNING" = avviso, altrimenti errore), aggiorna i contatori del file e invia.
+//                       bPrintToErrorFile = 0 (solo nelle istruzioni di debug): invia come messaggio informativo senza contare.
+//   myReportError / myReportWarning: come myShowErrorMessage ma con formato printf.
+void myEmitMessage(Params *pParams, mypdf_MessageLevel level, const char *szMsg);
 int myShowErrorMessage(Params *pParams, const char *szMsg, int bPrintToErrorFile);
+#if defined(__GNUC__)
+void myReportError(Params *pParams, const char *szFormat, ...) __attribute__((format(printf, 2, 3)));
+void myReportWarning(Params *pParams, const char *szFormat, ...) __attribute__((format(printf, 2, 3)));
+#else
+void myReportError(Params *pParams, const char *szFormat, ...);
+void myReportWarning(Params *pParams, const char *szFormat, ...);
+#endif
 
 unsigned char ReadNextChar(Params *pParams);
 
