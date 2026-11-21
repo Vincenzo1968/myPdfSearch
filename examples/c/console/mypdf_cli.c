@@ -550,31 +550,31 @@ int myParseCommandLine(CliOptions *pParams, int argc, char **argv)
 
 	if ( !(pParams->bOptVersionOrHelp) && (pParams->szFilePdf[0] == '\0' && pParams->szPath[0] == '\0') )
 	{
-		wprintf(L"\n\nErrore: dev'essere specificata una(e solo una, non entrambe) delle due opzioni: '-p (--path)' o '-e(--extracttextfrom)'\n\n");
+		wprintf(L"\n\nError: exactly one (not both) of the two options must be specified: '-p (--path)' or '-e(--extracttextfrom)'\n\n");
 		return 0;
 	}
 
 	if ( !(pParams->bOptVersionOrHelp) && (pParams->szFilePdf[0] != '\0' && pParams->szPath[0] != '\0') )
 	{
-		wprintf(L"\n\nErrore: dev'essere specificata soltanto una delle due opzioni mutualmente esclusive: '-p (--path)' o '-e(--extracttextfrom)'\n\n");
+		wprintf(L"\n\nError: only one of the two mutually exclusive options must be specified: '-p (--path)' or '-e(--extracttextfrom)'\n\n");
 		return 0;
 	}
 
 	if ( !(pParams->bOptVersionOrHelp) && (pParams->toPage > 0 && pParams->toPage < pParams->fromPage) )
 	{
-		wprintf(L"\n\nErrore: il valore specificato per l'opzione topage e' minore del valore specificato per l'opzione frompage. Dev'essere maggiore o uguale.\n\n");
+		wprintf(L"\n\nError: the value specified for the topage option is less than the value specified for the frompage option. It must be greater than or equal.\n\n");
 		return 0;
 	}
 
 	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] != '\0' && pParams->szWords[0] == '\0') )
 	{
-		wprintf(L"\n\nErrore: bisogna specificare le parole da cercare tramite l'opzione '-w (--words)'\n\n");
+		wprintf(L"\n\nError: the words to search must be specified with the option '-w (--words)'\n\n");
 		return 0;
 	}
 
 	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] == '\0' && pParams->szWords[0] != '\0') )
 	{
-		wprintf(L"\n\nErrore: bisogna specificare la cartella contenente i file pdf tramite l'opzione '-p (--path)'\n\n");
+		wprintf(L"\n\nError: the folder containing the pdf files must be specified with the option '-p (--path)'\n\n");
 		return 0;
 	}
 
@@ -603,7 +603,7 @@ int MakeAndOpenOutputFile(const char *pszOutputFile, FILE **ppFile)
 	{
 		fclose(*ppFile);
 		*ppFile = NULL;
-		wprintf(L"\n\nERRORE: il file specificato per l'output esiste già.\nBisogna indicare il nome di un file non esistente.\n\n");
+		wprintf(L"\n\nERROR: the specified output file already exists.\nPlease specify the name of a file that does not exist.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -611,7 +611,7 @@ int MakeAndOpenOutputFile(const char *pszOutputFile, FILE **ppFile)
 	(*ppFile) = fopen(pszOutputFile, "wb");
 	if ( (*ppFile) == NULL )
 	{
-		wprintf(L"\n\nERRORE: impossibile creara il file specificato per l'output: '%s'.\n\n", pszOutputFile);
+		wprintf(L"\n\nERROR: unable to create the specified output file: '%s'.\n\n", pszOutputFile);
 		retValue = 0;
 		goto uscita;
 	}
@@ -668,7 +668,7 @@ static const char *LinuxStorageTransport(const char *devicePath)
     char resolvedPath[PATH_MAX];
 
     if (devicePath == NULL || realpath(devicePath, resolvedPath) == NULL)
-        return "non rilevato";
+        return "not detected";
 
     if (strstr(resolvedPath, "/nvme") != NULL)
         return "NVMe";
@@ -683,7 +683,7 @@ static const char *LinuxStorageTransport(const char *devicePath)
     if (strstr(resolvedPath, "/sas") != NULL)
         return "SAS";
 
-    return "non identificato";
+    return "not identified";
 }
 
 static int IsVirtualBlockDeviceName(const char *name)
@@ -701,12 +701,12 @@ static void PrintLinuxStorageInfo(void)
     struct dirent *entry;
     int count = 0;
 
-    wprintf(L"\nUnità di memorizzazione (informazioni sysfs):\n");
+    wprintf(L"\nStorage units (sysfs information):\n");
 
     dir = opendir("/sys/block");
     if (dir == NULL)
     {
-        wprintf(L"  Informazioni sui dispositivi non disponibili.\n");
+        wprintf(L"  Device information not available.\n");
         return;
     }
 
@@ -746,26 +746,26 @@ static void PrintLinuxStorageInfo(void)
         (void)snprintf(devicePath, sizeof(devicePath), "/sys/block/%s/device", entry->d_name);
         sizeGiB = ((double)sectors * 512.0) / (1024.0 * 1024.0 * 1024.0);
 
-        wprintf(L"  Dispositivo        : /dev/%hs\n", entry->d_name);
+        wprintf(L"  Device             : /dev/%hs\n", entry->d_name);
         if (vendor[0] != '\0')
-            wprintf(L"    Produttore       : %hs\n", vendor);
+            wprintf(L"    Vendor           : %hs\n", vendor);
         if (model[0] != '\0')
-            wprintf(L"    Modello          : %hs\n", model);
-        wprintf(L"    Interfaccia      : %hs\n", LinuxStorageTransport(devicePath));
+            wprintf(L"    Model            : %hs\n", model);
+        wprintf(L"    Interface        : %hs\n", LinuxStorageTransport(devicePath));
 
         if (sectors == 0)
-            wprintf(L"    Capacità         : non disponibile (nessun supporto o capacità zero)\n");
+            wprintf(L"    Capacity         : not available (no media or zero capacity)\n");
         else
-            wprintf(L"    Capacità         : %.2f GiB\n", sizeGiB);
+            wprintf(L"    Capacity         : %.2f GiB\n", sizeGiB);
 
         if (strncmp(entry->d_name, "sr", 2) == 0)
-            wprintf(L"    Tipo             : unità ottica\n");
+            wprintf(L"    Type             : optical drive\n");
         else if (rotational == 1)
-            wprintf(L"    Supporto         : rotazionale (il kernel segnala ROTA=1; tipico HDD)\n");
+            wprintf(L"    Media            : rotational (the kernel reports ROTA=1; typical HDD)\n");
         else if (rotational == 0)
-            wprintf(L"    Supporto         : non rotazionale (SSD/flash o lettore)\n");
+            wprintf(L"    Media            : non-rotational (SSD/flash or reader)\n");
         else
-            wprintf(L"    Supporto         : non determinato\n");
+            wprintf(L"    Media            : undetermined\n");
 
         count++;
     }
@@ -773,7 +773,7 @@ static void PrintLinuxStorageInfo(void)
     closedir(dir);
 
     if (count == 0)
-        wprintf(L"  Nessuna unità fisica rilevata.\n");
+        wprintf(L"  No physical unit detected.\n");
 }
 
 static const char *PciVendorName(unsigned long vendorId)
@@ -785,7 +785,7 @@ static const char *PciVendorName(unsigned long vendorId)
         case 0x10DE: return "NVIDIA";
         case 0x1022: return "AMD";
         case 0x1000: return "Broadcom/LSI";
-        default: return "produttore non mappato";
+        default: return "vendor not mapped";
     }
 }
 
@@ -795,12 +795,12 @@ static void PrintLinuxGraphicsInfo(void)
     struct dirent *entry;
     int count = 0;
 
-    wprintf(L"\nGPU e controller grafici (PCI/sysfs):\n");
+    wprintf(L"\nGPUs and graphics controllers (PCI/sysfs):\n");
 
     dir = opendir("/sys/bus/pci/devices");
     if (dir == NULL)
     {
-        wprintf(L"  Informazioni PCI non disponibili.\n");
+        wprintf(L"  PCI information not available.\n");
         return;
     }
 
@@ -813,7 +813,7 @@ static void PrintLinuxGraphicsInfo(void)
         char subVendorText[32] = "";
         char subDeviceText[32] = "";
         char driverPath[PATH_MAX];
-        char driverName[128] = "non rilevato";
+        char driverName[128] = "not detected";
         unsigned long classCode;
         unsigned long vendorId;
         unsigned long deviceId;
@@ -862,43 +862,43 @@ static void PrintLinuxGraphicsInfo(void)
         }
 
         wprintf(L"  PCI address       : %hs\n", entry->d_name);
-        wprintf(L"    Classe          : ");
+        wprintf(L"    Class           : ");
         if (((classCode >> 8) & 0xFFUL) == 0x00UL)
-            wprintf(L"controller VGA\n");
+            wprintf(L"VGA controller\n");
         else if (((classCode >> 8) & 0xFFUL) == 0x02UL)
-            wprintf(L"controller 3D\n");
+            wprintf(L"3D controller\n");
         else
-            wprintf(L"controller display\n");
-        wprintf(L"    Produttore      : %hs (PCI %04lx)\n", PciVendorName(vendorId), vendorId);
+            wprintf(L"display controller\n");
+        wprintf(L"    Vendor          : %hs (PCI %04lx)\n", PciVendorName(vendorId), vendorId);
         wprintf(L"    Device ID       : %04lx\n", deviceId);
         if (vendorId == 0x1002 && deviceId == 0x675D)
-            wprintf(L"    Modello noto    : Turks PRO (Radeon HD 7570)\n");
+            wprintf(L"    Known model     : Turks PRO (Radeon HD 7570)\n");
         if (subVendorText[0] != '\0' && subDeviceText[0] != '\0')
             wprintf(L"    Subsystem ID    : %04lx:%04lx\n", subVendorId, subDeviceId);
-        wprintf(L"    Driver kernel   : %hs\n", driverName);
+        wprintf(L"    Kernel driver   : %hs\n", driverName);
         count++;
     }
 
     closedir(dir);
 
     if (count == 0)
-        wprintf(L"  Nessun controller grafico PCI rilevato.\n");
+        wprintf(L"  No PCI graphics controller detected.\n");
 }
 #endif // __linux__ 
 
 void PrintHardwareInfo(void)
 {
-    wprintf(L"Informazioni hardware e software:\n");
+    wprintf(L"Hardware and software information:\n");
 
     // Informazioni sul compilatore e sulla configurazione di build. 
 #if defined(__clang__)
-    wprintf(L"  Compilatore        : Clang %hs\n", __VERSION__);
+    wprintf(L"  Compiler           : Clang %hs\n", __VERSION__);
 #elif defined(__GNUC__)
-    wprintf(L"  Compilatore        : GCC %hs\n", __VERSION__);
+    wprintf(L"  Compiler           : GCC %hs\n", __VERSION__);
 #elif defined(_MSC_VER)
-    wprintf(L"  Compilatore        : Microsoft Visual C++ (%d)\n", _MSC_VER);
+    wprintf(L"  Compiler           : Microsoft Visual C++ (%d)\n", _MSC_VER);
 #else
-    wprintf(L"  Compilatore        : non identificato\n");
+    wprintf(L"  Compiler           : not identified\n");
 #endif
 
 #if defined(MYPDFSEARCH_BUILD_DEBUG)
@@ -906,32 +906,32 @@ void PrintHardwareInfo(void)
 #elif defined(MYPDFSEARCH_BUILD_RELEASE)
     wprintf(L"  Build              : RELEASE (-O3)\n");
 #elif defined(__OPTIMIZE__)
-    wprintf(L"  Ottimizzazione     : attiva (livello %d)\n", __OPTIMIZE__);
+    wprintf(L"  Optimization       : enabled (level %d)\n", __OPTIMIZE__);
 #else
-    wprintf(L"  Ottimizzazione     : non rilevata/disattivata\n");
+    wprintf(L"  Optimization       : not detected/disabled\n");
 #endif
 
 #if defined(__STDC_VERSION__)
 #if __STDC_VERSION__ >= 201710L
 #ifdef __STRICT_ANSI__
-    wprintf(L"  Standard C         : C17\n");
+    wprintf(L"  C standard         : C17\n");
 #else
-    wprintf(L"  Standard C         : GNU C17\n");
+    wprintf(L"  C standard         : GNU C17\n");
 #endif
 #elif __STDC_VERSION__ >= 201112L
 #ifdef __STRICT_ANSI__
-    wprintf(L"  Standard C         : C11\n");
+    wprintf(L"  C standard         : C11\n");
 #else
-    wprintf(L"  Standard C         : GNU C11\n");
+    wprintf(L"  C standard         : GNU C11\n");
 #endif
 #elif __STDC_VERSION__ >= 199901L
 #ifdef __STRICT_ANSI__
-    wprintf(L"  Standard C         : C99\n");
+    wprintf(L"  C standard         : C99\n");
 #else
-    wprintf(L"  Standard C         : GNU C99\n");
+    wprintf(L"  C standard         : GNU C99\n");
 #endif
 #else
-    wprintf(L"  Standard C         : versione precedente a C99\n");
+    wprintf(L"  C standard         : pre-C99 version\n");
 #endif
 #endif
 
@@ -941,15 +941,15 @@ void PrintHardwareInfo(void)
 
     GetNativeSystemInfo(&sysInfo);
     wprintf(L"\nHardware:\n");
-    wprintf(L"  CPU logiche online : %u\n", sysInfo.dwNumberOfProcessors);
-    wprintf(L"  Architettura OS    : ");
+    wprintf(L"  Online CPUs        : %u\n", sysInfo.dwNumberOfProcessors);
+    wprintf(L"  OS architecture    : ");
     if (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
         wprintf(L"x64\n");
     else if (sysInfo.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
         wprintf(L"x86\n");
     else
-        wprintf(L"Sconosciuta\n");
-    wprintf(L"  Architettura build : %ld-bit\n", (long)(sizeof(void *) * 8));
+        wprintf(L"Unknown\n");
+    wprintf(L"  Build architecture : %ld-bit\n", (long)(sizeof(void *) * 8));
 
     // Il nome CPU viene letto dal Registro di sistema. 
     {
@@ -974,8 +974,8 @@ void PrintHardwareInfo(void)
     {
         double totalRamGiB = (double)memStatus.ullTotalPhys / (1024.0 * 1024.0 * 1024.0);
         double availRamGiB = (double)memStatus.ullAvailPhys / (1024.0 * 1024.0 * 1024.0);
-        wprintf(L"  RAM totale         : %.2f GiB\n", totalRamGiB);
-        wprintf(L"  RAM disponibile    : %.2f GiB (utilizzo sistema: %lu%%)\n",
+        wprintf(L"  Total RAM          : %.2f GiB\n", totalRamGiB);
+        wprintf(L"  Available RAM      : %.2f GiB (system usage: %lu%%)\n",
                 availRamGiB, memStatus.dwMemoryLoad);
     }
 
@@ -985,22 +985,22 @@ void PrintHardwareInfo(void)
     struct utsname osInfo;
     if (uname(&osInfo) == 0)
     {
-        wprintf(L"\nSistema:\n");
-        wprintf(L"  Sistema operativo : %hs\n", osInfo.sysname);
+        wprintf(L"\nSystem:\n");
+        wprintf(L"  Operating system  : %hs\n", osInfo.sysname);
         wprintf(L"  Kernel             : %hs\n", osInfo.release);
-        wprintf(L"  Architettura HW    : %hs\n", osInfo.machine);
+        wprintf(L"  HW architecture    : %hs\n", osInfo.machine);
     }
 
     // CPU logiche visibili al sistema. 
     {
         long numProcessors = sysconf(_SC_NPROCESSORS_ONLN);
         if (numProcessors > 0)
-            wprintf(L"\nHardware:\n  CPU logiche online : %ld\n", numProcessors);
+            wprintf(L"\nHardware:\n  Online CPUs        : %ld\n", numProcessors);
         else
-            wprintf(L"\nHardware:\n  CPU logiche online : non rilevate\n");
+            wprintf(L"\nHardware:\n  Online CPUs        : not detected\n");
     }
 
-    wprintf(L"  Architettura build : %ld-bit\n", (long)(sizeof(void *) * 8));
+    wprintf(L"  Build architecture : %ld-bit\n", (long)(sizeof(void *) * 8));
 
     // CPU logiche consentite al processo secondo la CPU affinity. 
 #if defined(__linux__)
@@ -1011,7 +1011,7 @@ void PrintHardwareInfo(void)
         {
             int allowedCpus = CPU_COUNT(&cpuSet);
             if (allowedCpus > 0)
-                wprintf(L"  CPU consentite     : %d\n", allowedCpus);
+                wprintf(L"  Allowed CPUs       : %d\n", allowedCpus);
         }
     }
 #endif
@@ -1052,7 +1052,7 @@ void PrintHardwareInfo(void)
         {
             unsigned long maxFreqKHz;
             if (fscanf(fpFreq, "%lu", &maxFreqKHz) == 1)
-                wprintf(L"  Frequenza max CPU  : %.2f GHz (valore dichiarato)\n",
+                wprintf(L"  Max CPU frequency  : %.2f GHz (declared value)\n",
                         (double)maxFreqKHz / 1000000.0);
             fclose(fpFreq);
         }
@@ -1087,8 +1087,8 @@ void PrintHardwareInfo(void)
                 if (memAvailable <= memTotal)
                     usedPercent = ((double)(memTotal - memAvailable) / (double)memTotal) * 100.0;
 
-                wprintf(L"  RAM totale         : %.2f GiB\n", totalRamGiB);
-                wprintf(L"  RAM disponibile    : %.2f GiB (utilizzo sistema stimato: %.1f%%)\n",
+                wprintf(L"  Total RAM          : %.2f GiB\n", totalRamGiB);
+                wprintf(L"  Available RAM      : %.2f GiB (estimated system usage: %.1f%%)\n",
                         availRamGiB, usedPercent);
             }
         }
@@ -1101,10 +1101,10 @@ void PrintHardwareInfo(void)
         {
             // Linux esprime ru_maxrss in KiB; macOS lo esprime in byte. 
 #if defined(__APPLE__)
-            wprintf(L"  Picco RSS processo : %.2f MiB\n",
+            wprintf(L"  Process peak RSS   : %.2f MiB\n",
                     (double)processUsage.ru_maxrss / (1024.0 * 1024.0));
 #else
-            wprintf(L"  Picco RSS processo : %.2f MiB\n",
+            wprintf(L"  Process peak RSS   : %.2f MiB\n",
                     (double)processUsage.ru_maxrss / 1024.0);
 #endif
         }
@@ -1212,7 +1212,7 @@ wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen)
 	if (wcs == NULL)
 	{
 		//perror("calloc");
-		wprintf(L"ERRORE myMultibyteToWidechar calloc: %s \n", strerror(errno));
+		wprintf(L"ERROR myMultibyteToWidechar calloc: %s \n", strerror(errno));
 
 		return NULL;
 	}
@@ -1220,7 +1220,7 @@ wchar_t* myMultibyteToWidechar(const char *psz, size_t mbslen)
 	if (mbstowcs(wcs, (char*)psz, mbslen + 1) == (size_t) -1)
 	{
 		//perror("mbstowcs");
-		wprintf(L"ERRORE myMultibyteToWidechar mbstowcs: %s \n", strerror(errno));
+		wprintf(L"ERROR myMultibyteToWidechar mbstowcs: %s \n", strerror(errno));
 
 		free(wcs);
 		wcs = NULL;
@@ -1247,7 +1247,7 @@ void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *
 
 	if ( MYPDF_MSG_INFO == level )
 	{
-		if ( 0 == strncmp(pszMessage, "ERRORI (", 8) || 0 == strncmp(pszMessage, "WARNING (", 9) )
+		if ( 0 == strncmp(pszMessage, "ERRORS (", 8) || 0 == strncmp(pszMessage, "WARNING (", 9) )
 			fprintf(stderr, "%s (dettagli in AAA_mypdfsearch_parsing_errors.txt)\n", pszMessage);
 		else
 			fprintf(stderr, "%s\n", pszMessage);
@@ -1269,7 +1269,7 @@ void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *
 		pOut->fpErrors = fopen("AAA_mypdfsearch_parsing_errors.txt", "a");
 		if ( NULL == pOut->fpErrors )
 		{
-			fwprintf(stderr, L"\n\nERRORE: impossibile creare il file specificato per i messaggi d'errore.\n\n");
+			fwprintf(stderr, L"\n\nERROR: unable to create the specified error messages file.\n\n");
 			fprintf(stderr, "%s\n", pszMessage);
 			return;
 		}

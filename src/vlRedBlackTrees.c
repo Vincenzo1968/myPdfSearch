@@ -606,7 +606,7 @@ void vlrbtTraverseReverseInOrder(vlRedBlackTree *pTree)
 			}
 			else
 			{
-				printf("Errore: lo stack e' pieno.\n");
+				printf("Error: the stack is full.\n");
 				return;
 			}
 		}
@@ -652,7 +652,7 @@ void vlrbtTraverseInOrder(vlRedBlackTree *pTree)
 			}
 			else
 			{
-				printf("Errore: lo stack e' pieno.\n");
+				printf("Error: the stack is full.\n");
 				return;
 			}
 		}

@@ -493,7 +493,7 @@ void PrintTokenTrailer(Token *pToken, char cCarattereIniziale, char cCarattereFi
 			wprintf(L"T_VOID_STRING");
 			break;
 		default:
-			wprintf(L"TOKEN n° -> %d", pToken->Type);
+			wprintf(L"TOKEN no. -> %d", pToken->Type);
 			break;
 	}
 
@@ -518,14 +518,14 @@ int matchTrailer(Params *pParams, TokenTypeEnum ExpectedToken, char *pszFunction
 
 		if ( NULL != pszFunctionName )
 		{
-			snprintf(pParams->szError, 1024, "\nFUNZIONE match(richiamata dalla funzione '%s' -> errore di sintassi: Atteso token n° %d, trovato token n° %d\n", pszFunctionName, ExpectedToken, pParams->myToken.Type);
+			snprintf(pParams->szError, 1024, "\nFUNCTION match(called by function '%s' -> syntax error: Expected token no. %d, found token no. %d\n", pszFunctionName, ExpectedToken, pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
-			//fwprintf(pParams->fpErrors, L"\nFUNZIONE match(registered by the function '%s' -> syntax error: Expected token n° %d, found token n° %d\n", pszFunctionName, ExpectedToken, pParams->myToken.Type);
-			//wprintf(L"\nFUNZIONE match(registered by the '%s' function -> syntax error: Expected token n° %d, found token n° %d\n", pszFunctionName, ExpectedToken, pParams->myToken.Type);
+			//fwprintf(pParams->fpErrors, L"\nFUNCTION match(registered by the function '%s' -> syntax error: Expected token n° %d, found token n° %d\n", pszFunctionName, ExpectedToken, pParams->myToken.Type);
+			//wprintf(L"\nFUNCTION match(registered by the '%s' function -> syntax error: Expected token n° %d, found token n° %d\n", pszFunctionName, ExpectedToken, pParams->myToken.Type);
 		}
 		else
 		{
-			snprintf(pParams->szError, 1024, "\nFUNZIONE match -> errore di sintassi: Atteso token n° %d, trovato token n° %d\n", ExpectedToken, pParams->myToken.Type);
+			snprintf(pParams->szError, 1024, "\nFUNCTION match -> syntax error: Expected token no. %d, found token no. %d\n", ExpectedToken, pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(pParams->fpErrors, L"\nFUNTION match -> syntax error: Expected token no. %d, found token no. %d\n", ExpectedToken, pParams->myToken.Type);
 			//wprintf(L"\nFUNTION match -> syntax error: Expected token no. %d, found token no. %d\n", ExpectedToken, pParams->myToken.Type);
@@ -535,7 +535,7 @@ int matchTrailer(Params *pParams, TokenTypeEnum ExpectedToken, char *pszFunction
 #if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_MATCH)
 
 	if ( 0 == retValue )
-		wprintf(L"Token atteso : ");
+		wprintf(L"Expected token : ");
 
 	wprintf(L"MATCH ");
 	switch ( ExpectedToken )
@@ -614,7 +614,7 @@ int matchTrailer(Params *pParams, TokenTypeEnum ExpectedToken, char *pszFunction
 	}
 
 	if ( 0 == retValue )
-		wprintf(L" <> Token trovato : ");
+		wprintf(L" <> Found token : ");
 
 	PrintTokenTrailer(&(pParams->myToken), '\n', '\n', 1);
 
@@ -634,22 +634,22 @@ int trailerbody(Params *pParams)
 	{
 		mynumstacklist_Free( &(pParams->myNumStack) );
 
-		wprintf(L"\nBLOCCO ERRATO INIZIO\n");
+		wprintf(L"\nWRONG BLOCK START\n");
 		for (int k = 0; k < pParams->blockLen; k++ )
 		{
 			wprintf(L"%c", pParams->myBlock[k]);
 		}
-		wprintf(L"\nBLOCCO ERRATO FINE\n");
+		wprintf(L"\nWRONG BLOCK END\n");
 
 		return 0;
 	}
 
-	wprintf(L"\nBLOCCO CORRETTO INIZIO\n");
+	wprintf(L"\nCORRECT BLOCK START\n");
 	for (int k = 0; k < pParams->blockLen; k++ )
 	{
 		wprintf(L"%c", pParams->myBlock[k]);
 	}
-	wprintf(L"\nBLOCCO CORRETTO FINE\n");
+	wprintf(L"\nCORRECT BLOCK END\n");
 
 
 	if ( !traileritems(pParams) )
@@ -779,7 +779,7 @@ int trailerobj(Params *pParams)
 
 				if ( !matchTrailer(pParams, T_KW_R, "trailerobj") )
 				{
-					snprintf(pParams->szError, 1024, "Errore parsing trailerobj: atteso T_KW_R, trovato %d\n", pParams->myToken.Type);
+					snprintf(pParams->szError, 1024, "Error parsing trailerobj: expected T_KW_R, found %d\n", pParams->myToken.Type);
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore parsing trailerobj: expected T KW R, found %d\n", pParams->myToken.Type);
 					//fwprintf(pParams->fpErrors, L"Errore parsing trailerobj: expected T KW R, found %d\n", pParams->myToken.Type);
@@ -797,7 +797,7 @@ int trailerobj(Params *pParams)
 				{
 					if ( iGen < 0 )
 					{
-						snprintf(pParams->szError, 1024, "Errore parsing trailerobj: Root value shall be an indirect reference\n");
+						snprintf(pParams->szError, 1024, "Error parsing trailerobj: Root value shall be an indirect reference\n");
 						myShowErrorMessage(pParams, pParams->szError, 1);
 						//wprintf(L"Errore parsing trailerobj: Root value shall not be an indirect reference");
 						//fwprintf(pParams->fpErrors, L"Errore parsing trailerobj: Root value shall be an indirect reference\n");
@@ -811,7 +811,7 @@ int trailerobj(Params *pParams)
 				{
 					if ( iGen < 0 )
 					{
-						snprintf(pParams->szError, 1024, "Errore parsing trailerobj: Encrypt value shall be an indirect reference\n");
+						snprintf(pParams->szError, 1024, "Error parsing trailerobj: Encrypt value shall be an indirect reference\n");
 						myShowErrorMessage(pParams, pParams->szError, 1);
 						//wprintf(L"Errore parsing trailerobj: Encrypt value shall not be an indirect reference");
 						//fwprintf(pParams->fpErrors, L"Errore parsing trailerobj: Encrypt value shall be an indirect reference\n");
@@ -831,7 +831,7 @@ int trailerobj(Params *pParams)
 				{
 					if ( iGen < 0 )
 					{
-						snprintf(pParams->szError, 1024, "Errore parsing trailerobj: Size value shall be an indirect reference\n");
+						snprintf(pParams->szError, 1024, "Error parsing trailerobj: Size value shall be an indirect reference\n");
 						myShowErrorMessage(pParams, pParams->szError, 1);
 						//wprintf(L)Errore parsing trailerobj: Size value shall not be an indirect reference");
 						//fwprintf(pParams->fpErrors, L"Errore parsing trailerobj: Size value shall be an indirect reference\n");
@@ -852,7 +852,7 @@ int trailerobj(Params *pParams)
 				{
 					if ( iGen < 0 )
 					{
-						snprintf(pParams->szError, 1024, "Errore parsing trailerobj: Prev value shall be an indirect reference\n");
+						snprintf(pParams->szError, 1024, "Error parsing trailerobj: Prev value shall be an indirect reference\n");
 						myShowErrorMessage(pParams, pParams->szError, 1);
 						//wprintf(L)Errore parsing trailerobj: Prev value shall not be an indirect reference);
 						//fwprintf(pParams->fpErrors, L"Errore parsing trailerobj: Prev value shall be an indirect reference\n");
@@ -922,7 +922,7 @@ int trailerobj(Params *pParams)
 				return 0;
 			break;
 		default:
-			snprintf(pParams->szError, 1024, "Errore parsing trailerobj: token non valido: %d\n", pParams->myToken.Type);
+			snprintf(pParams->szError, 1024, "Error parsing trailerobj: invalid token: %d\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing trailerobj: not valid token: %d\n, pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"Errore parsing trailerobj: not valid token: %d\n, pParams->myToken.Type);
@@ -946,7 +946,7 @@ int trailerarrayobjs(Params *pParams)
 
 		if ( pParams->myToken.Type == T_ERROR || pParams->myToken.Type == T_EOF )
 		{
-			snprintf(pParams->szError, 8192, "Errore parsing trailerarrayobjs: token non valido: %d\n", pParams->myToken.Type);
+			snprintf(pParams->szError, 8192, "Error parsing trailerarrayobjs: invalid token: %d\n", pParams->myToken.Type);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore parsing trailerarrayobjs: not valid token: %d\n, pParams->myToken.Type);
 			//fwprintf(pParams->fpErrors, L"Errore parsing trailerarrayobjs: not valid token: %d\n, pParams->myToken.Type);
@@ -1149,7 +1149,7 @@ int ReadTrailerBody(Params *pParams, unsigned char *szInput, int index)
 
 	if ( c != '<' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 1: atteso '<' trovato '%c'\n", c);
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody 1: expected '<' found '%c'\n", c);
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1161,7 +1161,7 @@ int ReadTrailerBody(Params *pParams, unsigned char *szInput, int index)
 
 	if ( c != '<' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 2: atteso '<' trovato '%c'\n", c);
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody 2: expected '<' found '%c'\n", c);
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1183,7 +1183,7 @@ ciclo2:
 
 	if ( c != '/' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 3: atteso '/' trovato '%c'\n", c);
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody 3: expected '/' found '%c'\n", c);
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1620,7 +1620,7 @@ ciclo2:
 
 	if ( c == '\0' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 4: atteso '<' trovato carattere NULL -> '\\0'\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody 4: expected '<' found NULL character -> '\\0'\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1640,7 +1640,7 @@ ciclo2:
 
 			if ( x <= 0 || x >= 1024 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 5\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 5\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1663,7 +1663,7 @@ ciclo2:
 
 			if ( x <= 0 || x >= 1024 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 6\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 6\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1690,7 +1690,7 @@ ciclo2:
 
 			if ( x <= 0 || x >= 1024 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 7\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 7\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1710,7 +1710,7 @@ ciclo2:
 
 			if ( (c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != '\f' && c != '\b') )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 8: atteso spazio trovato '%c'\n", c);
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 8: expected space, found '%c'\n", c);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1726,7 +1726,7 @@ ciclo2:
 
 			if ( c == '\0' )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 9\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 9\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1743,7 +1743,7 @@ ciclo2:
 
 			if ( x <= 0 || x >= 1024 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 10\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 10\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1763,7 +1763,7 @@ ciclo2:
 
 			if ( (c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != '\f' && c != '\b') )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 11: atteso spazio trovato '%c'\n", c);
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 11: expected space, found '%c'\n", c);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1779,7 +1779,7 @@ ciclo2:
 
 			if ( c != 'R' )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 12\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 12\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1790,7 +1790,7 @@ ciclo2:
 			c = szInput[index++];
 			if ( (c != '/' && c != ' ' && c != '>' && c != '\r' && c != '\n' && c != '\t' && c != '\f' && c != '\b') )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 13: atteso '/' o spazio, trovato '%c'\n", c);
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 13: expected '/' or space, found '%c'\n", c);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1813,7 +1813,7 @@ ciclo2:
 
 			if ( x <= 0 || x >= 1024 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 7 Bis\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 7 Bis\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1827,7 +1827,7 @@ ciclo2:
 
 			if ( (c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != '\f' && c != '\b') )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 8 Bis: atteso spazio trovato '%c'\n", c);
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 8 Bis: expected space, found '%c'\n", c);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1843,7 +1843,7 @@ ciclo2:
 
 			if ( c == '\0' )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 9 Bis\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 9 Bis\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1860,7 +1860,7 @@ ciclo2:
 
 			if ( x <= 0 || x >= 1024 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 10 Bis\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 10 Bis\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1874,7 +1874,7 @@ ciclo2:
 
 			if ( (c != ' ' && c != '\r' && c != '\n' && c != '\t' && c != '\f' && c != '\b') )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 11 Bis: atteso spazio trovato '%c'\n", c);
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 11 Bis: expected space, found '%c'\n", c);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1890,7 +1890,7 @@ ciclo2:
 
 			if ( c != 'R' )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 12 Bis\n");
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 12 Bis\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -1901,7 +1901,7 @@ ciclo2:
 			c = szInput[index++];
 			if ( (c != '/' && c != ' ' && c != '>' && c != '\r' && c != '\n' && c != '\t' && c != '\f' && c != '\b') )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 13 Bis: atteso '/' o spazio, trovato '%c'\n", c);
+				snprintf(pParams->szError, 8192, "Error ReadTrailerBody 13 Bis: expected '/' or space, found '%c'\n", c);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -2087,7 +2087,7 @@ ciclo2:
                 pParams->myPdfTrailer.pID0Bytes == NULL &&
                 pParams->myPdfTrailer.pID1Bytes == NULL)
             {
-                snprintf(pParams->szError, sizeof(pParams->szError), "Errore ReadTrailerBody: array /ID non valido o incompleto.\n");
+                snprintf(pParams->szError, sizeof(pParams->szError), "Error ReadTrailerBody: invalid or incomplete /ID array.\n");
                 myShowErrorMessage(pParams, pParams->szError, 1);
                 return 0;
             }
@@ -2115,7 +2115,7 @@ ciclo2:
             }
             else
             {
-                snprintf(pParams->szError, sizeof(pParams->szError), "Errore ReadTrailerBody: array /ID malformato e fine buffer inattesa.\n");
+                snprintf(pParams->szError, sizeof(pParams->szError), "Error ReadTrailerBody: malformed /ID array and unexpected end of buffer.\n");
                 myShowErrorMessage(pParams, pParams->szError, 1);
                 return 0;
             }
@@ -2149,7 +2149,7 @@ ciclo3:
 	c = szInput[index++];
 	if ( c != '>' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody 16: atteso '>', trovato '%c'\n", c);
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody 16: expected '>', found '%c'\n", c);
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -2161,7 +2161,7 @@ ciclo4:
 
 	if ( !bSizeYes )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody: manca la voce 'Size' nel trailer\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody: missing 'Size' entry in the trailer\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -2171,7 +2171,7 @@ ciclo4:
 
 	if ( 0 == pParams->myPdfTrailer.Root.Number && !bRootYes )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailerBody: manca la voce 'Root' nel trailer\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailerBody: missing 'Root' entry in the trailer\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailerBody_FN)
 		myShowErrorMessage(pParams, pParams->szError, 0);
@@ -2197,7 +2197,7 @@ int GetLenNextInput(Params *pParams, int startxref, int *len)
 
 	if ( fseek(pParams->fp, startxref, SEEK_SET) )
 	{
-		snprintf(pParams->szError, 8192, "Errore GetLenNextInput fseek\n");
+		snprintf(pParams->szError, 8192, "Error GetLenNextInput fseek\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		myShowErrorMessage(pParams, pParams->szError, 0);
 		//wprintf(L"Errore GetLenNextInput fseek\n");
@@ -2209,7 +2209,7 @@ int GetLenNextInput(Params *pParams, int startxref, int *len)
 	myBlock = (unsigned char *)malloc(sizeof(unsigned char) * BLOCK_SIZE);
 	if ( !myBlock )
 	{
-		snprintf(pParams->szError, 8192, "Errore GetLenNextInput: memoria insufficiente.\n");
+		snprintf(pParams->szError, 8192, "Error GetLenNextInput: out of memory.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		myShowErrorMessage(pParams, pParams->szError, 0);
 		//wprintf(L"Errore GetLenNextInput: insufficient memory. \n);
@@ -2310,7 +2310,7 @@ int ReadLastTrailer(Params *pParams, unsigned char *szInput)
 
 			if ( x >= 7 )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadLastTrailer XRefStream: T_INT_LITERAL troppo lungo.\n");
+				snprintf(pParams->szError, 8192, "Error ReadLastTrailer XRefStream: T_INT_LITERAL too long.\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadLastTrailer_FN)
 				myShowErrorMessage(pParams, pParams->szError, 0);
@@ -2326,7 +2326,7 @@ int ReadLastTrailer(Params *pParams, unsigned char *szInput)
 		}
 		else
 		{
-			snprintf(pParams->szError, 8192, "Errore ReadLastTrailer: atteso 'x' o T_INT_LITERAL. Trovato invece '%c'\n", c);
+			snprintf(pParams->szError, 8192, "Error ReadLastTrailer: expected 'x' or T_INT_LITERAL. Found instead '%c'\n", c);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadLastTrailer_FN)
 			myShowErrorMessage(pParams, pParams->szError, 0);
@@ -2407,25 +2407,25 @@ int ReadLastTrailer(Params *pParams, unsigned char *szInput)
 
 
 	#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadLastTrailer_FN_BLOCCO)
-	wprintf(L"\n\n************************************* BLOCCO INIZIO ***************************************\n");
+	wprintf(L"\n\n************************************* BLOCK START ***************************************\n");
 	for (int k = 0; k < pParams->blockLen; k++ )
 	{
 		wprintf(L"%c", pParams->myBlock[k]);
 	}
-	wprintf(L"\n\n************************************* BLOCCO FINE *****************************************\n\n");
+	wprintf(L"\n\n************************************* BLOCK END *****************************************\n\n");
 	#endif
 
 	GetNextToken(pParams);
 
 	#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadLastTrailer_FN)
-	wprintf(L"\nReadLastTrailer: Fin qui tutto OK!\n\n");
+	wprintf(L"\nReadLastTrailer: All OK so far!\n\n");
 	#endif
 
 	//if (!trailerbody(pParams) )
 	if ( !ReadTrailerBody(pParams, szInput, index) )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadLastTrailer_FN)
-		wprintf(L"\nReadLastTrailer: ReadTrailerBody ERRORE!\n\n");
+		wprintf(L"\nReadLastTrailer: ReadTrailerBody ERROR!\n\n");
 		#endif
 		return 0;
 	}
@@ -2457,7 +2457,7 @@ int ReadSubSectionBody(Params *pParams, unsigned char *szInput, int fromNum, int
 		pParams->myObjsTable = (PdfObjsTableItem **)malloc(sizeof(PdfObjsTableItem*) * pParams->nObjsTableSizeFromPrescanFile);
 		if ( !(pParams->myObjsTable) )
 		{
-			snprintf(pParams->szError, 8192, "ERROR ReadSubSectionBody: memoria insufficiente per la tabella degli oggetti.\n\n");
+			snprintf(pParams->szError, 8192, "ERROR ReadSubSectionBody: out of memory for the objects table.\n\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			myShowErrorMessage(pParams, pParams->szError, 0);
 			//wprintf(L"ERROR ReadSubSectionBody: insufficient memory for the table of objects. \n\n);
@@ -2510,7 +2510,7 @@ int ReadSubSectionBody(Params *pParams, unsigned char *szInput, int fromNum, int
 				pParams->myObjsTable[numInit] = (PdfObjsTableItem *)malloc(sizeof(PdfObjsTableItem));
 				if ( NULL == pParams->myObjsTable[numInit] )
 				{
-					snprintf(pParams->szError, 8192, "ERRORE ReadSubSectionBody 0 bis: malloc failed\n");
+					snprintf(pParams->szError, 8192, "ERROR ReadSubSectionBody 0 bis: malloc failed\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					myShowErrorMessage(pParams, pParams->szError, 0);
 					//wprintf(L"ERRORE ReadSubSectionBody 0 bis: malloc failed\n");
@@ -2558,7 +2558,7 @@ int ReadSubSectionBody(Params *pParams, unsigned char *szInput, int fromNum, int
 				pParams->myObjsTable[numInit] = (PdfObjsTableItem *)malloc(sizeof(PdfObjsTableItem));
 				if ( NULL == pParams->myObjsTable[numInit] )
 				{
-					snprintf(pParams->szError, 8192, "ERRORE ReadSubSectionBody 0 tris: malloc failed\n");
+					snprintf(pParams->szError, 8192, "ERROR ReadSubSectionBody 0 tris: malloc failed\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					myShowErrorMessage(pParams, pParams->szError, 0);
 					//wprintf(L"ERRORE ReadSubSectionBody 0 tris: malloc failed\n");
@@ -2594,7 +2594,7 @@ int ReadSubSectionBody(Params *pParams, unsigned char *szInput, int fromNum, int
 			c2 = szInput[(*index)++];
 			if ( c2 != '\r' && c2 != '\n' )
 			{
-				snprintf(pParams->szError, 8192, "ERRORE ReadSubSectionBody 1: c = '%c', c2 = '%c'\n", c, c2);
+				snprintf(pParams->szError, 8192, "ERROR ReadSubSectionBody 1: c = '%c', c2 = '%c'\n", c, c2);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"ERRORE ReadSubSectionBody 1: c = '%c', c2 = '%c'\n', c, c2);
 				//fwprintf(pParams->fpErrors, L"ERRORE ReadSubSectionBody 1: c = '%c', c2 = '%c'\n'X, c2);
@@ -2605,7 +2605,7 @@ int ReadSubSectionBody(Params *pParams, unsigned char *szInput, int fromNum, int
 			c2 = szInput[(*index)++];
 			if ( c2 != '\n' )
 			{
-				snprintf(pParams->szError, 8192, "ERRORE ReadSubSectionBody 2: c = '%c', c2 = '%c'\n", c, c2);
+				snprintf(pParams->szError, 8192, "ERROR ReadSubSectionBody 2: c = '%c', c2 = '%c'\n", c, c2);
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"ERRORE ReadSubSectionBody 2: c = '%c', c2 = '%c'\n', c2);
 				//fwprintf(pParams->fpErrors, L"ERRORE ReadSubSectionBody 2: c = '%c', c2 = '%c'\n'X, c2);
@@ -2613,7 +2613,7 @@ int ReadSubSectionBody(Params *pParams, unsigned char *szInput, int fromNum, int
 			}
 			break;
 		default:
-			snprintf(pParams->szError, 8192, "Errore ReadSubSectionBody: atteso spazio trovato '%c'\n", c);
+			snprintf(pParams->szError, 8192, "Error ReadSubSectionBody: expected space, found '%c'\n", c);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore ReadSubSectionBody: expected space found '%c'\n", c);
 			//fwprintf(pParams->fpErrors, L"Errore ReadSubSectionBody: expected space found '%c'\n", c);
@@ -2650,7 +2650,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 	if ( (c != '\n' && c != '\r' && c != '\t' && c != ' ' && c != '\f' && c != '\b') )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"ReadObjsTable: ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO UN CARATTERE SPAZIO SEPARATORE MA QUESTO: <%c>\n", c);
+		wprintf(L"ReadObjsTable: UNEXPECTED!!! AFTER 'xref' NO SEPARATOR SPACE CHARACTER WAS FOUND, BUT THIS: <%c>\n", c);
 		#endif
 
 		retValue = 0;
@@ -2659,7 +2659,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 	#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
 	else
 	{
-		wprintf(L"\nReadObjsTable: BENISSIMO!!! DOPO 'xref' HO TROVATO UN CARATTERE SPAZIO SEPARATORE:\n");
+		wprintf(L"\nReadObjsTable: GOOD!!! AFTER 'xref' A SEPARATOR SPACE CHARACTER WAS FOUND:\n");
 		switch ( c )
 		{
 			case '\n':
@@ -2681,7 +2681,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 				wprintf(L"\\b");
 				break;
 			default:
-				wprintf(L"CARATTERE SEPARATORE SCONOSCIUTO!");
+				wprintf(L"UNKNOWN SEPARATOR CHARACTER!");
 				break;
 		}
 		wprintf(L"\n");
@@ -2705,7 +2705,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 		if ( c < '0' || c > '9' )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"ReadObjsTable: 1 ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO IL CARATTERE CHE CERCAVO MA QUESTO: <%c>\n", c);
+			wprintf(L"ReadObjsTable: 1 UNEXPECTED!!! AFTER 'xref' THE EXPECTED CHARACTER WAS NOT FOUND, BUT THIS ONE: <%c>\n", c);
 			#endif
 
 			retValue = 0;
@@ -2725,7 +2725,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 		if ( c != ' ' )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"ReadObjsTable: 2 ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO IL CARATTERE CHE CERCAVO MA QUESTO: <%c>\n", c);
+			wprintf(L"ReadObjsTable: 2 UNEXPECTED!!! AFTER 'xref' THE EXPECTED CHARACTER WAS NOT FOUND, BUT THIS ONE: <%c>\n", c);
 			#endif
 
 			retValue = 0;
@@ -2743,7 +2743,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 		if ( c < '0' || c > '9' )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"ReadObjsTable: 3 ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO IL CARATTERE CHE CERCAVO MA QUESTO: <%c>\n", c);
+			wprintf(L"ReadObjsTable: 3 UNEXPECTED!!! AFTER 'xref' THE EXPECTED CHARACTER WAS NOT FOUND, BUT THIS ONE: <%c>\n", c);
 			#endif
 
 			retValue = 0;
@@ -2774,7 +2774,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 		if ( c != '\r' && c != '\n' )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"ReadObjsTable: 4 ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO IL CARATTERE CHE CERCAVO MA QUESTO: <%c>\n", c);
+			wprintf(L"ReadObjsTable: 4 UNEXPECTED!!! AFTER 'xref' THE EXPECTED CHARACTER WAS NOT FOUND, BUT THIS ONE: <%c>\n", c);
 			#endif
 
 			retValue = 0;
@@ -2792,7 +2792,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 		if ( !ReadSubSectionBody(pParams, szInput, fromNum, numObjs, &index) )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"ReadObjsTable: 5 ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO IL CARATTERE CHE CERCAVO MA QUESTO: <%c>\n", c);
+			wprintf(L"ReadObjsTable: 5 UNEXPECTED!!! AFTER 'xref' THE EXPECTED CHARACTER WAS NOT FOUND, BUT THIS ONE: <%c>\n", c);
 			#endif
 
 			retValue = 0;
@@ -2803,7 +2803,7 @@ int ReadObjsTable(Params *pParams, unsigned char *szInput)
 	if ( c != 't' )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"ReadObjsTable: 6 ACCIDENTACCIO!!! DOPO 'xref' NON HO TROVATO IL CARATTERE CHE CERCAVO MA QUESTO: <%c>\n", c);
+		wprintf(L"ReadObjsTable: 6 UNEXPECTED!!! AFTER 'xref' THE EXPECTED CHARACTER WAS NOT FOUND, BUT THIS ONE: <%c>\n", c);
 		#endif
 
 		retValue = 0;
@@ -2830,7 +2830,7 @@ int ReadHeader(Params *pParams)
 
 	if ( fseek(pParams->fp, 0, SEEK_CUR) )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader fseek\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader fseek\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		myShowErrorMessage(pParams, pParams->szError, 0);
 		//wprintf(L"Errore ReadHeader fseek\n");
@@ -2841,7 +2841,7 @@ int ReadHeader(Params *pParams)
 	bytereads = fread(szTemp, 1, BLOCK_SIZE, pParams->fp);
 	if ( bytereads <= 5 )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader fred\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader fred\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		myShowErrorMessage(pParams, pParams->szError, 0);
 		//wprintf(L"Errore ReadHeader fread\n");
@@ -2868,7 +2868,7 @@ int ReadHeader(Params *pParams)
 
 	if ( pParams->szPdfHeader[0] != '%' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader formato file non valido\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader invalid file format\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE ReadHeader: form invalid file\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE ReadHeader: invalid file format\n");
@@ -2877,7 +2877,7 @@ int ReadHeader(Params *pParams)
 
 	if ( pParams->szPdfHeader[1] != 'P' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader formato file non valido\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader invalid file format\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE ReadHeader: form invalid file\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE ReadHeader: form invalid file\n");
@@ -2886,7 +2886,7 @@ int ReadHeader(Params *pParams)
 
 	if ( pParams->szPdfHeader[2] != 'D' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader formato file non valido\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader invalid file format\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE ReadHeader: form invalid file\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE ReadHeader: form invalid file\n");
@@ -2895,7 +2895,7 @@ int ReadHeader(Params *pParams)
 
 	if ( pParams->szPdfHeader[3] != 'F' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader formato file non valido\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader invalid file format\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE ReadHeader: form invalid file\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE ReadHeader: form invalid file\n");
@@ -2904,7 +2904,7 @@ int ReadHeader(Params *pParams)
 
 	if ( pParams->szPdfHeader[4] != '-' )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadHeader formato file non valido\n");
+		snprintf(pParams->szError, 8192, "Error ReadHeader invalid file format\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE ReadHeader: form invalid file\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE ReadHeader: form invalid file\n");
@@ -3011,10 +3011,10 @@ int ReadTrailer(Params *pParams)
 		if ( fseek(pParams->fp, -BLOCK_SIZE, SEEK_CUR) )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"Errore ReadTrailer: fseek 1\n");
+			wprintf(L"Error ReadTrailer: fseek 1\n");
 			#endif
 
-			snprintf(pParams->szError, 8192, "Errore ReadTrailer: fseek 1\n");
+			snprintf(pParams->szError, 8192, "Error ReadTrailer: fseek 1\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(pParams->fpErrors, L"Errore ReadTrailer: fseek 1\n");
 			return 0;
@@ -3025,10 +3025,10 @@ int ReadTrailer(Params *pParams)
 		if ( fseek(pParams->fp, 0, SEEK_SET) )
 		{
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-			wprintf(L"Errore ReadTrailer: fseek 2\n");
+			wprintf(L"Error ReadTrailer: fseek 2\n");
 			#endif
 
-			snprintf(pParams->szError, 8192, "Errore ReadTrailer: fseek 2\n");
+			snprintf(pParams->szError, 8192, "Error ReadTrailer: fseek 2\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//fwprintf(pParams->fpErrors, L"Errore ReadTrailer: fseek 2\n");
 			return 0;
@@ -3038,7 +3038,7 @@ int ReadTrailer(Params *pParams)
 	bytereads = fread(szTemp, 1, BLOCK_SIZE, pParams->fp);
 	if ( bytereads <= 5 )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: fread 1\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: fread 1\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		myShowErrorMessage(pParams, pParams->szError, 0);
 		//wprintf(L"Errore ReadTrailer: fread 1\n");
@@ -3136,10 +3136,10 @@ int ReadTrailer(Params *pParams)
 	if ( dimInput <= 0 )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"Errore ReadTrailer: manca l'offset per xref.\n");
+		wprintf(L"Error ReadTrailer: missing offset for xref.\n");
 		#endif
 
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: manca l'offset per xref.\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: missing offset for xref.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//fwprintf(pParams->fpErrors, L"Errore ReadTrailer: missing the offset for xref. \n);
 		return 0;
@@ -3150,7 +3150,7 @@ unsigned char szPeek[256];
 
 	if ( fseek(pParams->fp, byteOffsetXRef, SEEK_SET) )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: fseek byteOffsetXRef\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: fseek byteOffsetXRef\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		return 0;
 	}
@@ -3159,7 +3159,7 @@ unsigned char szPeek[256];
 	peekReads = (int)fread(szPeek, 1, sizeof(szPeek) - 1, pParams->fp);
 	if ( peekReads <= 0 )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: fread peek\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: fread peek\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		return 0;
 	}
@@ -3199,10 +3199,10 @@ unsigned char szPeek[256];
 	if ( !szInput )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"Errore ReadTrailer: memoria insufficiente.\n");
+		wprintf(L"Error ReadTrailer: out of memory.\n");
 		#endif
 
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: memoria insufficiente.\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: out of memory.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//fwprintf(pParams->fpErrors, L"Errore ReadTrailer: insufficient memory. \n);
 		return 0;
@@ -3215,7 +3215,7 @@ unsigned char szPeek[256];
 	szInput = EscapeNulBytesInTrailerBuffer(szInput, &bytereads);
 	if ( NULL == szInput )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: memoria insufficiente.\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: out of memory.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		return 0;
 	}
@@ -3230,12 +3230,12 @@ unsigned char szPeek[256];
 	if ( NULL != pParams->fpOutput )
 	{
 		fwprintf(pParams->fpOutput, L"\n\nReadTrailer: bytes read for szInput -> %d\n", bytereads);
-		fwprintf(pParams->fpOutput, L"ECCO IL BLOCCO ALL'OFFSET %d -> <", byteOffsetXRef);
+		fwprintf(pParams->fpOutput, L"HERE IS THE BLOCK AT OFFSET %d -> <", byteOffsetXRef);
 	}
 	else
 	{
 		wprintf(L"\n\nReadTrailer: bytes read for szInput -> %d\n", bytereads);
-		wprintf(L"ECCO IL BLOCCO ALL'OFFSET %d -> <", byteOffsetXRef);
+		wprintf(L"HERE IS THE BLOCK AT OFFSET %d -> <", byteOffsetXRef);
 	}
 
 	for ( int i = 0; i < bytereads; i++ )
@@ -3293,7 +3293,7 @@ unsigned char szPeek[256];
 	if ( !retReadLastTrailer )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"ReadTrailer: ACCIDENTACCIO! ERRORE IN ReadLastTrailer!\n");
+		wprintf(L"ReadTrailer: UNEXPECTED! ERROR IN ReadLastTrailer!\n");
 		#endif
 
 		free(szInput);
@@ -3319,7 +3319,7 @@ unsigned char szPeek[256];
 	if ( !ReadObjsTable(pParams, szInput) )
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN)
-		wprintf(L"ReadTrailer: ACCIDENTACCIO! ERRORE IN ReadObjsTable!\n");
+		wprintf(L"ReadTrailer: UNEXPECTED! ERROR IN ReadObjsTable!\n");
 		#endif
 
 		free(szInput);
@@ -3339,7 +3339,7 @@ unsigned char szPeek[256];
 		free(szInput);
 		if ( !GetLenNextInput(pParams, pParams->myPdfTrailer.Prev, &dimInput) )
 		{
-			snprintf(pParams->szError, 8192, "Errore GetLenNextInput\n");
+			snprintf(pParams->szError, 8192, "Error GetLenNextInput\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore GetLenNextInput\n");
 			//fwprintf(pParams->fpErrors, L"Errore GetLenNextInput\n");
@@ -3349,7 +3349,7 @@ unsigned char szPeek[256];
 		szInput = (unsigned char*)malloc(sizeof(unsigned char)*(dimInput) + 1);
 		if ( !szInput )
 		{
-			snprintf(pParams->szError, 8192, "GetLenNextInput errore ReadTrailer: memoria insufficiente.\n");
+			snprintf(pParams->szError, 8192, "GetLenNextInput error ReadTrailer: out of memory.\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"GetLenNextInput ReadTrailer error: insufficient memory. \n);
 			//fwprintf(pParams->fpErrors, L"GetLenNextInput error ReadTrailer: insufficient memory. \n);
@@ -3358,7 +3358,7 @@ unsigned char szPeek[256];
 
 		if ( fseek(pParams->fp, pParams->myPdfTrailer.Prev, SEEK_SET) )
 		{
-			snprintf(pParams->szError, 8192, "GetLenNextInput: Errore fseek 3\n");
+			snprintf(pParams->szError, 8192, "GetLenNextInput: Error fseek 3\n");
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L"Errore fseek 3\n");
 			//fwprintf(pParams->fpErrors, L"Errore fseek 3\n");
@@ -3371,7 +3371,7 @@ unsigned char szPeek[256];
 	szInput = EscapeNulBytesInTrailerBuffer(szInput, &bytereads);
 	if ( NULL == szInput )
 	{
-		snprintf(pParams->szError, 8192, "Errore ReadTrailer: memoria insufficiente.\n");
+		snprintf(pParams->szError, 8192, "Error ReadTrailer: out of memory.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		return 0;
 	}
@@ -3382,7 +3382,7 @@ unsigned char szPeek[256];
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN) || defined(MYDEBUG_PRINT_ON_ReadEncrypt_R)
 		wprintf(L"pParams->myPdfTrailer.Prev = %d Encrypt obj:\n", pParams->myPdfTrailer.Prev);
-		wprintf(L"\tPrima della chiamata a ReadLastTrailer:\n");
+		wprintf(L"\tBefore the call to ReadLastTrailer:\n");
 		wprintf(L"\tpParams->myPdfTrailer.Encrypt.Number = %u\n", pParams->myPdfTrailer.Encrypt.Number);
 		wprintf(L"\tpParams->myPdfTrailer.Encrypt.Generation = %u\n", pParams->myPdfTrailer.Encrypt.Generation);
 		#endif
@@ -3395,7 +3395,7 @@ unsigned char szPeek[256];
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN) || defined(MYDEBUG_PRINT_ON_ReadEncrypt_R)
 		wprintf(L"pParams->myPdfTrailer.Prev = %d Encrypt obj:\n", pParams->myPdfTrailer.Prev);
-		wprintf(L"\tPrima della chiamata a ReadObjsTable:\n");
+		wprintf(L"\tBefore the call to ReadObjsTable:\n");
 		wprintf(L"\tpParams->myPdfTrailer.Encrypt.Number = %u\n", pParams->myPdfTrailer.Encrypt.Number);
 		wprintf(L"\tpParams->myPdfTrailer.Encrypt.Generation = %u\n", pParams->myPdfTrailer.Encrypt.Generation);
 		#endif
@@ -3408,7 +3408,7 @@ unsigned char szPeek[256];
 
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ReadTrailer_FN) || defined(MYDEBUG_PRINT_ON_ReadEncrypt_R)
 		wprintf(L"pParams->myPdfTrailer.Prev = %d Encrypt obj:\n", pParams->myPdfTrailer.Prev);
-		wprintf(L"\tDopo le chiamate a ReadLastTrailer e ReadObjsTable:\n");
+		wprintf(L"\tAfter the calls to ReadLastTrailer and ReadObjsTable:\n");
 		wprintf(L"\tpParams->myPdfTrailer.Encrypt.Number = %u\n", pParams->myPdfTrailer.Encrypt.Number);
 		wprintf(L"\tpParams->myPdfTrailer.Encrypt.Generation = %u\n", pParams->myPdfTrailer.Encrypt.Generation);
 		#endif
@@ -4032,7 +4032,7 @@ void IgnoreStreamChars(Params *pParams)
 		{
 			if ( fseek(pParams->fp, -BLOCK_SIZE, SEEK_CUR) )
 			{
-				snprintf(pParams->szError, 8192, "Errore IgnoreStreamChars fseek 1\n");
+				snprintf(pParams->szError, 8192, "Error IgnoreStreamChars fseek 1\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"Error IgnoreStreamChars fseek 1\n");
 				//fwprintf(pParams->fpErrors, L"Error IgnoreStreamChars fseek 1\n");
@@ -4043,7 +4043,7 @@ void IgnoreStreamChars(Params *pParams)
 		{
 			if ( fseek(pParams->fp, 0, SEEK_SET) )
 			{
-				snprintf(pParams->szError, 8192, "Errore IgnoreStreamChars fseek 2\n");
+				snprintf(pParams->szError, 8192, "Error IgnoreStreamChars fseek 2\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"Error IgnoreStreamChars fseek 2\n");
 				//fwprintf(pParams->fpErrors, L"Error IgnoreStreamChars fseek 2\n");
@@ -4121,7 +4121,7 @@ unsigned char ReadNextChar(Params *pParams)
 		{
 			if ( fseek(pParams->fp, -BLOCK_SIZE, SEEK_CUR) )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadNextChar fseek 1\n");
+				snprintf(pParams->szError, 8192, "Error ReadNextChar fseek 1\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"Errore ReadNextChar fseek 1\n");
 				//fwprintf(pParams->fpErrors, L"Errore ReadNextChar fseek 1\n");
@@ -4132,7 +4132,7 @@ unsigned char ReadNextChar(Params *pParams)
 		{
 			if ( fseek(pParams->fp, 0, SEEK_SET) )
 			{
-				snprintf(pParams->szError, 8192, "Errore ReadNextChar fseek 2\n");
+				snprintf(pParams->szError, 8192, "Error ReadNextChar fseek 2\n");
 				myShowErrorMessage(pParams, pParams->szError, 1);
 				//wprintf(L"Error ReadNextChar fseek 2\n");
 				//fwprintf(pParams->fpErrors, L"Errore ReadNextChar fseek 2\n");
@@ -4377,7 +4377,7 @@ void GetNextToken(Params *pParams)
 						if ( !(pParams->bStreamState) )
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextToken: trovato '>' singolo\n");
+							snprintf(pParams->szError, 8192, "Error GetNextToken: found single '>'\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextToken: found '>' single\n");
 							return;
@@ -4446,7 +4446,7 @@ void GetNextToken(Params *pParams)
 														if ( c != '\n' )
 														{
 															pParams->myToken.Type = T_ERROR;
-															snprintf(pParams->szError, 8192, "Errore GetNextToken: la keyword 'stream' dev'essere seguita da '\\r\\n' oppure da '\\n'. Trovato invece '%c'(hex = <%2X>)\n", c, c);
+															snprintf(pParams->szError, 8192, "Error GetNextToken: the 'stream' keyword must be followed by '\\r\\n' or '\\n'. Found instead '%c'(hex = <%2X>)\n", c, c);
 															myShowErrorMessage(pParams, pParams->szError, 1);
 															//wprintf(L"Errore GetNextToken: the keyword 'stream' must be followed by '\\r\\n' or '\\n'. Found instead '%c'(hex = <%2X>)\n", c, c);
 															//fwprintf(pParams->fpErrors, L"Errore GetNextToken: the keyword 'stream' must be followed by '\\r\\n' or '\\n'. Found instead '%c'(hex = <%2X>)\n", c, c);
@@ -4520,7 +4520,7 @@ void GetNextToken(Params *pParams)
 							if ( c != '\n' )
 							{
 								pParams->myToken.Type = T_ERROR;
-								snprintf(pParams->szError, 8192, "Errore GetNextToken: la keyword 'stream' dev'essere seguita da '\\r\\n' oppure da '\\n'. Trovato invece '\\r'\n");
+								snprintf(pParams->szError, 8192, "Error GetNextToken: the 'stream' keyword must be followed by '\\r\\n' or '\\n'. Found instead '\\r'\n");
 								myShowErrorMessage(pParams, pParams->szError, 1);
 								//wprintf(L"Errore GetNextToken: the keyword 'stream' must be followed by '\\r\\n' or '\\n'. Found instead '\\r'\n');
 								//fwprintf(pParams->fpErrors, L"Errore GetNextToken: the keyword 'stream' must be followed by '\\r\\n' or '\\n'. Found instead '\\r'\n');
@@ -4530,7 +4530,7 @@ void GetNextToken(Params *pParams)
 						else if ( c != '\n' )
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextToken: la keyword 'stream' dev'essere seguita da '\\r\\n' oppure da '\\n'. Trovato invece '%c'\n", c);
+							snprintf(pParams->szError, 8192, "Error GetNextToken: the 'stream' keyword must be followed by '\\r\\n' or '\\n'. Found instead '%c'\n", c);
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextToken: the keyword 'stream' must be followed by '\\r\\n' or '\\n'. Found instead '%c'\n", c);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextToken: the keyword 'stream' must be followed by '\\r\\n' or '\\n'. Found instead '%c'\n", c);
@@ -5359,7 +5359,7 @@ void GetNextToken(Params *pParams)
 				else
 				{
 					pParams->myToken.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextToken: numero esadecimale errato.\n");
+					snprintf(pParams->szError, 8192, "Error GetNextToken: wrong hexadecimal number.\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Error GetNextToken: wrong hexadecimal number. \n);
 					//fwprintf(pParams->fpErrors, L"Errore GetNextToken: wrong hexadecimal number. \n);
@@ -5376,7 +5376,7 @@ void GetNextToken(Params *pParams)
 				else
 				{
 					pParams->myToken.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextToken: numero esadecimale errato.\n");
+					snprintf(pParams->szError, 8192, "Error GetNextToken: wrong hexadecimal number.\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Error GetNextToken: wrong hexadecimal number. \n);
 					//fwprintf(pParams->fpErrors, L"Errore GetNextToken: wrong hexadecimal number. \n);
@@ -5464,7 +5464,7 @@ void GetNextToken(Params *pParams)
 							if ( pParams->bHasCodeSpaceTwoByte && !pParams->bHasCodeSpaceOneByte ) // 
 							{
 								#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-								wprintf(L"\nEHI!!! SIAMO NEL CODE SPACE RANGE TWO BYTES ONLY.\n");
+								wprintf(L"\nNOTE: IN THE CODE SPACE RANGE TWO BYTES ONLY.\n");
 								#endif
 
 								w = 0;
@@ -5493,7 +5493,7 @@ void GetNextToken(Params *pParams)
 											if ( pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo )
 											{
 												#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-												wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTES, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+												wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE TWO BYTES, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 												#endif
 
 												break;
@@ -5502,7 +5502,7 @@ void GetNextToken(Params *pParams)
 										else
 										{
 											#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-											wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+											wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 											#endif
 
 											pParams->myCID = 0xFFFD;
@@ -5522,7 +5522,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 									}
 									else
@@ -5531,7 +5531,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = 0xFFFD;
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tCACCHIO, CID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tNOT OK, CID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 									}
 
@@ -5541,7 +5541,7 @@ void GetNextToken(Params *pParams)
 							else if ( pParams->bHasCodeSpaceTwoByte && pParams->bHasCodeSpaceOneByte ) // 
 							{
 								#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-								wprintf(L"\nEHI!!! SIAMO NEL CODE SPACE RANGE ONE AND TWO BYTES.\n");
+								wprintf(L"\nNOTE: IN THE CODE SPACE RANGE ONE AND TWO BYTES.\n");
 								#endif
 
 								w = 0;
@@ -5563,7 +5563,7 @@ void GetNextToken(Params *pParams)
 											if ( 1 == pParams->pCodeSpaceRangeArray[u].nNumBytes && (pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo) )
 											{
 												#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-												wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTES, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+												wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE ONE BYTES, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 												#endif
 												break;
 											}
@@ -5571,7 +5571,7 @@ void GetNextToken(Params *pParams)
 										else
 										{
 											#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-											wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+											wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 											#endif
 
 											pParams->myCID = 0xFFFD;
@@ -5582,7 +5582,7 @@ void GetNextToken(Params *pParams)
 									if ( u >= pParams->nCurrentFontCodeSpacesNum ) // 
 									{
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tCID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE ONE BYTE. CONSUMO UN ALTRO BYTE.\n", pParams->myCID, pParams->myCID);
+										wprintf(L"\tCID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE ONE BYTE. CONSUMING ANOTHER BYTE.\n", pParams->myCID, pParams->myCID);
 										#endif
 									}
 									else // 
@@ -5591,7 +5591,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTE -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE ONE BYTE -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 
 										w++;
@@ -5619,7 +5619,7 @@ void GetNextToken(Params *pParams)
 											if ( 2 == pParams->pCodeSpaceRangeArray[u].nNumBytes && (pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo) )
 											{
 												#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-												wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTES, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+												wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE TWO BYTES, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 												#endif
 
 												break;
@@ -5628,7 +5628,7 @@ void GetNextToken(Params *pParams)
 										else
 										{
 											#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-											wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+											wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 											#endif
 
 											pParams->myCID = 0xFFFD;
@@ -5648,7 +5648,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 									}
 									else
@@ -5657,7 +5657,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = 0xFFFD;
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tCACCHIO, CID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tNOT OK, CID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 									}
 
@@ -5667,7 +5667,7 @@ void GetNextToken(Params *pParams)
 							else if ( !pParams->bHasCodeSpaceTwoByte && pParams->bHasCodeSpaceOneByte ) // 
 							{
 								#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-								wprintf(L"\nEHI!!! SIAMO NEL CODE SPACE RANGE ONE BYTE ONLY.\n");
+								wprintf(L"\nNOTE: IN THE CODE SPACE RANGE ONE BYTE ONLY.\n");
 								#endif
 
 								w = 0;
@@ -5687,7 +5687,7 @@ void GetNextToken(Params *pParams)
 											if ( pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo )
 											{
 												#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-												wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTE, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+												wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE ONE BYTE, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 												#endif
 
 												break;
@@ -5696,7 +5696,7 @@ void GetNextToken(Params *pParams)
 										else
 										{
 											#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-											wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+											wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 											#endif
 
 											pParams->myCID = 0xFFFD;
@@ -5716,7 +5716,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTE ONLY-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE ONE BYTE ONLY-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 									}
 									else
@@ -5725,7 +5725,7 @@ void GetNextToken(Params *pParams)
 										pParams->pUtf8String[w] = 0xFFFD;
 
 										#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-										wprintf(L"\tCACCHIO, CID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE ONE BYTE ONLY -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+										wprintf(L"\tNOT OK, CID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE ONE BYTE ONLY -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 										#endif
 									}
 
@@ -5892,7 +5892,7 @@ void GetNextToken(Params *pParams)
 						else
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextToken: numero ottale errato.\n");
+							snprintf(pParams->szError, 8192, "Error GetNextToken: wrong octal number.\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextToken: wrong octal number. \n);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextToken: wrong octal number. \n);
@@ -5932,7 +5932,7 @@ void GetNextToken(Params *pParams)
 						else
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextToken: numero ottale errato.\n");
+							snprintf(pParams->szError, 8192, "Error GetNextToken: wrong octal number.\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextToken: wrong octal number. \n);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextToken: wrong octal number. \n);
@@ -5974,7 +5974,7 @@ void GetNextToken(Params *pParams)
 						else
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextToken: numero ottale errato.\n");
+							snprintf(pParams->szError, 8192, "Error GetNextToken: wrong octal number.\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextToken: wrong octal number. \n);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextToken: wrong octal number. \n);
@@ -6233,7 +6233,7 @@ void GetNextToken(Params *pParams)
 					pParams->pUtf8String[0] = L'\0';
 
 					pParams->myToken.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextToken: numero esadecimale errato. Carattere non valido -> codice decimale = %u\n", (unsigned int)c);
+					snprintf(pParams->szError, 8192, "Error GetNextToken: wrong hexadecimal number. Invalid character -> decimal code = %u\n", (unsigned int)c);
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Error GetNextToken: wrong hexadecimal number. Not valid character -> decimal code = %u\n", (unsigned int)c);
 					//fwprintf(pParams->fpErrors, L"Errore GetNextToken: wrong hexadecimal number. Not valid character -> decimal code = %u\n", (unsigned int)c);
@@ -6256,7 +6256,7 @@ void GetNextToken(Params *pParams)
 		if ( k > MAX_STRING_LENTGTH_IN_CONTENT_STREAM )
 		{
 			pParams->myToken.Type = T_ERROR;
-			snprintf(pParams->szError, 8192, "Errore GetNextToken: lexeme troppo lungo(> %d byte)\n", MAX_STRING_LENTGTH_IN_CONTENT_STREAM);
+			snprintf(pParams->szError, 8192, "Error GetNextToken: lexeme too long(> %d bytes)\n", MAX_STRING_LENTGTH_IN_CONTENT_STREAM);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L)Errore GetNextToken: lexeme too long(> %d byte)\n", MAX STRING LENTGTH IN CONTENT STREAM);
 			//fwprintf(pParams->fpErrors, L"Error GetNextToken: lexeme too long(> %d byte)\n", MAX STRING LENTGTH IN CONTENT STREAM);
@@ -6282,7 +6282,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 	if ( pParams->bHasCodeSpaceTwoByte && !pParams->bHasCodeSpaceOneByte ) // 
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-		wprintf(L"\nEHI!!! SIAMO NEL CODE SPACE RANGE TWO BYTES ONLY.\n");
+		wprintf(L"\nNOTE: IN THE CODE SPACE RANGE TWO BYTES ONLY.\n");
 		#endif
 
 		w = 0;
@@ -6312,7 +6312,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 					if ( pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo )
 					{
 						#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-						wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTE, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+						wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE TWO BYTE, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 						#endif
 
 						break;
@@ -6321,7 +6321,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				else
 				{
 					#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-					wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+					wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 					#endif
 
 					pParams->myCID = 0xFFFD;
@@ -6335,7 +6335,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				// Search here in NOTDEF CODE SPACE RANGE
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tCID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE.\n", pParams->myCID, pParams->myCID);
+				wprintf(L"\tCID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE.\n", pParams->myCID, pParams->myCID);
 				#endif
 
 				pParams->myCID = 0xFFFD;
@@ -6344,7 +6344,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 			#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
 			else
 			{
-				wprintf(L"\tCID %u(hex: %X) TROVATO NEL CODE SPACE RANGE. YAHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!!!\n", pParams->myCID, pParams->myCID);
+				wprintf(L"\tCID %u(hex: %X) FOUND IN THE CODE SPACE RANGE.\n", pParams->myCID, pParams->myCID);
 			}
 			#endif
 
@@ -6354,7 +6354,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 			}
 			else
@@ -6363,7 +6363,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = 0xFFFD;
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tATTENZIONE, CID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tWARNING, CID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 			}
 
@@ -6373,7 +6373,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 	else if ( pParams->bHasCodeSpaceTwoByte && pParams->bHasCodeSpaceOneByte ) // 
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-		wprintf(L"\nEHI!!! SIAMO NEL CODE SPACE RANGE ONE AND TWO BYTES.\n");
+		wprintf(L"\nNOTE: IN THE CODE SPACE RANGE ONE AND TWO BYTES.\n");
 		#endif
 
 		w = 0;
@@ -6392,7 +6392,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 					if ( 1 == pParams->pCodeSpaceRangeArray[u].nNumBytes && (pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo) )
 					{
 						#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-						wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTE, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+						wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE ONE BYTE, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 						#endif
 
 						break;
@@ -6401,7 +6401,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				else
 				{
 					#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-					wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+					wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 					#endif
 
 					pParams->myCID = 0xFFFD;
@@ -6414,7 +6414,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				// Search here in NOTDEF CODE SPACE RANGE
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tCID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE ONE BYTE. CONSUMO UN ALTRO BYTE.\n", pParams->myCID, pParams->myCID);
+				wprintf(L"\tCID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE ONE BYTE. CONSUMING ANOTHER BYTE.\n", pParams->myCID, pParams->myCID);
 				#endif
 			}
 			else // 
@@ -6423,7 +6423,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE ONE BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 
 				w++;
@@ -6448,7 +6448,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 					if ( 2 == pParams->pCodeSpaceRangeArray[u].nNumBytes && (pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo) )
 					{
 						#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-						wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTE, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+						wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE TWO BYTE, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 						#endif
 
 						break;
@@ -6457,7 +6457,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				else
 				{
 					#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-					wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+					wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 					#endif
 
 					pParams->myCID = 0xFFFD;
@@ -6479,7 +6479,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 			}
 			else
@@ -6488,7 +6488,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = 0xFFFD;
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tCACCHIO, CID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE ONE AND TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tNOT OK, CID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE ONE AND TWO BYTES-> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 			}
 
@@ -6498,7 +6498,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 	else if ( !pParams->bHasCodeSpaceTwoByte && pParams->bHasCodeSpaceOneByte ) // 
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-		wprintf(L"\nEHI!!! SIAMO NEL CODE SPACE RANGE ONE BYTE ONLY.\n");
+		wprintf(L"\nNOTE: IN THE CODE SPACE RANGE ONE BYTE ONLY.\n");
 		#endif
 
 		w = 0;
@@ -6514,7 +6514,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 					if ( pParams->myCID >= pParams->pCodeSpaceRangeArray[u].nFrom && pParams->myCID <= pParams->pCodeSpaceRangeArray[u].nTo )
 					{
 						#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-						wprintf(L"\tECCOLO! -> CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTE, NEL RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
+						wprintf(L"\tFOUND! -> CID %u(hex: %X) FOUND IN CODE SPACE RANGE ONE BYTE, IN RANGE %lu(hex: %X) - %lu(hex: %X).\n", pParams->myCID, pParams->myCID, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nFrom, pParams->pCodeSpaceRangeArray[u].nTo, pParams->pCodeSpaceRangeArray[u].nTo);
 						#endif
 
 						break;
@@ -6523,7 +6523,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				else
 				{
 					#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-					wprintf(L"\tpParams->pCodeSpaceRangeArray È NULL!!!\n");
+					wprintf(L"\tpParams->pCodeSpaceRangeArray IS NULL!!!\n");
 					#endif
 
 					pParams->myCID = 0xFFFD;
@@ -6545,7 +6545,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = pParams->pCurrentEncodingArray[pParams->myCID];
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tOK, CID %u(hex: %X) TROVATO NEL CODE SPACE RANGE ONE BYTE ONLY -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tOK, CID %u(hex: %X) FOUND IN THE CODE SPACE RANGE ONE BYTE ONLY -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 			}
 			else
@@ -6554,7 +6554,7 @@ int ManageTypeZeroHexString(Params *pParams, int lenCurrLexeme)
 				pParams->pUtf8String[w] = 0xFFFD;
 
 				#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_ManageContent_PrintStrings_HEXADECIMAL)
-				wprintf(L"\tATTENZIONE, CID %u(hex: %X) NON TROVATO NEL CODE SPACE RANGE ONE BYTE ONLY -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
+				wprintf(L"\tWARNING, CID %u(hex: %X) NOT FOUND IN THE CODE SPACE RANGE ONE BYTE ONLY -> pParams->pUtf8String[%d] = '%lc' -> (hex: <%4X>)\n", pParams->myCID, pParams->myCID, w, pParams->pUtf8String[w], pParams->pUtf8String[w]);
 				#endif
 			}
 
@@ -6665,7 +6665,7 @@ void GetNextTokenLengthObj(Params *pParams)
 					if ( DELIM_SPACECHAR != nDelimChar )
 					{
 						pParams->myTokenLengthObj.Type = T_ERROR;
-						snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_INT_LITERAL\n");
+						snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_INT_LITERAL\n");
 						myShowErrorMessage(pParams, pParams->szError, 1);
 						//wprintf(L"Errore GetNextTokenLengthObj: expected T INT LITERAL\n");
 						//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T INT LITERAL\n");
@@ -6689,7 +6689,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_OBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_OBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW OBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW OBJ\n");
@@ -6708,7 +6708,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_OBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_OBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW OBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW OBJ\n");
@@ -6723,7 +6723,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_ENDOBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_ENDOBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
@@ -6738,7 +6738,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_ENDOBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_ENDOBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
@@ -6753,7 +6753,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_ENDOBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_ENDOBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
@@ -6768,7 +6768,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_ENDOBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_ENDOBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW OBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
@@ -6787,7 +6787,7 @@ void GetNextTokenLengthObj(Params *pParams)
 				else
 				{
 					pParams->myTokenLengthObj.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenLengthObj: atteso T_KW_ENDOBJ\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenLengthObj: expected T_KW_ENDOBJ\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Errore GetNextTokenLengthObj: expected T KW OBJ\n");
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenLengthObj: expected T KW ENDOBJ\n");
@@ -6805,7 +6805,7 @@ void GetNextTokenLengthObj(Params *pParams)
 		if ( k >= 4096 )
 		{
 			pParams->myTokenLengthObj.Type = T_ERROR;
-			snprintf(pParams->szError, 8192, "Errore GetNextTokenLength: lexeme troppo lungo(> %d byte)\n", MAX_STRING_LENTGTH_IN_CONTENT_STREAM);
+			snprintf(pParams->szError, 8192, "Error GetNextTokenLength: lexeme too long(> %d bytes)\n", MAX_STRING_LENTGTH_IN_CONTENT_STREAM);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L)Errore GetNextTokenLength: lexeme too long(> %d byte)\n", MAX STRING LENTGTH IN CONTENT STREAM);
 			//fwprintf(pParams->fpErrors, L"Error GetNextTokenLength: lexeme too long(> %d byte)\n", MAX STRING LENTGTH IN CONTENT STREAM);
@@ -7260,7 +7260,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 				else
 				{
 					pParams->myToken.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: numero esadecimale errato.\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: wrong hexadecimal number.\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Error GetNextTokenFromToUnicodeStream: wrong hexadecimal number. \n);
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenFromToUnicodeStream: wrong hexadecimal number. \n);
@@ -7277,7 +7277,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 				else
 				{
 					pParams->myToken.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: numero esadecimale errato.\n");
+					snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: wrong hexadecimal number.\n");
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Error GetNextTokenFromToUnicodeStream: wrong hexadecimal number. \n);
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenFromToUnicodeStream: wrong hexadecimal number. \n);
@@ -7431,7 +7431,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 						else
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: numero ottale errato.\n");
+							snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: wrong octal number.\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextTokenFromToUnicodeStream: wrong octal number. \n);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextTokenFromToUnicodeStream: wrong octal number. \n);
@@ -7462,7 +7462,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 						else
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: numero ottale errato.\n");
+							snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: wrong octal number.\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextTokenFromToUnicodeStream: wrong octal number. \n);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextTokenFromToUnicodeStream: wrong octal number. \n);
@@ -7493,7 +7493,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 						else
 						{
 							pParams->myToken.Type = T_ERROR;
-							snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: numero ottale errato.\n");
+							snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: wrong octal number.\n");
 							myShowErrorMessage(pParams, pParams->szError, 1);
 							//wprintf(L"Errore GetNextTokenFromToUnicodeStream: wrong octal number. \n);
 							//fwprintf(pParams->fpErrors, L"Errore GetNextTokenFromToUnicodeStream: wrong octal number. \n);
@@ -7689,7 +7689,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 					pParams->pUtf8String[0] = L'\0';
 
 					pParams->myToken.Type = T_ERROR;
-					snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: numero esadecimale errato. Carattere non valido -> codice decimale = %u\n", (unsigned int)c);
+					snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: wrong hexadecimal number. Invalid character -> decimal code = %u\n", (unsigned int)c);
 					myShowErrorMessage(pParams, pParams->szError, 1);
 					//wprintf(L"Error GetNextTokenFromToUnicodeStream: wrong hexadecimal number. Not valid character -> decimal code = %u\n", (unsigned int)c);
 					//fwprintf(pParams->fpErrors, L"Errore GetNextTokenFromToUnicodeStream: wrong hexadecimal number. Not valid character -> decimal code = %u\n", (unsigned int)c);
@@ -7710,7 +7710,7 @@ void GetNextTokenFromToUnicodeStream(Params *pParams)
 		if ( k > MAX_STRING_LENTGTH_IN_CONTENT_STREAM )
 		{
 			pParams->myToken.Type = T_ERROR;
-			snprintf(pParams->szError, 8192, "Errore GetNextTokenFromToUnicodeStream: lexeme troppo lungo(> %d byte)\n", MAX_STRING_LENTGTH_IN_CONTENT_STREAM);
+			snprintf(pParams->szError, 8192, "Error GetNextTokenFromToUnicodeStream: lexeme too long(> %d bytes)\n", MAX_STRING_LENTGTH_IN_CONTENT_STREAM);
 			myShowErrorMessage(pParams, pParams->szError, 1);
 			//wprintf(L)Errore GetNextTokenFromToUnicodeStream: lexeme too long(> %d byte)\n", MAX STRING LENTGTH IN CONTENT STREAM);
 			//fwprintf(pParams->fpErrors, L"Error GetNextTokenFromToUnicodeStream: lexeme too long(> %d byte)\n", MAX STRING LENTGTH IN CONTENT STREAM);

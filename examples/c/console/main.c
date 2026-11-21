@@ -171,7 +171,7 @@ static int MYPDF_CALL MyConsolePasswordCallback(void *pUser,
     if ( error_msg != NULL )
         fprintf(stderr, "%s\n", error_msg);
 
-    fprintf(stderr, "Inserisci la password utente per '%s' (invio a vuoto per annullare): ", pdf_filename);
+    fprintf(stderr, "Enter the user password for '%s' (empty line to cancel): ", pdf_filename);
     fflush(stderr);
 
     if ( !ReadPasswordFromTerminal(out_password, max_len, out_len) )
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 
 	if ( !getTimes(&mt_start) )
 	{
-		wprintf(L"\nErrore getTimes(&mt_start) in main.c\n\n");
+		wprintf(L"\nError getTimes(&mt_start) in main.c\n\n");
 		retValue = EXIT_FAILURE;
 		goto uscita;
 	}
@@ -232,8 +232,8 @@ int main(int argc, char **argv)
 	//if ( !setlocale(LC_CTYPE, "it_IT.utf8") )
 	if ( !setlocale(LC_ALL, "C.UTF-8") )
 	{
-		wprintf(L"Impossibile selezionare utf8!\n");
-		printf("Impossibile selezionare utf8!\n");
+		wprintf(L"Unable to select utf8!\n");
+		printf("Unable to select utf8!\n");
 		retValue = EXIT_FAILURE;
 		goto uscita;
 	}
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
 
 	if ( MYPDF_OK != mypdf_Init() )
 	{
-		fprintf(stderr, "ERRORE: inizializzazione globale OpenSSL fallita.\n");
+		fprintf(stderr, "ERROR: global OpenSSL initialization failed.\n");
 
 		retValue = EXIT_FAILURE;
 		goto uscita;
@@ -272,7 +272,7 @@ int main(int argc, char **argv)
 	ctx = mypdf_CreateContext();
 	if ( NULL == ctx )
 	{
-		fprintf(stderr, "ERRORE: impossibile creare il contesto della libreria.\n");
+		fprintf(stderr, "ERROR: unable to create the library context.\n");
 		retValue = EXIT_FAILURE;
 		goto uscita;
 	}
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
 	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_ERRORS, cliOptions.bShowErrors) ||
 	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_WARNINGS, cliOptions.bShowWarnings) )
 	{
-		fprintf(stderr, "ERRORE: %s\n", mypdf_GetLastError(ctx));
+		fprintf(stderr, "ERROR: %s\n", mypdf_GetLastError(ctx));
 		retValue = EXIT_FAILURE;
 		goto uscita;
 	}
@@ -319,7 +319,7 @@ int main(int argc, char **argv)
 			retValue = MYPDFSEARCH_EXIT_FILE_ERRORS;
 			break;
 		default:
-			fprintf(stderr, "ERRORE: %s\n", mypdf_GetLastError(ctx));
+			fprintf(stderr, "ERROR: %s\n", mypdf_GetLastError(ctx));
 			retValue = EXIT_FAILURE;
 			break;
 	}
@@ -351,7 +351,7 @@ uscita:
 
 		if ( !getTimes(&mt_end) )
 		{
-			wprintf(L"\nErrore getTimes(&mt_end) in main.c\n\n");
+			wprintf(L"\nError getTimes(&mt_end) in main.c\n\n");
 			retValue = EXIT_FAILURE;
 		}
 		else
@@ -361,19 +361,19 @@ uscita:
 			elapsedSystem = mt_end.systemTime - mt_start.systemTime;
 
 			wprintf(L"\n\n-----------------------------------------------------------------------\n");
-			wprintf(L"Tempi di esecuzione (secondi):\n");
+			wprintf(L"Execution times (seconds):\n");
 			wprintf(L"  Real Time  : %5.5f\n  User Time  : %5.5f\n  System Time: %5.5f\n",
 				elapsedReal, elapsedUser, elapsedSystem);
 
 			if (elapsedReal > 0.0)
 			{
 				cpuUsagePercent = ((elapsedUser + elapsedSystem) / elapsedReal) * 100.0;
-				wprintf(L"  CPU media  : %.1f%% (100%% equivale a una CPU logica)\n\n",
+				wprintf(L"  Average CPU: %.1f%% (100%% equals one logical CPU)\n\n",
 					cpuUsagePercent);
 			}
 			else
 			{
-				wprintf(L"  CPU media  : non calcolabile (tempo reale nullo)\n\n");
+				wprintf(L"  Average CPU: not computable (zero real time)\n\n");
 			}
 
 			PrintHardwareInfo();

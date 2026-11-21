@@ -134,7 +134,7 @@ MyDictionaryQueueItem_t* mydictionaryqueuelist_NewNode(MyData_t *pDataItem)
 		n->myDataItem.pszKey = (char*)malloc(sizeof(char) * len + sizeof(char));
 		if ( NULL == n->myDataItem.pszKey )
 		{
-			wprintf(L"ERRORE mystringqueuelist_NewNode: impossibile allocare la memoria per n->myDataItem.pszKey\n");
+			wprintf(L"ERROR mystringqueuelist_NewNode: unable to allocate memory for n->myDataItem.pszKey\n");
 			free(n);
 			n = NULL;
 			return NULL;
@@ -160,7 +160,7 @@ MyDictionaryQueueItem_t* mydictionaryqueuelist_NewNode(MyData_t *pDataItem)
 			n->myDataItem.tok.vString = (char*)malloc(sizeof(char) * len + sizeof(char));
 			if ( NULL == n->myDataItem.tok.vString )
 			{
-				wprintf(L"ERRORE mystringqueuelist_NewNode: impossibile allocare la memoria per n->myDataItem.tok.vString\n");
+				wprintf(L"ERROR mystringqueuelist_NewNode: unable to allocate memory for n->myDataItem.tok.vString\n");
 				free(n);
 				n = NULL;
 				return NULL;
@@ -320,7 +320,7 @@ int mydictionaryqueuelist_Dequeue(MyDictionaryQueueList_t* p, MyData_t *pDataIte
 				pDataItem->tok.vString = (char*)malloc(sizeof(char) * len + sizeof(char));
 				if ( NULL == pDataItem->tok.vString )
 				{
-					wprintf(L"ERRORE mystringqueuelist_NewNode: impossibile allocare la memoria per pDataItem->tok.vString\n");
+					wprintf(L"ERROR mystringqueuelist_NewNode: unable to allocate memory for pDataItem->tok.vString\n");
 					return 0;
 				}
 			}
@@ -407,7 +407,7 @@ int mydictionaryqueuelist_Peek(MyDictionaryQueueList_t* p, MyData_t *pDataItem)
 			pDataItem->pszKey = (char*)malloc(sizeof(char) * len + sizeof(char));
 			if ( NULL == pDataItem->pszKey )
 			{
-				wprintf(L"ERRORE mydictionaryqueuelist_Peek -> impossibile allocare la memoria per pDataItem->pszKey\n");
+				wprintf(L"ERROR mydictionaryqueuelist_Peek -> unable to allocate memory for pDataItem->pszKey\n");
 				return 0;
 			}
 		}
@@ -433,7 +433,7 @@ int mydictionaryqueuelist_Peek(MyDictionaryQueueList_t* p, MyData_t *pDataItem)
 				pDataItem->tok.vString = (char*)malloc(sizeof(char) * len + sizeof(char));
 				if ( NULL == pDataItem->tok.vString )
 				{
-					wprintf(L"ERRORE mystringqueuelist_NewNode: impossibile allocare la memoria per pDataItem->tok.vString\n");
+					wprintf(L"ERROR mystringqueuelist_NewNode: unable to allocate memory for pDataItem->tok.vString\n");
 					return 0;
 				}
 			}

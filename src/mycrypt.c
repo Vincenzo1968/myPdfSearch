@@ -57,7 +57,7 @@ static void set_error(PdfCryptoParams *cp, const char *message)
     if (cp == NULL)
 		return;
 
-    (void)snprintf(cp->szError, sizeof(cp->szError), "%s", message ? message : "Errore crittografico.");
+    (void)snprintf(cp->szError, sizeof(cp->szError), "%s", message ? message : "Cryptographic error.");
 }
 
 void PdfCryptoParams_FreeOutput(PdfCryptoParams *cp)
@@ -827,7 +827,7 @@ static int get_file_key(CryptoEnv *env, PdfCryptoParams *cp, unsigned char key[3
     {
         if (cp->lenFileKey == 0 || cp->lenFileKey > sizeof(cp->fileKey))
         {
-            set_error(cp, "Lunghezza della file key non valida.");
+            set_error(cp, "Invalid file key length.");
             return 0;
         }
 
@@ -839,7 +839,7 @@ static int get_file_key(CryptoEnv *env, PdfCryptoParams *cp, unsigned char key[3
 
     if (cp->R < 2 || cp->R > 6)
     {
-        set_error(cp, "Revisione PDF non supportata: sono gestite R=2..R=6.");
+        set_error(cp, "Unsupported PDF revision: R=2..R=6 are handled.");
         return 0;
     }
 
@@ -854,13 +854,13 @@ static int get_file_key(CryptoEnv *env, PdfCryptoParams *cp, unsigned char key[3
 
     if (status <= 0)
     {
-        set_error(cp, status < 0 ? "Revisione PDF non supportata." : "Password errata, dizionario Encrypt incompleto o algoritmo non supportato.");
+        set_error(cp, status < 0 ? "Unsupported PDF revision." : "Wrong password, incomplete Encrypt dictionary or unsupported algorithm.");
         return 0;
     }
 
     if (*key_len > sizeof(cp->fileKey))
     {
-        set_error(cp, "La chiave derivata supera la dimensione supportata.");
+        set_error(cp, "The derived key exceeds the supported size.");
         OPENSSL_cleanse(key, 32);
 
         return 0;
@@ -894,7 +894,7 @@ int PdfCryptoParams_Authenticate(PdfCryptoParams *cp)
 
     if (!crypto_env_init(&env))
     {
-        set_error(cp, "Impossibile inizializzare i provider OpenSSL.");
+        set_error(cp, "Unable to initialize the OpenSSL providers.");
         goto uscita;
     }
 
@@ -1023,7 +1023,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
     if (cp->lenInput != 0 && cp->pInput == NULL)
     {
-        set_error(cp, "pInput è NULL ma lenInput è diverso da zero.");
+        set_error(cp, "pInput is NULL but lenInput is not zero.");
         goto done;
     }
 
@@ -1031,19 +1031,19 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
     if (method == PDF_CRYPT_AUTO)
     {
-        set_error(cp, "Crypt filter non risolto: impostare method/strMethod/streamMethod in base a /CF.");
+        set_error(cp, "Unresolved crypt filter: set method/strMethod/streamMethod according to /CF.");
         goto done;
     }
 
     if (method < PDF_CRYPT_NONE || method > PDF_CRYPT_AESV3)
     {
-        set_error(cp, "Metodo di cifratura non valido.");
+        set_error(cp, "Invalid encryption method.");
         goto done;
     }
 
     if (!crypto_env_init(&env))
     {
-        set_error(cp, "Impossibile inizializzare i provider OpenSSL.");
+        set_error(cp, "Unable to initialize the OpenSSL providers.");
         goto done;
     }
 
@@ -1055,7 +1055,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
         if (out == NULL)
         {
-			set_error(cp, "malloc fallita per lo stream di output.");
+			set_error(cp, "malloc failed for the output stream.");
 			goto done;
 		}
 
@@ -1070,7 +1070,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 	if (!get_file_key(&env, cp, file_key, &file_key_len))
 	{
 		#if defined(MYDEBUG_PRINT_ALL) || defined(MYDEBUG_PRINT_ON_Decrypt)
-		wprintf(L"[DEBUG transform] get_file_key FALLITA: %s\n", cp->szError);
+		wprintf(L"[DEBUG transform] get_file_key FAILED: %s\n", cp->szError);
 		#endif
 		goto done;
 	}
@@ -1079,13 +1079,13 @@ static int transform(PdfCryptoParams *cp, int encrypt)
     {
         if (cp->V >= 5)
         {
-            set_error(cp, "RC4/AESV2 non sono validi per il percorso PDF R=5/6.");
+            set_error(cp, "RC4/AESV2 are not valid for the PDF R=5/6 path.");
             goto done;
         }
 
         if (!derive_object_key(&env, cp, file_key, file_key_len, method, object_key, &object_key_len))
         {
-            set_error(cp, "Impossibile derivare la chiave dell'oggetto PDF.");
+            set_error(cp, "Unable to derive the PDF object key.");
             goto done;
         }
 
@@ -1097,7 +1097,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
     {
         if (file_key_len != 32)
         {
-            set_error(cp, "AESV3 richiede una file key di 32 byte.");
+            set_error(cp, "AESV3 requires a 32-byte file key.");
             goto done;
         }
         key_for_data = file_key;
@@ -1111,13 +1111,13 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
         if (out == NULL)
         {
-			set_error(cp, "malloc fallita per lo stream RC4.");
+			set_error(cp, "malloc failed for the RC4 stream.");
 			goto done;
 		}
 
         if (!rc4_crypt(&env, key_for_data, key_for_data_len, cp->pInput, cp->lenInput, out))
         {
-            set_error(cp, "Decifratura RC4 fallita.");
+            set_error(cp, "RC4 decryption failed.");
             goto done;
         }
 
@@ -1132,7 +1132,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
             if (cp->lenInput > SIZE_MAX - 48U)
             {
-				set_error(cp, "Input troppo grande.");
+				set_error(cp, "Input too large.");
 				goto done;
 			}
 
@@ -1143,13 +1143,13 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
             if (out == NULL)
             {
-				set_error(cp, "malloc fallita per lo stream AES.");
+				set_error(cp, "malloc failed for the AES stream.");
 				goto done;
 			}
 
             if (RAND_bytes_ex(env.libctx, iv, sizeof(iv), 0) != 1)
             {
-                set_error(cp, "RAND_bytes_ex non è riuscita a generare il vettore IV.");
+                set_error(cp, "RAND_bytes_ex failed to generate the IV vector.");
                 goto done;
             }
 
@@ -1157,7 +1157,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
             if (!aes_crypt(&env, 1, key_for_data, key_for_data_len, iv, cp->pInput, cp->lenInput, out + 16, &out_len, 1, 0))
             {
-                set_error(cp, "Cifratura AES-CBC fallita."); goto done;
+                set_error(cp, "AES-CBC encryption failed."); goto done;
             }
 
             out_len += 16U;
@@ -1169,7 +1169,7 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
             if (cp->lenInput < 32U || ((cp->lenInput - 16U) % 16U) != 0U)
             {
-                set_error(cp, "Stream AES malformato: attesi IV di 16 byte e ciphertext a blocchi da 16."); goto done;
+                set_error(cp, "Malformed AES stream: expected a 16-byte IV and ciphertext in 16-byte blocks."); goto done;
             }
 
             encrypted_len = cp->lenInput - 16U;
@@ -1179,20 +1179,20 @@ static int transform(PdfCryptoParams *cp, int encrypt)
 
             if (out == NULL)
             {
-				set_error(cp, "malloc fallita per lo stream AES decifrato.");
+				set_error(cp, "malloc failed for the decrypted AES stream.");
 				goto done;
 			}
 
             if (!aes_crypt(&env, 0, key_for_data, key_for_data_len, cp->pInput, cp->pInput + 16U, encrypted_len, out, &out_len, 1, 0))
             {
-                set_error(cp, "Decifratura AES fallita: password errata, ciphertext danneggiato o padding non valido.");
+                set_error(cp, "AES decryption failed: wrong password, damaged ciphertext or invalid padding.");
                 goto done;
             }
         }
     }
     else
     {
-        set_error(cp, "Metodo di cifratura non gestito.");
+        set_error(cp, "Unhandled encryption method.");
         goto done;
     }
 
@@ -1200,7 +1200,7 @@ success:
 
     if (out_len > UINT_MAX)
     {
-        set_error(cp, "L'output supera UINT_MAX: il contratto lenStream usa unsigned int.");
+        set_error(cp, "The output exceeds UINT_MAX: the lenStream contract uses unsigned int.");
         goto done;
     }
 

@@ -180,7 +180,7 @@ FilesList* getFilesRecursive(Params *pParams, char *dirName, int lenOrig, int bN
 	dir = opendir(dirName);
 	if( dir == NULL )
 	{
-		myReportError(pParams, "Errore nell'apertura della directory '%s': %s", dirName, strerror(errno));
+		myReportError(pParams, "Error opening directory '%s': %s", dirName, strerror(errno));
 		return myFilesList;
 	}
 
@@ -246,7 +246,7 @@ FilesList* getFilesRecursive(Params *pParams, char *dirName, int lenOrig, int bN
 		}
 		else
 		{
-			myReportError(pParams, "Errore lstat %s: %s", pathName, strerror(errno));
+			myReportError(pParams, "Error lstat %s: %s", pathName, strerror(errno));
 		}
 
 		entry = readdir(dir);
@@ -376,7 +376,7 @@ int mySplitWords(Params *pParams, wchar_t *pwszOption)
 
     if ( MY_UNICODE_NFC_OK != nfcStatus )
     {
-        myReportError(pParams, "ERRORE mySplitWords: normalizzazione NFC fallita: %s.",
+        myReportError(pParams, "ERROR mySplitWords: NFC normalization failed: %s.",
                 myUnicodeNFC_StatusString(nfcStatus));
         retValue = 0;
         goto uscita;
@@ -384,7 +384,7 @@ int mySplitWords(Params *pParams, wchar_t *pwszOption)
 
     if ( normalizedLength > MAX_LEN_STR )
     {
-        myReportError(pParams, "ERRORE mySplitWords: la query normalizzata NFC supera MAX_LEN_STR (%d caratteri).",
+        myReportError(pParams, "ERROR mySplitWords: the NFC-normalized query exceeds MAX_LEN_STR (%d characters).",
                 MAX_LEN_STR);
         retValue = 0;
         goto uscita;

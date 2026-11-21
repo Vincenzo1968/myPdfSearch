@@ -271,7 +271,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 
 	if ( NULL != pszDecodedStream )
 	{
-		myReportError(pParams, "\n\nDecodeStream -> pszDecodedStream NON È NULL. ESCO, CIAO CIAO\n\n");
+		myReportError(pParams, "\n\nDecodeStream -> pszDecodedStream IS NOT NULL. EXITING\n\n");
 
 		return NULL;
 	}
@@ -290,7 +290,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 		pszDecodedStream = (unsigned char *)calloc( 1, *pDecodedStreamSize );
 		if ( NULL == pszDecodedStream )
 		{
-			myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStream.\n");
+			myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStream.\n");
 			goto uscita;
 		}
 
@@ -322,7 +322,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 					pszDecodedStream = (unsigned char *)calloc( 1, *pDecodedStreamSize );
 					if ( NULL == pszDecodedStream )
 					{
-						myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStream.\n");
+						myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStream.\n");
 						retValue = NULL;
 						goto uscita;
 					}
@@ -362,7 +362,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 					pszDecodedStreamTemp = (unsigned char *)malloc( *pDecodedStreamSize );
 					if ( NULL == pszDecodedStreamTemp )
 					{
-						myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStreamTemp.\n");
+						myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStreamTemp.\n");
 						retValue = NULL;
 						goto uscita;
 					}
@@ -433,7 +433,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 					pszDecodedStreamTemp = (unsigned char *)malloc( *pDecodedStreamSize );
 					if ( NULL == pszDecodedStreamTemp )
 					{
-						myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStreamTemp.\n");
+						myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStreamTemp.\n");
 						retValue = NULL;
 						goto uscita;
 					}
@@ -514,7 +514,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 					pszDecodedStreamTemp = (unsigned char *)malloc( *pDecodedStreamSize );
 					if ( NULL == pszDecodedStreamTemp )
 					{
-						myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStreamTemp.\n");
+						myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStreamTemp.\n");
 						retValue = NULL;
 						goto uscita;
 					}
@@ -595,7 +595,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 					pszDecodedStreamTemp = (unsigned char *)malloc( *pDecodedStreamSize );
 					if ( NULL == pszDecodedStreamTemp )
 					{
-						myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStreamTemp.\n");
+						myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStreamTemp.\n");
 						retValue = NULL;
 						goto uscita;
 					}
@@ -629,7 +629,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 			}
 			else
 			{
-				myReportError(pParams, "ERRORE DecodeStream: filtro '%s' non supportato in questa versione del programma.\n", szTemp);
+				myReportError(pParams, "ERROR DecodeStream: filter '%s' is not supported in this version of the program.\n", szTemp);
 
 				retValue = 0;
 				goto uscita;
@@ -673,7 +673,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 							break;
 
 						case T_REAL_LITERAL:
-							myReportError(pParams, "ERRORE DecodeStream: atteso T_INT_LITERAL per DecodeParms.\n");
+							myReportError(pParams, "ERROR DecodeStream: expected T_INT_LITERAL for DecodeParms.\n");
 
 							free(myDataTemp.pszKey);
 							myDataTemp.pszKey = NULL;
@@ -686,7 +686,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 						case T_STRING_HEXADECIMAL:
 						case T_STRING:
 						case T_NAME:
-							myReportError(pParams, "ERRORE DecodeStream: atteso T_INT_LITERAL per DecodeParms.\n");
+							myReportError(pParams, "ERROR DecodeStream: expected T_INT_LITERAL for DecodeParms.\n");
 
 							free(myDataTemp.tok.vString);
 							myDataTemp.tok.vString = NULL;
@@ -699,7 +699,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 							break;
 
 						default:
-							myReportError(pParams, "ERRORE DecodeStream: atteso T_INT_LITERAL per DecodeParms.\n");
+							myReportError(pParams, "ERROR DecodeStream: expected T_INT_LITERAL for DecodeParms.\n");
 
 							retValue = NULL;
 							goto uscita;
@@ -716,7 +716,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 				pszDecodedStreamTemp = (unsigned char *)malloc( *pDecodedStreamSize );
 				if ( NULL == pszDecodedStreamTemp )
 				{
-					myReportError(pParams, "ERRORE DecodeStream: impossibile allocare la memoria per pszDecodedStreamTemp.\n");
+					myReportError(pParams, "ERROR DecodeStream: unable to allocate memory for pszDecodedStreamTemp.\n");
 					retValue = NULL;
 					goto uscita;
 				}
@@ -745,7 +745,7 @@ unsigned char* DecodeStream(unsigned char *pszEncodedStream,
 
 				if ( NULL == pszDecodedStream )
 				{
-					myReportError(pParams, "\n\t***** ERRORE DecodeStream: memory allocation failed *****\n");
+					myReportError(pParams, "\n\t***** ERROR DecodeStream: memory allocation failed *****\n");
 					retValue = NULL;
 					goto uscita;
 				}
@@ -973,7 +973,7 @@ wchar_t* FromUnicodeToUtf8WideCharString(const char *inbuf, size_t InbufSize, co
 	pMyWideString = calloc(InbufSize + 1, sizeof(wchar_t));
 	if ( NULL == pMyWideString )
 	{
-		perror("ERRORE myConvertUnicodeStringsToUtf8 calloc\n");
+		perror("ERROR myConvertUnicodeStringsToUtf8 calloc\n");
 		return NULL;
 	}
 	wrptr = (char*)pMyWideString;

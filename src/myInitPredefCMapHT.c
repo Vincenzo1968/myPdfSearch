@@ -329,7 +329,7 @@ int CMapHT_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -351,7 +351,7 @@ int CMapHT_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -375,7 +375,7 @@ int CMapHT_UniCNS_UTF16_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniCNS_UTF16_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniCNS_UTF16_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -397,7 +397,7 @@ int CMapHT_UniCNS_UTF16_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniCNS_UTF16_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniCNS_UTF16_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -421,7 +421,7 @@ int CMapHT_GB_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GB_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GB_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -443,7 +443,7 @@ int CMapHT_GB_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GB_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GB_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -467,7 +467,7 @@ int CMapHT_UniCNS_UCS2_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniCNS_UCS2_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniCNS_UCS2_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -488,7 +488,7 @@ int CMapHT_UniCNS_UCS2_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniCNS_UCS2_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniCNS_UCS2_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -512,7 +512,7 @@ int CMapHT_UniGB_UCS2_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniGB_UCS2_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniGB_UCS2_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -533,7 +533,7 @@ int CMapHT_UniGB_UCS2_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniGB_UCS2_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniGB_UCS2_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -557,7 +557,7 @@ int CMapHT_GBK2K_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBK2K_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBK2K_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -579,7 +579,7 @@ int CMapHT_GBK2K_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBK2K_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBK2K_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -603,7 +603,7 @@ int CMapHT_GBpc_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBpc_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBpc_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -625,7 +625,7 @@ int CMapHT_GBpc_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBpc_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBpc_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -649,7 +649,7 @@ int CMapHT_UniKS_UTF16_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniKS_UTF16_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniKS_UTF16_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -671,7 +671,7 @@ int CMapHT_UniKS_UTF16_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniKS_UTF16_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniKS_UTF16_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -695,7 +695,7 @@ int CMapHT_90pv_RKSJ_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_90pv_RKSJ_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_90pv_RKSJ_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -717,7 +717,7 @@ int CMapHT_83pv_RKSJ_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_83pv_RKSJ_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_83pv_RKSJ_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -739,7 +739,7 @@ int CMapHT_GBKp_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBKp_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBKp_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -761,7 +761,7 @@ int CMapHT_GBKp_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBKp_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBKp_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -785,7 +785,7 @@ int CMapHT_Add_RKSJ_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_Add_RKSJ_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_Add_RKSJ_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -807,7 +807,7 @@ int CMapHT_Add_RKSJ_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_Add_RKSJ_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_Add_RKSJ_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -831,7 +831,7 @@ int CMapHT_ETen_B5_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_ETen_B5_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_ETen_B5_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -853,7 +853,7 @@ int CMapHT_ETen_B5_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_ETen_B5_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_ETen_B5_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -877,7 +877,7 @@ int CMapHT_Ext_RKSJ_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_Ext_RKSJ_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_Ext_RKSJ_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -899,7 +899,7 @@ int CMapHT_Ext_RKSJ_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_Ext_RKSJ_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_Ext_RKSJ_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -923,7 +923,7 @@ int CMapHT_UniJIS_UTF16_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniJIS_UTF16_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniJIS_UTF16_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -945,7 +945,7 @@ int CMapHT_UniJIS_UTF16_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniJIS_UTF16_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniJIS_UTF16_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -969,7 +969,7 @@ int CMapHT_UniKS_UCS2_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniKS_UCS2_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniKS_UCS2_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -991,7 +991,7 @@ int CMapHT_UniKS_UCS2_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniKS_UCS2_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniKS_UCS2_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1015,7 +1015,7 @@ int CMapHT_UniJIS_UCS2_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniJIS_UCS2_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniJIS_UCS2_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1039,7 +1039,7 @@ int CMapHT_B5pc_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_B5pc_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_B5pc_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1061,7 +1061,7 @@ int CMapHT_B5pc_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_B5pc_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_B5pc_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1085,7 +1085,7 @@ int CMapHT_UniJIS_UCS2_HW_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniJIS_UCS2_HW_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniJIS_UCS2_HW_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1107,7 +1107,7 @@ int CMapHT_UniJIS_UCS2_HW_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniJIS_UCS2_HW_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniJIS_UCS2_HW_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1131,7 +1131,7 @@ int CMapHT_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1153,7 +1153,7 @@ int CMapHT_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1177,7 +1177,7 @@ int CMapHT_90ms_RKSJ_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_90ms_RKSJ_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_90ms_RKSJ_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1199,7 +1199,7 @@ int CMapHT_90ms_RKSJ_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_90ms_RKSJ_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_90ms_RKSJ_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1223,7 +1223,7 @@ int CMapHT_KSC_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_KSC_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_KSC_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1245,7 +1245,7 @@ int CMapHT_KSC_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_KSC_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_KSC_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1269,7 +1269,7 @@ int CMapHT_90msp_RKSJ_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_90msp_RKSJ_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_90msp_RKSJ_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1291,7 +1291,7 @@ int CMapHT_90msp_RKSJ_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_90msp_RKSJ_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_90msp_RKSJ_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1315,7 +1315,7 @@ int CMapHT_KSCpc_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_KSCpc_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_KSCpc_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1337,7 +1337,7 @@ int CMapHT_ETenms_B5_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_ETenms_B5_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_ETenms_B5_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1359,7 +1359,7 @@ int CMapHT_ETenms_B5_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_ETenms_B5_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_ETenms_B5_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1383,7 +1383,7 @@ int CMapHT_HKscs_B5_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_HKscs_B5_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_HKscs_B5_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1405,7 +1405,7 @@ int CMapHT_HKscs_B5_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_HKscs_B5_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_HKscs_B5_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1429,7 +1429,7 @@ int CMapHT_CNS_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_CNS_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_CNS_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1451,7 +1451,7 @@ int CMapHT_CNS_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_CNS_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_CNS_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1475,7 +1475,7 @@ int CMapHT_UniGB_UTF16_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniGB_UTF16_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniGB_UTF16_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1497,7 +1497,7 @@ int CMapHT_UniGB_UTF16_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_UniGB_UTF16_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_UniGB_UTF16_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1521,7 +1521,7 @@ int CMapHT_KSCms_UHC_HW_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_KSCms_UHC_HW_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_KSCms_UHC_HW_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1543,7 +1543,7 @@ int CMapHT_KSCms_UHC_HW_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_KSCms_UHC_HW_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_KSCms_UHC_HW_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1567,7 +1567,7 @@ int CMapHT_GBK_EUC_H(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBK_EUC_H: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBK_EUC_H: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}
@@ -1589,7 +1589,7 @@ int CMapHT_GBK_EUC_V(Params *pParams)
 	myData.pszDecodedStream = (unsigned char *)malloc(myData.DecodedStreamSize + sizeof(unsigned char));
 	if ( NULL == myData.pszDecodedStream  )
 	{
-		wprintf(L"\n\nErrore CMapHT_GBK_EUC_V: impossibile allocare la memoria.\n\n");
+		wprintf(L"\n\nError CMapHT_GBK_EUC_V: unable to allocate memory.\n\n");
 		retValue = 0;
 		goto uscita;
 	}

@@ -40,7 +40,7 @@ int InitializeUnicodeArray(Params *pParams)
 	pParams->pArrayUnicode = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
 	if ( NULL == pParams->pArrayUnicode )
 	{
-		snprintf(pParams->szError, 4096, "ERRORE InitializeUnicodeArray: impossibile allocare la memoria per pParams->pArrayUnicode\n");
+		snprintf(pParams->szError, 4096, "ERROR InitializeUnicodeArray: unable to allocate memory for pParams->pArrayUnicode\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		return 0;
 	}
@@ -49,7 +49,7 @@ int InitializeUnicodeArray(Params *pParams)
 	pParams->sequences = (wchar_t**)calloc(0x10000, sizeof(wchar_t*));
 	if ( NULL == pParams->sequences )
 	{
-		snprintf(pParams->szError, 4096, "ERRORE InitializeUnicodeArray: impossibile allocare la memoria per pParams->sequences\n");
+		snprintf(pParams->szError, 4096, "ERROR InitializeUnicodeArray: unable to allocate memory for pParams->sequences\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		free(pParams->pArrayUnicode);
 		pParams->pArrayUnicode = NULL;
@@ -59,7 +59,7 @@ int InitializeUnicodeArray(Params *pParams)
 	pParams->paCustomizedFont_CharSet = (wchar_t*)malloc(0x10000 * sizeof(wchar_t));
 	if ( NULL == pParams->paCustomizedFont_CharSet )
 	{
-		snprintf(pParams->szError, 4096, "ERRORE InitializeUnicodeArray: impossibile allocare la memoria per pParams->paCustomizedFont_CharSet\n");
+		snprintf(pParams->szError, 4096, "ERROR InitializeUnicodeArray: unable to allocate memory for pParams->paCustomizedFont_CharSet\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 
 		free(pParams->pArrayUnicode);
@@ -16826,7 +16826,7 @@ int InitializeCharSetHashTable(Params *pParams)
 
 	if ( !htInit(&(pParams->myCharSetHashTable), 8191, StringHashFunc, StringCompareFunc) )
 	{
-		snprintf(pParams->szError, 4096, "ERRORE InitializeCharSetHashTable -> htInit.\n");
+		snprintf(pParams->szError, 4096, "ERROR InitializeCharSetHashTable -> htInit.\n");
 		myShowErrorMessage(pParams, pParams->szError, 1);
 		//wprintf(L"ERRORE InitializeCharSetHashTable -> htInit.\n");
 		//fwprintf(pParams->fpErrors, L"ERRORE InitializeCharSetHashTable -> htInit.\n");

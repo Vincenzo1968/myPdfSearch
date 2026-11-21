@@ -120,12 +120,12 @@ int genhtFind(GenHashTable_t* p, const void* pKey, uint32_t keysize, void** pDat
 
 	if ( NULL == p )
 	{
-		wprintf(L"\n\n\tERRORE genhtFind: p È NULL!!!\n\n");
+		wprintf(L"\n\n\tERROR genhtFind: p IS NULL!!!\n\n");
 		return -2;
 	}
 
 	if ( NULL == p->HashFunc )
-		wprintf(L"\n\n\tERRORE genhtFind: p->HashFunc È NULL!!! -> KEY = <%s>\n\n", (char*)pKey);
+		wprintf(L"\n\n\tERROR genhtFind: p->HashFunc IS NULL!!! -> KEY = <%s>\n\n", (char*)pKey);
 
 	index = p->HashFunc(p, pKey, keysize);
 
@@ -187,13 +187,13 @@ int genhtFind_OLD(GenHashTable_t* p, const void* pKey, uint32_t keysize, void* p
 	//wprintf(L"\n\n\tgenhtFind: INIZIO LA RICERCA...\n\n");
 	if ( NULL == p )
 	{
-		wprintf(L"\n\n\tERRORE genhtFind: p È NULL!!!\n\n");
+		wprintf(L"\n\n\tERROR genhtFind: p IS NULL!!!\n\n");
 		return -2;
 	}
 	//wprintf(L"\n\n\tOK! genhtFind: p NOT NULL!!! -> KEY = <%s>\n\n", (char*)pKey);
 
 	if ( NULL == p->HashFunc )
-		wprintf(L"\n\n\tERRORE genhtFind: p->HashFunc È NULL!!! -> KEY = <%s>\n\n", (char*)pKey);
+		wprintf(L"\n\n\tERROR genhtFind: p->HashFunc IS NULL!!! -> KEY = <%s>\n\n", (char*)pKey);
 	//else
 	// wprintf(L"\n\n\tOK! genhtFind: p->HashFunc IS NOT NULL!!! -> KEY = <%s>\n\n", (char*)pKey);
 
