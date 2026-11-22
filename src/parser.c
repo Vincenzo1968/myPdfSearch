@@ -2719,6 +2719,14 @@ successivo:
 		pParams->sequences = NULL;
 		pParams->nNonNulLSequences = 0;
 
+		// Stato del font corrente: i buffer appena liberati non devono restare referenziati.
+		// Senza questo reset, con piu' file nella stessa esecuzione (--path), il file successivo leggeva da
+		// pCurrentEncodingArray (use-after-free) gia' in ParseInfoObject -> GetNextToken.
+		pParams->pCurrentEncodingArray = &(pParams->aSTD_CharSet[0]);
+		pParams->nCurrentFontSubtype = FONT_SUBTYPE_Unknown;
+		pParams->nCurrentFontCodeSpacesNum = 0;
+		pParams->pCodeSpaceRangeArray = NULL;
+
 		if ( NULL != pParams->pPagesTree )
 		{
 			treeFree(pParams->pPagesTree);
