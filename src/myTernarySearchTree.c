@@ -22,6 +22,7 @@ along with mypdfsearch. If not, see <http://www.gnu.org/licenses/>. */
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <wchar.h>
 
 #include "myTernarySearchTree.h"
 
@@ -252,6 +253,94 @@ uint32_t tstPrefixSearch(tnode_t* p, const wchar_t* s, pfnOnTraverseTst OnTraver
 	{
 		return 0;
 	}
+}
+
+static int tstEnumRec(tnode_t* p, wchar_t* buf, size_t pos, pfnOnTstWord OnWord, void* user)
+{
+	int r;
+
+	if ( !p )
+		return 0;
+
+	if ( (r = tstEnumRec(p->lokid, buf, pos, OnWord, user)) != 0 )
+		return r;
+
+	if ( 0 == p->splitchar )
+	{
+		buf[pos] = L'\0';
+		if ( (r = OnWord(buf, user)) != 0 )
+			return r;
+	}
+	else if ( pos + 1 < TST_ENUM_MAX_WORD )
+	{
+		buf[pos] = p->splitchar;
+		if ( (r = tstEnumRec(p->eqkid, buf, pos + 1, OnWord, user)) != 0 )
+			return r;
+	}
+
+	return tstEnumRec(p->hikid, buf, pos, OnWord, user);
+}
+
+int tstEnumWords(tnode_t* p, pfnOnTstWord OnWord, void* user)
+{
+	wchar_t* buf;
+	int r;
+
+	if ( !p || !OnWord )
+		return 0;
+
+	buf = (wchar_t*)malloc((TST_ENUM_MAX_WORD + 1) * sizeof(wchar_t));
+	if ( !buf )
+		return 0;
+
+	r = tstEnumRec(p, buf, 0, OnWord, user);
+
+	free(buf);
+	return r;
+}
+
+int tstEnumPrefixWords(tnode_t* p, const wchar_t* prefix, pfnOnTstWord OnWord, void* user)
+{
+	wchar_t* buf;
+	size_t n, i = 0;
+	int r;
+
+	if ( !p || !prefix || !OnWord )
+		return 0;
+
+	n = wcslen(prefix);
+	if ( 0 == n || n >= TST_ENUM_MAX_WORD )
+		return 0;
+
+	// Scende lungo il prefisso fino al nodo del suo ultimo carattere.
+	while ( p )
+	{
+		if ( prefix[i] < p->splitchar )
+			p = p->lokid;
+		else if ( prefix[i] > p->splitchar )
+			p = p->hikid;
+		else
+		{
+			if ( ++i == n )
+				break;
+			p = p->eqkid;
+		}
+	}
+
+	if ( !p )
+		return 0;
+
+	buf = (wchar_t*)malloc((TST_ENUM_MAX_WORD + 1) * sizeof(wchar_t));
+	if ( !buf )
+		return 0;
+
+	wmemcpy(buf, prefix, n);
+
+	// Parole = prefisso + (sottoalbero eqkid dell'ultimo carattere).
+	r = tstEnumRec(p->eqkid, buf, n, OnWord, user);
+
+	free(buf);
+	return r;
 }
 
 int tstSearchRecursive(tnode_t* p, const wchar_t* s, void* pData, uint32_t* dataSize)

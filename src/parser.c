@@ -9281,6 +9281,132 @@ static int ParseContentsEntry(Params *pParams, int objNum, int nDepth, int *pnFa
 	return 1;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Ricerca delle parole richieste nell'indice (TST) della pagina corrente e notifica con pfnWordFound.
+//   - parola intera (predefinito): la callback riceve la parola cercata;
+//   - prefisso / suffisso / contenuta: la callback riceve ogni parola del testo che corrisponde (una volta sola
+//     per pagina, anche se piu' parole cercate corrispondono alla stessa parola). Le parole dell'indice sono
+//     in minuscolo e normalizzate NFC, come le parole cercate.
+//   - le parole cercate che contengono caratteri CJK restano sempre "parola intera": l'indice CJK e' gia'
+//     fatto di singoli caratteri e coppie di caratteri.
+// ---------------------------------------------------------------------------------------------
+typedef struct tagPartialMatchCtx
+{
+	Params *pParams;
+	int nPage;
+	const wchar_t *pwszPattern;
+	size_t patLen;
+	int nMode;
+	TernarySearchTree_t *pReported;
+} PartialMatchCtx;
+
+static int OnPartialMatchWord(const wchar_t *pwszWord, void *pUser)
+{
+	PartialMatchCtx *m = (PartialMatchCtx*)pUser;
+	size_t wordLen = wcslen(pwszWord);
+	int bMatch = 0;
+	char *pUtf8Word;
+
+	switch ( m->nMode )
+	{
+		case MYPDF_MATCH_PREFIX:
+			bMatch = ( wordLen >= m->patLen && 0 == wcsncmp(pwszWord, m->pwszPattern, m->patLen) );
+			break;
+		case MYPDF_MATCH_SUFFIX:
+			bMatch = ( wordLen >= m->patLen && 0 == wcscmp(pwszWord + (wordLen - m->patLen), m->pwszPattern) );
+			break;
+		case MYPDF_MATCH_CONTAINS:
+			bMatch = ( NULL != wcsstr(pwszWord, m->pwszPattern) );
+			break;
+		default:
+			break;
+	}
+
+	if ( !bMatch )
+		return 0;
+
+	// Gia' notificata per questa pagina (cercata da un'altra parola)?
+	if ( tstSearchRecursive(m->pReported->pRoot, pwszWord, NULL, NULL) )
+		return 0;
+	{
+		tnode_t *pNewRoot = tstInsertRecursive(m->pReported->pRoot, pwszWord, NULL, 0, NULL);
+		if ( NULL != pNewRoot )
+			m->pReported->pRoot = pNewRoot;
+	}
+
+	pUtf8Word = myWideToUtf8(pwszWord, wordLen, NULL);
+	if ( NULL == pUtf8Word )
+		return 0;
+
+	if ( m->pParams->pfnWordFound(m->pParams->pWordFoundUser, m->pParams->szFileName, m->nPage, pUtf8Word) )
+		m->pParams->bCancelRequested = 1;
+
+	free(pUtf8Word);
+
+	return m->pParams->bCancelRequested ? 1 : 0;
+}
+
+static int HasAsianChar(const wchar_t *pwsz)
+{
+	for ( ; L'\0' != *pwsz; pwsz++ )
+	{
+		if ( IS_ASIAN_SCRIPT(towlower(*pwsz)) )
+			return 1;
+	}
+	return 0;
+}
+
+static void ReportFoundWords(Params *pParams, int nPage)
+{
+	int idxWord;
+	TernarySearchTree_t reported;
+
+	if ( NULL == pParams->pfnWordFound || pParams->countWordsToSearch <= 0 )
+		return;
+
+	tstInit(&reported);
+
+	for ( idxWord = 0; idxWord < pParams->countWordsToSearch && !pParams->bCancelRequested; idxWord++ )
+	{
+		const wchar_t *pwszPattern = pParams->pWordsToSearchArray[idxWord];
+
+		if ( MYPDF_MATCH_WORD == pParams->nMatchMode || HasAsianChar(pwszPattern) )
+		{
+			if ( tstSearchRecursive(pParams->myTST.pRoot, pwszPattern, NULL, NULL) )
+			{
+				char *pUtf8Word = myWideToUtf8(pwszPattern, wcslen(pwszPattern), NULL);
+
+				if ( NULL != pUtf8Word )
+				{
+					if ( pParams->pfnWordFound(pParams->pWordFoundUser, pParams->szFileName, nPage, pUtf8Word) )
+						pParams->bCancelRequested = 1;
+					free(pUtf8Word);
+				}
+			}
+		}
+		else
+		{
+			PartialMatchCtx ctx;
+
+			ctx.pParams = pParams;
+			ctx.nPage = nPage;
+			ctx.pwszPattern = pwszPattern;
+			ctx.patLen = wcslen(pwszPattern);
+			ctx.nMode = pParams->nMatchMode;
+			ctx.pReported = &reported;
+
+			if ( MYPDF_MATCH_PREFIX == pParams->nMatchMode )
+				tstEnumPrefixWords(pParams->myTST.pRoot, pwszPattern, OnPartialMatchWord, &ctx);
+			else
+				tstEnumWords(pParams->myTST.pRoot, OnPartialMatchWord, &ctx);
+		}
+	}
+
+	if ( NULL != reported.pRoot )
+		tstFreeRecursive(&reported, reported.pRoot);
+}
+
+
 int ParseObject(Params *pParams, int objNum)
 {
 	int retValue = 1;
@@ -9293,14 +9419,6 @@ int ParseObject(Params *pParams, int objNum)
 	int nMiddlePage;
 	int nCountPagesToParse;
 	int nCountHalfPages;
-
-	int idxWord;
-
-	#if defined(MYPDFSEARCH_USE_TST)
-	uint32_t res;
-	#else
-	int res;
-	#endif
 
 	int count;
 
@@ -9874,21 +9992,7 @@ int ParseObject(Params *pParams, int objNum)
 		wprintf(L"TERNARY SEARCH TREE (Page %d) -> TRAVERSE COUNT = %u\n", nInt, count);
 		#endif
 
-		for ( idxWord = 0; NULL != pParams->pfnWordFound && idxWord < pParams->countWordsToSearch; idxWord++ )
-		{
-			res = tstSearchRecursive(pParams->myTST.pRoot, pParams->pWordsToSearchArray[idxWord], NULL, NULL);
-			if ( res )
-			{
-				char *pUtf8Word = myWideToUtf8(pParams->pWordsToSearchArray[idxWord], wcslen(pParams->pWordsToSearchArray[idxWord]), NULL);
-
-				if ( NULL != pUtf8Word )
-				{
-					if ( pParams->pfnWordFound(pParams->pWordFoundUser, pParams->szFileName, nInt, pUtf8Word) )
-						pParams->bCancelRequested = 1;
-					free(pUtf8Word);
-				}
-			}
-		}
+		ReportFoundWords(pParams, nInt);
 	}
 
 uscita:

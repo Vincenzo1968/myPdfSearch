@@ -746,6 +746,7 @@ typedef struct tagParams
 
 	wchar_t **pWordsToSearchArray;
 	int countWordsToSearch;
+	int nMatchMode;           // mypdf_MatchMode: parola intera (0), prefisso, suffisso, contenuta
 
 	char* lexeme;
 	char* lexemeTemp;

@@ -83,6 +83,18 @@ tnode_t* tstPrefixSearchRoot(tnode_t* p, const wchar_t* s);
 
 uint32_t tstPrefixSearch(tnode_t* p, const wchar_t* s, pfnOnTraverseTst OnTraverse);
 
+// Enumerazione delle parole contenute nell'albero (le chiavi non sono memorizzate nei nodi: vengono
+// ricostruite scendendo nell'albero). La callback riceve la parola intera; ritorno != 0 = interrompi.
+// Le parole sono emesse in ordine crescente. Le parole piu' lunghe di TST_ENUM_MAX_WORD sono ignorate.
+#define TST_ENUM_MAX_WORD 4096
+typedef int (*pfnOnTstWord)(const wchar_t* word, void* user);
+
+// Tutte le parole dell'albero. Ritorna il valore != 0 che ha interrotto l'enumerazione, 0 se completata (o errore di memoria).
+int tstEnumWords(tnode_t* p, pfnOnTstWord OnWord, void* user);
+
+// Solo le parole che iniziano con 'prefix' (compresa la parola uguale al prefisso). 'prefix' non vuoto.
+int tstEnumPrefixWords(tnode_t* p, const wchar_t* prefix, pfnOnTstWord OnWord, void* user);
+
 END_C_DECLS
 
 #endif // MY_TERNARY_SEARCH_TREE_INCLUDED

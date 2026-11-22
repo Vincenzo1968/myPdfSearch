@@ -32,6 +32,10 @@ MSG_INFO, MSG_WARNING, MSG_ERROR = 0, 1, 2
 OPT_SORT_GLYPHS = 1
 OPT_SHOW_ERRORS = 2
 OPT_SHOW_WARNINGS = 3
+OPT_MATCH_MODE = 4
+
+# How the words to search are compared with the words of the text (OPT_MATCH_MODE).
+MATCH_WORD, MATCH_PREFIX, MATCH_SUFFIX, MATCH_CONTAINS = 0, 1, 2, 3
 
 
 class MypdfError(Exception):
@@ -195,6 +199,11 @@ class Context:
 
     def set_sort_glyphs_by_row(self, on=True):
         self._check(_SetOptionInt(self._h, OPT_SORT_GLYPHS, 1 if on else 0))
+
+    def set_match_mode(self, mode):
+        """MATCH_WORD (default), MATCH_PREFIX, MATCH_SUFFIX or MATCH_CONTAINS.
+        With the partial modes on_word_found receives the word found in the text, not the word searched."""
+        self._check(_SetOptionInt(self._h, OPT_MATCH_MODE, int(mode)))
 
     # ---- callbacks (return False from on_page_text/on_word_found to stop) -------------------
     def on_file_start(self, fn):

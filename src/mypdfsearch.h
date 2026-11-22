@@ -142,7 +142,11 @@ typedef int (MYPDF_CALL *mypdf_PageTextCallback)(void *user_data,
                                                  const char *text,
                                                  size_t byte_len);
 
-/* Parola cercata trovata in una pagina (una chiamata per parola per pagina, come oggi). */
+/* Parola trovata in una pagina (una chiamata per parola per pagina).
+ * - Modo MYPDF_MATCH_WORD (predefinito): 'word' e' la parola cercata.
+ * - Modi MYPDF_MATCH_PREFIX / SUFFIX / CONTAINS: 'word' e' la parola effettivamente presente nel testo
+ *   (in minuscolo, normalizzata NFC) che corrisponde, es. cercando "pre" con MYPDF_MATCH_PREFIX si ricevono
+ *   "prezzo", "prefisso", ... ciascuna una sola volta per pagina. */
 typedef int (MYPDF_CALL *mypdf_WordFoundCallback)(void *user_data,
                                                   const char *file_path,
                                                   int32_t page_number,
@@ -204,8 +208,21 @@ typedef enum mypdf_Option
 	MYPDF_OPT_SORT_GLYPHS   = 1,   /* 1 = ordina i glifi per riga (CLI: -s); 0 = ordine di apparizione (predefinito) */
 	MYPDF_OPT_SHOW_ERRORS   = 2,   /* 1 = invia alla callback dei messaggi il riepilogo degli errori per file (CLI: --show_errors) */
 	MYPDF_OPT_SHOW_WARNINGS = 3,   /* 1 = idem per i warning (CLI: --show_warnings) */
+	MYPDF_OPT_MATCH_MODE    = 4,   /* come si confrontano le parole cercate: un valore di mypdf_MatchMode (CLI: --prefix, --suffix, --contains) */
 	MYPDF_OPT_FORCE_INT32 = 0x7fffffff
 } mypdf_Option;
+
+/* Modo di confronto delle parole cercate (opzione MYPDF_OPT_MATCH_MODE; valori diversi: MYPDF_ERR_INVALID_ARGUMENT).
+ * Le parole cercate che contengono caratteri CJK sono sempre confrontate come parola intera
+ * (il testo CJK e' gia' indicizzato per singoli caratteri e coppie di caratteri). */
+typedef enum mypdf_MatchMode
+{
+	MYPDF_MATCH_WORD     = 0,   /* parola intera (predefinito) */
+	MYPDF_MATCH_PREFIX   = 1,   /* la parola del testo inizia con la parola cercata */
+	MYPDF_MATCH_SUFFIX   = 2,   /* la parola del testo finisce con la parola cercata */
+	MYPDF_MATCH_CONTAINS = 3,   /* la parola del testo contiene la parola cercata */
+	MYPDF_MATCH_FORCE_INT32 = 0x7fffffff
+} mypdf_MatchMode;
 
 MYPDF_API mypdf_Status MYPDF_CALL mypdf_SetOptionInt(mypdf_Context *ctx, mypdf_Option option, int64_t value);
 

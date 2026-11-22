@@ -11,6 +11,15 @@ using System.Runtime.InteropServices;
 
 namespace MyPdfSearch
 {
+    /// <summary>How the words to search are compared with the words of the text.</summary>
+    public enum MatchMode
+    {
+        Word = 0,       // whole word (default)
+        Prefix = 1,     // the word of the text starts with the word searched
+        Suffix = 2,     // ... ends with it
+        Contains = 3    // ... contains it
+    }
+
     public enum Status
     {
         Ok = 0, InvalidArgument = 1, OutOfMemory = 2, FileOpen = 3, NotAPdf = 4, Corrupted = 5,
@@ -94,6 +103,8 @@ namespace MyPdfSearch
         public void SetSearchWords(string words) => Check(Native.mypdf_SetSearchWords(_ctx, words));
         public void SetPageRange(int first, int last) => Check(Native.mypdf_SetPageRange(_ctx, first, last));
         public void SetSortGlyphsByRow(bool on) => Check(Native.mypdf_SetOptionInt(_ctx, 1, on ? 1 : 0));
+        // With the partial modes OnWordFound receives the word of the text that matches, not the word searched.
+        public void SetMatchMode(MatchMode mode) => Check(Native.mypdf_SetOptionInt(_ctx, 4, (long)mode));
 
         // ---- callbacks (return false from OnPageText / OnWordFound to stop) ------------------
         public void OnFileStart(Action<string> fn)

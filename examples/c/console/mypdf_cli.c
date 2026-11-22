@@ -89,6 +89,13 @@ void PrintHelpCommandLine(void)
 	wprintf(L"'-o, --outputfile' (optional)        Specifies the output file\n");
 	wprintf(L"   Arguments for option '-o, --outputfile': exactly 1(string)\n");
 	wprintf(L"\n");
+	wprintf(L"'--prefix' (optional)                Partial search: with '-w', find every word of the text that STARTS WITH one of the specified words\n");
+	wprintf(L"\n");
+	wprintf(L"'--suffix' (optional)                Partial search: with '-w', find every word of the text that ENDS WITH one of the specified words\n");
+	wprintf(L"\n");
+	wprintf(L"'--contains' (optional)              Partial search: with '-w', find every word of the text that CONTAINS one of the specified words\n");
+	wprintf(L"   '--prefix', '--suffix' and '--contains' are mutually exclusive. The words found are printed as they appear in the text (lowercase).\n");
+	wprintf(L"\n");
 	wprintf(L"'--show_errors' (optional)           For each file, print on screen (stderr) the number of parsing errors written to the errors log file\n");
 	wprintf(L"\n");
 	wprintf(L"'--show_warnings' (optional)         For each file, print on screen (stderr) the number of parsing warnings written to the errors log file\n");
@@ -297,6 +304,21 @@ int myParseOption(CliOptions *pParams, char *pszOption)
 		else if ( wcsncmp(szName, L"sortglyphsbyrow", CLI_MAX_STR) == 0 )
 		{
 			pParams->bSortGlyphs = 1;
+			goto uscita;
+		}
+		else if ( wcsncmp(szName, L"prefix", CLI_MAX_STR) == 0 )
+		{
+			pParams->bPrefix = 1;
+			goto uscita;
+		}
+		else if ( wcsncmp(szName, L"suffix", CLI_MAX_STR) == 0 )
+		{
+			pParams->bSuffix = 1;
+			goto uscita;
+		}
+		else if ( wcsncmp(szName, L"contains", CLI_MAX_STR) == 0 )
+		{
+			pParams->bContains = 1;
 			goto uscita;
 		}
 		else if ( wcsncmp(szName, L"show_errors", CLI_MAX_STR) == 0 )
@@ -569,6 +591,18 @@ int myParseCommandLine(CliOptions *pParams, int argc, char **argv)
 	if ( !(pParams->bOptVersionOrHelp) && (pParams->szPath[0] != '\0' && pParams->szWords[0] == '\0') )
 	{
 		wprintf(L"\n\nError: the words to search must be specified with the option '-w (--words)'\n\n");
+		return 0;
+	}
+
+	if ( !(pParams->bOptVersionOrHelp) && (pParams->bPrefix + pParams->bSuffix + pParams->bContains) > 1 )
+	{
+		wprintf(L"\n\nError: the options '--prefix', '--suffix' and '--contains' are mutually exclusive: specify only one of them\n\n");
+		return 0;
+	}
+
+	if ( !(pParams->bOptVersionOrHelp) && (pParams->bPrefix || pParams->bSuffix || pParams->bContains) && pParams->szWords[0] == '\0' )
+	{
+		wprintf(L"\n\nError: '--prefix', '--suffix' and '--contains' require the words to search ('-w (--words)') and the folder ('-p (--path)')\n\n");
 		return 0;
 	}
 

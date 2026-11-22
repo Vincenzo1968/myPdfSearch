@@ -46,6 +46,9 @@ typedef struct tagCliOptions
 	int  bSortGlyphs;
 	int  bShowErrors;
 	int  bShowWarnings;
+	int  bPrefix;                     // --prefix:   le parole cercate sono prefissi
+	int  bSuffix;                     // --suffix:   le parole cercate sono suffissi
+	int  bContains;                   // --contains: le parole cercate sono sottostringhe
 	int  fromPage;
 	int  toPage;
 	char szPath[CLI_MAX_PATH];

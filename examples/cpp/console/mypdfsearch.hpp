@@ -67,6 +67,9 @@ public:
 	void setSearchWords(const std::string &words) { check(mypdf_SetSearchWords(ctx_, words.c_str())); }
 	void setPageRange(int first, int last)        { check(mypdf_SetPageRange(ctx_, first, last)); }
 	void setSortGlyphsByRow(bool on)              { check(mypdf_SetOptionInt(ctx_, MYPDF_OPT_SORT_GLYPHS, on ? 1 : 0)); }
+	// MYPDF_MATCH_WORD (default), MYPDF_MATCH_PREFIX, MYPDF_MATCH_SUFFIX or MYPDF_MATCH_CONTAINS. With the partial
+	// modes the word found callback receives the word of the text that matches, not the word searched.
+	void setMatchMode(mypdf_MatchMode mode)       { check(mypdf_SetOptionInt(ctx_, MYPDF_OPT_MATCH_MODE, static_cast<int64_t>(mode))); }
 
 	// ---- callbacks (the std::function objects live as long as the Context) -----------------
 	void onFileStart(FileStartFn fn) { fileStart_ = std::move(fn); mypdf_SetFileStartCallback(ctx_, fileStart_ ? &fileStartTramp : nullptr, this); }

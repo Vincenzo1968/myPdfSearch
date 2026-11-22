@@ -282,7 +282,11 @@ int main(int argc, char **argv)
 	     MYPDF_OK != mypdf_SetPageRange(ctx, cliOptions.fromPage, cliOptions.toPage) ||
 	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SORT_GLYPHS, cliOptions.bSortGlyphs) ||
 	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_ERRORS, cliOptions.bShowErrors) ||
-	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_WARNINGS, cliOptions.bShowWarnings) )
+	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_SHOW_WARNINGS, cliOptions.bShowWarnings) ||
+	     MYPDF_OK != mypdf_SetOptionInt(ctx, MYPDF_OPT_MATCH_MODE,
+	                                    cliOptions.bPrefix ? MYPDF_MATCH_PREFIX :
+	                                    cliOptions.bSuffix ? MYPDF_MATCH_SUFFIX :
+	                                    cliOptions.bContains ? MYPDF_MATCH_CONTAINS : MYPDF_MATCH_WORD) )
 	{
 		fprintf(stderr, "ERROR: %s\n", mypdf_GetLastError(ctx));
 		retValue = EXIT_FAILURE;

@@ -321,6 +321,14 @@ mypdf_Status MYPDF_CALL mypdf_SetOptionInt(mypdf_Context *ctx, mypdf_Option opti
 		case MYPDF_OPT_SHOW_WARNINGS:
 			ctx->params.bShowWarnings = value ? 1 : 0;
 			return MYPDF_OK;
+		case MYPDF_OPT_MATCH_MODE:
+			if ( value < MYPDF_MATCH_WORD || value > MYPDF_MATCH_CONTAINS )
+			{
+				snprintf(ctx->szLastError, sizeof(ctx->szLastError), "invalid match mode %lld", (long long)value);
+				return MYPDF_ERR_INVALID_ARGUMENT;
+			}
+			ctx->params.nMatchMode = (int)value;
+			return MYPDF_OK;
 		default:
 			snprintf(ctx->szLastError, sizeof(ctx->szLastError), "unknown option %d", (int)option);
 			return MYPDF_ERR_INVALID_ARGUMENT;

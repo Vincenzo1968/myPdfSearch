@@ -98,6 +98,31 @@ By default, directory searches include subdirectories. Use `--nosubdirs` to sear
 mypdfsearch --path="/path/to/pdf-directory" --words="word1 word2" --nosubdirs
 ```
 
+### Partial search (prefix, suffix, contained text)
+
+By default a searched word must match a whole word of the text. With one of these options, each word given to `--words` is instead compared with the beginning, the end or any part of the words of the text:
+
+| Option | Finds the words of the text that... | Searched word | Matches, for example |
+| --- | --- | --- | --- |
+| `--prefix` | start with the searched word | `pre` | `pre`, `prezzo`, `prefazione` |
+| `--suffix` | end with the searched word | `zione` | `informazione`, `stazione` |
+| `--contains` | contain the searched word | `tazi` | `stazione`, `presentazione` |
+
+```sh
+mypdfsearch --path="/path/to/pdf-directory" --words="pre inter" --prefix
+```
+
+```text
+File: '/path/to/pdf-directory/book.pdf'
+	Key 'prezzo' found on page 3
+	Key 'interno' found on page 3
+	Key 'prefazione' found on page 7
+```
+
+The three options are mutually exclusive and are meant for `--path` searches (they need `--words`). The words reported are the ones **found in the text** (lowercase), each once per page, even when several searched words match it. Searched words containing Chinese, Japanese or Korean characters are always matched as whole words, because CJK text is already indexed by single characters and character pairs.
+
+In the library the same feature is the option `MYPDF_OPT_MATCH_MODE` (`MYPDF_MATCH_WORD`, `MYPDF_MATCH_PREFIX`, `MYPDF_MATCH_SUFFIX`, `MYPDF_MATCH_CONTAINS`), set with `mypdf_SetOptionInt()`.
+
 ### Select text by glyph row order
 
 ```sh
@@ -115,8 +140,8 @@ mypdfsearch --path="/path/to/pdf-directory" --words="word1 word2" --show_errors 
 ```
 
 ```text
-ERRORI (2) durante l'elaborazione di '/path/to/broken.pdf' (dettagli in AAA_mypdfsearch_parsing_errors.txt)
-WARNING (1) durante l'elaborazione di '/path/to/odd.pdf' (dettagli in AAA_mypdfsearch_parsing_errors.txt)
+ERRORS (2) while processing '/path/to/broken.pdf'
+WARNING (1) while processing '/path/to/odd.pdf'
 ```
 
 The summaries go to stderr, so they do not mix with the extracted text on stdout. The exit code is not affected by these options.
