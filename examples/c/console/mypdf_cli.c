@@ -1294,8 +1294,10 @@ void MYPDF_CALL CliOnMessage(void *pUser, mypdf_MessageLevel level, const char *
 		return;
 	}
 
-	// Gli avvisi (es. PDF saltato per la password) si vedono anche a video, su stderr: il testo su stdout resta pulito.
-	if ( MYPDF_MSG_WARNING == level )
+	// Solo gli avvisi "WARNING: ..." (PDF saltato per la password) si vedono anche a video, su stderr: il testo su stdout
+	// resta pulito. Gli altri avvisi del parser (es. "WARNING OBJECT(...)") vanno solo nel file di log;
+	// il riepilogo si ottiene con --show_warnings.
+	if ( MYPDF_MSG_WARNING == level && 0 == strncmp(pszMessage, "WARNING: ", 9) )
 		fprintf(stderr, "File '%s': %s\n", pszFile, pszMessage);
 
 	if ( NULL == pOut->fpErrors )
