@@ -1,0 +1,84 @@
+% !TEX program = lualatex
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{geometry}
+\geometry{margin=2cm}
+\usepackage{fontspec}
+
+% Imposta HarfBuzz come motore di rendering OpenType moderno in LuaLaTeX
+\defaultfontfeatures{Renderer=HarfBuzz}
+
+% Font di base
+\setmainfont{Noto Sans}
+
+% Font specifici per scritture del mondo
+\newfontfamily\arabicfont[Script=Arabic]{Noto Sans Arabic}
+\newfontfamily\hebrewfont[Script=Hebrew]{Noto Sans Hebrew}
+\newfontfamily\devanagarifont[Script=Devanagari]{Noto Sans Devanagari}
+\newfontfamily\bengalifont[Script=Bengali]{Noto Sans Bengali}
+\newfontfamily\thaifont[Script=Thai]{Noto Sans Thai}
+\newfontfamily\japanesefont{Noto Sans CJK JP}
+\newfontfamily\chinesesimplifiedfont{Noto Sans CJK SC}
+\newfontfamily\chinesetraditionalfont{Noto Sans CJK TC}
+\newfontfamily\koreanfont{Noto Sans CJK KR}
+\newfontfamily\ethiopicfont[Script=Ethiopic]{Noto Sans Ethiopic}
+\newfontfamily\georgianfont[Script=Georgian]{Noto Sans Georgian}
+\newfontfamily\armenianfont[Script=Armenian]{Noto Sans Armenian}
+
+% Comandi per la direzione nativa Right-to-Left in LuaTeX
+\newcommand{\textarabicrtl}[1]{{\textdir TRT\arabicfont #1}}
+\newcommand{\texthebrewrtl}[1]{{\textdir TRT\hebrewfont #1}}
+
+\begin{document}
+
+\section*{Test Multilingua Universale per myPdfSearch}
+
+\subsection*{1. Italiano (LTR)}
+Questo è un testo di prova in lingua italiana.
+
+\subsection*{2. Spagnolo (LTR)}
+Este es un texto de prueba en español: ¿Cómo estás? ¡Muy bien!
+
+\subsection*{3. Giapponese (LTR)}
+{\japanesefont こんにちは世界！これは日本語のテキスト抽出テストです。}
+
+\subsection*{4. Cinese Semplificato (LTR)}
+{\chinesesimplifiedfont 你好世界！这是一个简体中文的文本提取测试。}
+
+\subsection*{5. Cinese Tradizionale (LTR)}
+{\chinesetraditionalfont 你好世界！這是一個繁體中文的文本提取測試。}
+
+\subsection*{6. Coreano (LTR)}
+{\koreanfont 안녕하세요 세상! 이것은 한국어 텍스트 추출 테스트입니다.}
+
+\subsection*{7. Arabo (RTL)}
+\textarabicrtl{مرحبا بالعالم}! \textarabicrtl{هذا اختبار لاستخراج النص العربي}.
+
+\subsection*{8. Ebraico (RTL)}
+\texthebrewrtl{שלום עולם}! \texthebrewrtl{זהו מבחן לחילוץ טקסט בעברית}.
+
+\subsection*{9. Hindi - Devanagari (LTR)}
+{\devanagarifont नमस्ते दुनिया}! {\devanagarifont यह हिंदी पाठ का एक परीक्षण है।}
+
+\subsection*{10. Bengalese (LTR)}
+{\bengalifont হ্যালো বিশ্ব}! {\bengalifont এটি বাংলা পাঠ্য নিষ্কাশন পরীক্ষা।}
+
+\subsection*{11. Thai (LTR)}
+{\thaifont สวัสดีชาวโลก}! {\thaifont นี่คือการทดสอบการดึงข้อความภาษาไทย}
+
+\subsection*{12. Russo - Cirillico (LTR)}
+Привет, мир! Это тест извлечения текста на русском языке.
+
+\subsection*{13. Greco Moderno (LTR)}
+Γειά σου κόσμε! Αυτή είναι μια δοκιμή εξαγωγής ελληνικού κειμένου.
+
+\subsection*{14. Amarico / Ge'ez - Africa Orientale (LTR)}
+{\ethiopicfont ሰላም ልዑል}! {\ethiopicfont ይህ የአማርኛ ጽሑፍ ማውጣት ፈተና ነው።}
+
+\subsection*{15. Georgiano (LTR)}
+{\georgianfont გამარჯობა მსოფლიო}! {\georgianfont ეს არის ქართული ტექსტის ამოღების ტესტი.}
+
+\subsection*{16. Armeno (LTR)}
+{\armenianfont Բարև աշխարհ}: {\armenianfont Սա հայերեն տեքստի արդյունահանման թեստ է:}
+
+\end{document}

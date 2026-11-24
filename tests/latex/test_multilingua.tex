@@ -1,0 +1,47 @@
+% !TEX program = xelatex
+\documentclass[12pt]{article}
+
+% Pacchetti fondamentali
+\usepackage{fontspec}
+\usepackage{polyglossia}
+% NOTA: NON caricare bidi esplicitamente, polyglossia lo fa da solo.
+
+% Imposta la lingua principale
+\setmainlanguage{italian}
+% Definisci le altre lingue che userai
+\setotherlanguages{arabic, hebrew, hindi, thai, japanese, chinese}
+
+% Definizione dei font per ogni script
+\newfontfamily\arabicfont[Script=Arabic, Scale=1.1]{Noto Sans Arabic}
+\newfontfamily\hebrewfont[Script=Hebrew, Scale=1.1]{Noto Sans Hebrew}
+\newfontfamily\devanagarifont[Script=Devanagari, Scale=1.1]{Noto Sans Devanagari}
+\newfontfamily\thaifont[Script=Thai, Scale=1.1]{Noto Sans Thai}
+\newfontfamily\japanesefont[Script=CJK, Language=Japanese]{Noto Sans CJK JP}
+\newfontfamily\chinesefont[Script=CJK, Language=Chinese Simplified]{Noto Sans CJK SC}
+
+\begin{document}
+
+\section*{Test Multilingua}
+
+\subsection*{Italiano (LTR)}
+Questo è un testo in italiano. La lingua principale.
+
+\subsection*{Arabo (RTL)}
+\textarabic{مرحبا بالعالم! هذا اختبار للنص العربي.}
+
+\subsection*{Ebraico (RTL)}
+\texthebrew{שלום עולם! זהו מבחן לטקסט בעברית.}
+
+\subsection*{Hindi (LTR)}
+\texthindi{नमस्ते दुनिया! यह हिंदी पाठ का एक परीक्षण है।}
+
+\subsection*{Thai (LTR)}
+\textthai{สวัสดีชาวโลก! นี่คือการทดสอบข้อความภาษาไทย}
+
+\subsection*{Giapponese (LTR)}
+\textjapanese{こんにちは世界！これは日本語のテストです。}
+
+\subsection*{Cinese Semplificato (LTR)}
+\textchinese{你好世界！这是一个中文测试。}
+
+\end{document}
