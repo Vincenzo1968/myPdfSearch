@@ -1,16 +1,18 @@
 # MyPdfSearch
 
-**A C-based PDF parser for text extraction and direct keyword searching.**
+A standalone C library and command-line utility for PDF parsing, Unicode text extraction, and direct keyword searching.
 
-MyPdfSearch is a command-line program written in C. It can extract text from PDF documents and search for words directly inside PDF files, without requiring the user to export the complete text first.
+MyPdfSearch is a command-line program and shared C library (`libmypdfsearch`). It extracts text from PDF documents and searches for words directly inside PDF files—both single documents and entire directory trees—without requiring the user to export the complete text first.
 
 ## Project status
 
-**Beta release — version 1.0.0**
+**Stable release — version 1.0.0**
 
-MyPdfSearch is under active development. PDF parsing, text extraction, font and character-encoding support, and the handling of complex document structures are still being improved. Some PDF files may not yet be processed correctly.
+MyPdfSearch is actively maintained. While the core parsing engine, memory safety, and CMap/ToUnicode extraction have been validated against the Isartor PDF/A-1b test suite and multilingual documents, support for complex layouts and non-standard font encodings continues to evolve.
 
-MyPdfSearch is a text parser, not a PDF page renderer. It does not reproduce the original visual layout of a page. The reading order of text in complex layouts (for example, newspapers with multiple columns, mixed text and images, or unusual writing modes) may require further improvement. It is not an OCR application, so image-only pages without an embedded text layer cannot be read as text.
+MyPdfSearch is a structural text parser, not a PDF page renderer or an OCR application:
+* **Layout & Reading Order:** It does not reproduce the original visual layout of a page. In complex documents (such as multi-column newspapers, mixed text and graphics, or unusual writing modes), the reading order may differ from the visual flow.
+* **No OCR:** Image-only pages or scanned documents without an embedded text layer cannot be read as text.
 
 ## Features
 
