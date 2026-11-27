@@ -195,15 +195,17 @@ gcc my_app.c \$(pkg-config --cflags --libs mypdfsearch) -o my_app
 
 The `examples/` directory includes complete integration examples demonstrating how to call `libmypdfsearch` from C, C++, Python, C#, and GTK4.
 
+#### C Console Example (`examples/c/console`)
+
+1. **Full Unicode text extraction console:**
+
+   <img src="docs/images/console_multilingual_extract.png" alt="Estrazione di testo completo in Unicode attraverso 16 sistemi di scrittura" width="800">
+   
+   *Figure 1: Extracting the complete text (console mode) of a document.*
+
 #### GTK4 GUI Example (`examples/c/gtk4`)
 
 When built with `--enable-examples` (with `libgtk-4-dev` installed), the C/GTK4 sample application provides a graphical interface for searching keywords and extracting text across files and directories:
-
-1. **Launching the GTK4 application (`./mypdfsearch-gtk4`):**
-
-   <img src="docs/images/gtk4_launch.png" alt="Interfaccia grafica GTK4 di myPdfSearch all'avvio con i campi di ricerca vuoti" width="800">
-   
-   *Figure 1: Launching the GTK4 application (./mypdfsearch-gtk4) from the terminal. The GUI provides fields to specify a target PDF file or directory and the keywords to search for.*
 
 2. **Multilingual keyword search (`тест testo мир! Georgiano`) on `test_multilingua_all.pdf`:**
 
