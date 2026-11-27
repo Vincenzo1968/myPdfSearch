@@ -44,21 +44,34 @@ sudo apt update
 sudo apt install build-essential zlib1g-dev libssl-dev
 ```
 
-Build and install the program globally from the project directory:
+Build and install the program and library globally from the project directory:
 
-```sh
+```bash
 ./configure
 make -j2
 sudo make install
 ```
 
-The executable is named `mypdfsearch` and can be launched from any directory.
+#### Optional `./configure` Flags
 
-To display the available command-line options:
+You can customize the build by passing optional flags to `./configure`:
 
-```sh
-mypdfsearch --help
+| Flag | Description |
+| :--- | :--- |
+| `--enable-examples` | Also build the optional GUI and C++ examples (GTK4 and C++). The basic C console example is always built. |
+| `--enable-debug` | Build with debugging symbols (`-g`) and without compiler optimizations. |
+| `--enable-mytime` | Enable `MYTIME` execution-time instrumentation. |
+| `--enable-shared` / `--enable-static` | Control whether shared (`.so`) or static (`.a`) libraries are built (both enabled by default). |
+
+For example, to build the library, the CLI tool, and all optional examples (including GTK4 and C++):
+
+```bash
+./configure --enable-examples
+make -j2
+sudo make install
 ```
+
+*(Note: building the GTK4 example requires `libgtk-4-dev` installed on your system).*
 
 MyPdfSearch has been built and tested on Ubuntu 24.04 LTS with GCC 13.3.0. Other platforms have not yet been fully validated for this release.
 
@@ -182,6 +195,22 @@ gcc my_app.c \$(pkg-config --cflags --libs mypdfsearch) -o my_app
 
 The `examples/` directory includes complete integration examples demonstrating how to call `libmypdfsearch` from C, C++, Python, C#, and GTK4.
 
+#### GTK4 GUI Example (`examples/c/gtk4`)
+
+When built with `--enable-examples` (with `libgtk-4-dev` installed), the C/GTK4 sample application provides a graphical interface for searching keywords and extracting text across files and directories:
+
+1. **Launching the GTK4 application (`./mypdfsearch-gtk4`):**
+
+   ![GTK4 Example Launch](docs/images/gtk4_launch.png)
+
+2. **Multilingual keyword search (`тест testo мир! Georgiano`) on `test_multilingua_all.pdf`:**
+
+   ![GTK4 Multilingual Search](docs/images/gtk4_multilingual_search.png)
+
+3. **Full Unicode text extraction across 16 writing systems:**
+
+   ![GTK4 Multilingual Extraction](docs/images/gtk4_multilingual_extract.png)
+
 ## Validation and Robustness
 
 MyPdfSearch undergoes rigorous regression testing to ensure cross-platform consistency and syntactic reliability. 
@@ -192,11 +221,11 @@ The parsing engine was stress-tested against the industry-standard **Isartor Tes
 - **Trailer & XRef Anomalies:** Safely caught corrupted cross-reference tables and malformed trailer dictionaries.
 - **Stream Object Violations:** Fully compliant with ISO specifications by identifying and blocking invalid whitespace characters following the `stream` keyword token.
 
-## Text Extraction: Multilingual Support and Comparison Tests
+## Text Extraction: Multilingual Support
 
 MyPdfSearch is being developed with particular attention to Unicode text extraction from PDF files. The implementation handles PDF character-mapping mechanisms such as CMaps and `ToUnicode` maps, and works with different font encodings and Unicode character sequences.
 
-The following tests use multilingual PDF documents created to exercise a range of writing systems. They provide examples of the text currently extracted by MyPdfSearch and, where available, a comparison with Poppler's `pdftotext` utility.
+The following tests use multilingual PDF documents created to exercise a range of writing systems. They provide examples of the text currently extracted by MyPdfSearch.
 
 ### Individual language tests
 
