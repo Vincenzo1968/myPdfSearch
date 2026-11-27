@@ -201,15 +201,21 @@ When built with `--enable-examples` (with `libgtk-4-dev` installed), the C/GTK4 
 
 1. **Launching the GTK4 application (`./mypdfsearch-gtk4`):**
 
-   ![GTK4 Example Launch](docs/images/gtk4_launch.png)
+   <img src="docs/images/gtk4_launch.png" alt="Interfaccia grafica GTK4 di myPdfSearch all'avvio con i campi di ricerca vuoti" width="800">
+   
+   *Figure 1: Launching the GTK4 application (./mypdfsearch-gtk4) from the terminal. The GUI provides fields to specify a target PDF file or directory and the keywords to search for.*
 
 2. **Multilingual keyword search (`тест testo мир! Georgiano`) on `test_multilingua_all.pdf`:**
 
-   ![GTK4 Multilingual Search](docs/images/gtk4_multilingual_search.png)
+   <img src="docs/images/gtk4_multilingual_search.png" alt="Ricerca multilingue con parole chiave in cirillico, latino e georgiano" width="800">
+   
+   *Figure 2: Executing a multilingual keyword search (тест testo мир! Georgiano). The output area demonstrates the library's ability to successfully locate and display matches across Latin, Cyrillic, and Georgian scripts within the same document.*
 
 3. **Full Unicode text extraction across 16 writing systems:**
 
-   ![GTK4 Multilingual Extraction](docs/images/gtk4_multilingual_extract.png)
+   <img src="docs/images/gtk4_multilingual_extract.png" alt="Estrazione di testo completo in Unicode attraverso 16 sistemi di scrittura" width="800">
+   
+   *Figure 3: Extracting the complete text of a document by leaving the keyword field empty. The output showcases the parser's capability to handle Unicode character mappings across 16 different writing systems.*
 
 ## Validation and Robustness
 
