@@ -174,12 +174,6 @@ MyPdfSearch is being developed with particular attention to Unicode text extract
 
 The following tests use multilingual PDF documents created to exercise a range of writing systems. They provide examples of the text currently extracted by MyPdfSearch and, where available, a comparison with Poppler's `pdftotext` utility.
 
-### A respectful comparison with Poppler
-
-[Poppler](https://poppler.freedesktop.org/) is a mature and widely used PDF rendering and processing library, with a much broader scope than MyPdfSearch. The purpose of these examples is not to claim that MyPdfSearch is generally better than Poppler, or to make a general performance or compatibility comparison.
-
-They document specific test cases in which the text returned by MyPdfSearch is equivalent to, or in some instances closer to, the expected text than the output obtained with `pdftotext`. The results also help identify areas where extraction still needs improvement.
-
 ### Individual language tests
 
 The following examples show the first page of each test document. The commands are shown in a simplified form; run `mypdfsearch --help` for the complete list of available options.
@@ -188,25 +182,15 @@ The following examples show the first page of each test document. The commands a
 
 `test_bengalese.pdf`
 
-Poppler (`pdftotext`):
-
-```text
-নমস্কার িবশ্ব! এিট বাংলা ভাষা পরীক্ষা।
-```
-
-MyPdfSearch:
-
 ```text
 নমস্কার বিশ্ব! এটি বাংলা ভাষা পরীক্ষা।
 ```
 
-In this test, MyPdfSearch produces the expected placement of the Bengali combining marks more accurately.
+In this test, MyPdfSearch produces the expected placement of the Bengali combining marks, accurately.
 
 #### Traditional Chinese
 
 `test_cinese_tradizionale.pdf`
-
-Both Poppler and MyPdfSearch produce:
 
 ```text
 你好世界！這是一個中文測試。
@@ -216,8 +200,6 @@ Both Poppler and MyPdfSearch produce:
 
 `test_coreano.pdf`
 
-Both Poppler and MyPdfSearch produce:
-
 ```text
 안녕하세요 세계! 이것은 한국어 테스트입니다.
 ```
@@ -225,8 +207,6 @@ Both Poppler and MyPdfSearch produce:
 #### Hindi
 
 `test_hindi.pdf`
-
-Both Poppler and MyPdfSearch produce:
 
 ```text
 नमस्ते दुनिया! यह हिंदी पाठ का एक परीक्षण है।
@@ -236,43 +216,23 @@ Both Poppler and MyPdfSearch produce:
 
 `test_kannada.pdf`
 
-Poppler (`pdftotext`):
-
-```text
-ನಮಸ್ಕಾರ ವಿಶ್ವ! ಇದು ಕನ್ನಡ ಭಾಷೆ ಪರೀಕ್ಷೆ.
-```
-
-MyPdfSearch:
-
 ```text
 ನಮಸ್ಕಾರ ವಿಶ್ವ! ಇದು ಕನ್ನಡ ಭಾಷೆ ಪರೀಕ್ಷೆ.
 ```
-
-The two outputs differ in the representation of the word for “test”. The MyPdfSearch output matches the spelling used in the test document.
 
 #### Tamil
 
 `test_tamil.pdf`
 
-Poppler (`pdftotext`):
-
-```text
-வணக்கம் உலகம்! இது தமிழ் ெமாழி ேசாதைன.
-```
-
-MyPdfSearch:
-
 ```text
 வணக்கம் உலகம்! இது தமிழ் மொழி சோதனை.
 ```
 
-In this example, MyPdfSearch reconstructs the Tamil words in the expected form, whereas the Poppler output contains combining characters in positions that do not produce the expected words.
+In this example, MyPdfSearch reconstructs the Tamil words in the expected form.
 
 #### Telugu
 
 `test_telugu.pdf`
-
-Both Poppler and MyPdfSearch produce:
 
 ```text
 నమస్కారం ప్రపంచం! ఇది తెలుగు భాష పరీక్ష.
